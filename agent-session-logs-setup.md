@@ -1,5 +1,12 @@
 # Agent Session Logs — Setup Guide
 
+> **Superseded for this repository (2026-10-30).** The original guide below tells
+> agents to commit `.claude-logs/`. This repo's approved policy is the opposite:
+> logs are local-only, gitignored and never staged or committed, and sharing one is
+> prohibited until an approval process is documented. See
+> `docs/SESSION_LOGGING.md` and `docs/DECISIONS.md`. The rest of this file is
+> kept unchanged as the historical spec.
+
 Hand this file to your coding agent (Claude Code, Codex, Cursor, etc.) and ask it to set up session logging in the current repo. The end result: every prompt + final response from the session is captured to `.claude-logs/` in the directory where the session started, and committed alongside the work — but **none of the intermediate tool calls, file reads, or work artefacts** are recorded.
 
 ---

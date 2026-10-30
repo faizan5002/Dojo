@@ -7,7 +7,8 @@ found in one (see `AGENTS.md` and `docs/rules/` for the specifics).
 
 It is built to be worked on with an AI coding agent: the rules are written
 for agents to follow, the Claude Code skills in `.claude/skills/` do the
-setup, and every Claude Code session can be logged to `.claude-logs/`.
+setup, and Claude Code and Codex sessions are logged locally to `.claude-logs/` (gitignored,
+never committed; see `docs/SESSION_LOGGING.md`).
 
 **This is a living template, not a finished product.** It gets copied, not
 imported — a new project generated from it owns its copy outright and is
@@ -44,7 +45,7 @@ belong back here; project-specific choices don't.
 ```
 template-web/
 ├── .claude/skills/          Claude Code skills — see "Skills" below
-├── .claude-logs/            tracked (not gitignored) — AI session transcripts ship with the branch
+├── .claude-logs/            local-only, gitignored — AI session logs are never committed
 ├── .github/workflows/       ci.yml, deploy-migrations.yml, claude-code-review.yml
 ├── .githooks/commit-msg     installed automatically by `pnpm install`
 ├── docs/

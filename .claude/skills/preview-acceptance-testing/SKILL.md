@@ -66,7 +66,8 @@ preview deploy. So, in order of preference:
 
 Never read secrets out of `.env*` on disk (`docs/rules/*` and this repo's
 `.gitignore` both treat those as off limits), and never print a resolved
-connection string or token — `.claude-logs/` is committed.
+connection string or token — `.claude-logs/` records the session verbatim (it is
+local-only, but still sensitive).
 
 ## The loop
 

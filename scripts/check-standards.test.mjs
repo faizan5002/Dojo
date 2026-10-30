@@ -497,13 +497,60 @@ test('machine-local-state-ignored flags patterns that only match at the root', (
 	assert.match(results['machine-local-state-ignored'].detail, /nested\/node_modules\/x\.js/)
 })
 
-test('session-logs-tracked fails when transcripts are gitignored', () => {
+test('session-logs-tracked fails when a session-log directory is not gitignored', () => {
 	const results = withFixture(
-		(root) => edit(root, '.gitignore', (text) => `${text}\n.claude-logs/\n`),
+		(root) => edit(root, '.gitignore', (text) => text.replace(/\.claude-logs\/\r?\n/, '')),
 		['session-logs-tracked']
 	)
 	assert.equal(results['session-logs-tracked'].ok, false)
-	assert.match(results['session-logs-tracked'].detail, /gitignored/)
+	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is not gitignored/)
+})
+
+test('session-logs-tracked names each log directory that is not gitignored', () => {
+	const results = withFixture(
+		(root) =>
+			edit(root, '.gitignore', (text) =>
+				text.replace(/\.claude-logs\/\r?\n/, '').replace(/\.codex-logs\/\r?\n/, '')
+			),
+		['session-logs-tracked']
+	)
+	assert.equal(results['session-logs-tracked'].ok, false)
+	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is not gitignored/)
+	assert.match(results['session-logs-tracked'].detail, /\.codex-logs\/ is not gitignored/)
+})
+
+test('session-logs-tracked fails when an actual session log is tracked', () => {
+	const results = withFixture(
+		(root) => {
+			writeFileSync(join(root, '.claude-logs', '2026-01-01_00-00-00_probe.md'), 'x')
+			git(root, 'add', '-f', '.claude-logs/2026-01-01_00-00-00_probe.md')
+		},
+		['session-logs-tracked']
+	)
+	assert.equal(results['session-logs-tracked'].ok, false)
+	assert.match(results['session-logs-tracked'].detail, /1 session log file\(s\) are tracked/)
+	assert.match(results['session-logs-tracked'].detail, /git rm --cached/)
+})
+
+test('session-logs-tracked allows .gitkeep placeholders and a repo with no log directories', () => {
+	const withPlaceholders = withFixture(() => {}, ['session-logs-tracked'])
+	assert.equal(
+		withPlaceholders['session-logs-tracked'].ok,
+		true,
+		withPlaceholders['session-logs-tracked'].detail
+	)
+	const noDirs = withFixture(
+		(root) => {
+			rmSync(join(root, '.claude-logs'), { recursive: true, force: true })
+			rmSync(join(root, '.codex-logs'), { recursive: true, force: true })
+			git(root, 'add', '-A')
+			edit(root, '.prettierignore', (text) =>
+				text.replace(/\.claude-logs\/\r?\n/, '').replace(/\.codex-logs\/\r?\n/, '')
+			)
+		},
+		['session-logs-tracked']
+	)
+	assert.equal(noDirs['session-logs-tracked'].ok, true, noDirs['session-logs-tracked'].detail)
 })
 
 test('session-logs-tracked fails when Prettier is not told to skip the transcripts', () => {

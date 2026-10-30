@@ -10,13 +10,12 @@ This file holds the things that genuinely are Qwen-Code-specific.
 
 ## Session logs
 
-`.claude-logs/` is tracked, not gitignored — the transcript for the session
-that produced a change belongs on the branch that ships it. Claude Code
-writes those transcripts automatically; Qwen Code does not, so there is
-usually nothing to stage from a Qwen Code session. If you do save a transcript
-or a working log, put it in `.claude-logs/` with the same
-`YYYY-MM-DD_HH-MM-SS_<id>.md` naming, and stage it immediately before
-`git push`, separately from the code commit.
+`.claude-logs/` and `.codex-logs/` are **local-only by default** and gitignored; never
+stage, commit or push a session log or include one in an ordinary commit. Claude
+Code and Codex write these automatically; Qwen Code does not. If you do save a
+transcript or working log, keep it there. Sharing a log, even a sanitized example, is
+prohibited until the owner documents an approval process. Redaction does not guarantee
+a log is private.
 
 ## Workflows (the "skills")
 
