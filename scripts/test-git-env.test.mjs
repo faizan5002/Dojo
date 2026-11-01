@@ -127,7 +127,7 @@ const passed = (stdout) => Number(/^# pass (\d+)/m.exec(stdout)?.[1] ?? 0)
 test('session-log tests that use git leave the hook repo untouched under hook-style GIT_*', () => {
 	const { result, before, after } = runUnderHook('scripts/session-log.test.mjs', [
 		'real git config is used when no override is set',
-		'never show up in git status under the repo .gitignore'
+		'show up in git status under the repo .gitignore'
 	])
 	assert.equal(result.status, 0, result.stdout + result.stderr)
 	assert.equal(passed(result.stdout), 2, 'both git-using tests ran and passed')

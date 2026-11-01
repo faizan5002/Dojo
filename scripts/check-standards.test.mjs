@@ -531,39 +531,34 @@ test('machine-local-state-ignored flags patterns that only match at the root', (
 	assert.match(results['machine-local-state-ignored'].detail, /nested\/node_modules\/x\.js/)
 })
 
-test('session-logs-tracked fails when a session-log directory is not gitignored', () => {
+test('session-logs-tracked fails when a session-log directory is gitignored', () => {
 	const results = withFixture(
-		(root) => edit(root, '.gitignore', (text) => text.replace(/\.claude-logs\/\r?\n/, '')),
+		(root) => edit(root, '.gitignore', (text) => `${text}\n.claude-logs/\n`),
 		['session-logs-tracked']
 	)
 	assert.equal(results['session-logs-tracked'].ok, false)
-	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is not gitignored/)
+	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is gitignored/)
 })
 
-test('session-logs-tracked names each log directory that is not gitignored', () => {
+test('session-logs-tracked names each log directory that is gitignored', () => {
 	const results = withFixture(
-		(root) =>
-			edit(root, '.gitignore', (text) =>
-				text.replace(/\.claude-logs\/\r?\n/, '').replace(/\.codex-logs\/\r?\n/, '')
-			),
+		(root) => edit(root, '.gitignore', (text) => `${text}\n.claude-logs/\n.codex-logs/\n`),
 		['session-logs-tracked']
 	)
 	assert.equal(results['session-logs-tracked'].ok, false)
-	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is not gitignored/)
-	assert.match(results['session-logs-tracked'].detail, /\.codex-logs\/ is not gitignored/)
+	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is gitignored/)
+	assert.match(results['session-logs-tracked'].detail, /\.codex-logs\/ is gitignored/)
 })
 
-test('session-logs-tracked fails when an actual session log is tracked', () => {
+test('session-logs-tracked passes when an actual session log is tracked', () => {
 	const results = withFixture(
 		(root) => {
 			writeFileSync(join(root, '.claude-logs', '2026-01-01_00-00-00_probe.md'), 'x')
-			git(root, 'add', '-f', '.claude-logs/2026-01-01_00-00-00_probe.md')
+			git(root, 'add', '.claude-logs/2026-01-01_00-00-00_probe.md')
 		},
 		['session-logs-tracked']
 	)
-	assert.equal(results['session-logs-tracked'].ok, false)
-	assert.match(results['session-logs-tracked'].detail, /1 session log file\(s\) are tracked/)
-	assert.match(results['session-logs-tracked'].detail, /git rm --cached/)
+	assert.equal(results['session-logs-tracked'].ok, true, results['session-logs-tracked'].detail)
 })
 
 test('session-logs-tracked allows .gitkeep placeholders and a repo with no log directories', () => {

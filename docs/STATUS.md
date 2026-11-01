@@ -13,7 +13,7 @@ The work so far is published on the branch `chore/phase-0-agent-setup` of `https
 | Item                                                                | Notes                                                                                                                                                                                      |
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Landing page at `/`                                                 | Adapted from the Kage page in `@designcodeio/threeui` 1.2.0. Provenance and hashes: `public/landing-pages/ADAPTATION.md`. Copy states plainly that the coaching loop is still being built. |
-| Local session logger for Claude Code and Codex                      | `scripts/session-log.mjs`, `.claude/settings.json`, `.codex/hooks.json`. Local-only, gitignored, redacted. See [`SESSION_LOGGING.md`](SESSION_LOGGING.md).                                 |
+| Local session logger for Claude Code and Codex                      | `scripts/session-log.mjs`, `.claude/settings.json`, `.codex/hooks.json`. Redacted, committed with the work. See [`SESSION_LOGGING.md`](SESSION_LOGGING.md).                                |
 | Windows-capable test suite and checks                               | CRLF checkouts, the missing executable bit, `.bin` shims and the `@/` alias no longer fail tests on Windows. LF is enforced by `.gitattributes`.                                           |
 | Test isolation from git hooks                                       | Git-using tests no longer inherit `GIT_*` variables from a hook, so a push from a linked worktree cannot corrupt the repository's config or index. See [`TESTING.md`](TESTING.md).         |
 | Engineering foundation: rules, CI, hooks, skills, standards checker | Inherited from `8xsocial/template-web`. See [`../AGENTS.md`](../AGENTS.md) and [`STANDARDS.md`](STANDARDS.md).                                                                             |
@@ -21,7 +21,7 @@ The work so far is published on the branch `chore/phase-0-agent-setup` of `https
 
 ## Not implemented
 
-- Everything product-specific beyond the landing page: accounts, session upload or intake, review, coaching, progress.
+- Everything product-specific beyond the landing page and session intake (`/sessions`, on `feat/session-intake-free-metrics`, not merged): accounts, stored data, redaction review, scoring, coaching, progress.
 - Project customisation: `package.json` is still named `template-web`, and `SITE.name` in `src/lib/seo/site.ts` is still `Web template`. The `template-setup` skill has not been run, deliberately, until the product questions in [`HANDOFF.md`](HANDOFF.md) are answered.
 - A configured production URL. `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
 - Automated coverage of the landing page itself. The only Playwright test is a smoke test of `/` and the locale redirect.

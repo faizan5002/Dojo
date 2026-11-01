@@ -20,8 +20,8 @@ research or roadmap is in the repo yet — **open**.)
 - The shared engineering rules (`AGENTS.md`, `docs/rules/*`), CI, git hooks and
   agent skills that come with the `8xsocial/template-web` template this repo
   started from.
-- Session logging for Claude Code and Codex (`docs/SESSION_LOGGING.md`): local-only,
-  gitignored, never committed automatically.
+- Session logging for Claude Code and Codex (`docs/SESSION_LOGGING.md`): digests are
+  committed with the work they produced, never automatically.
 - **Not yet customised:** `package.json` is still named `template-web` and
   `SITE.name` is still `Web template`. `template-setup` (the one-time bootstrap
   skill) has not been run, on purpose, until the product questions in

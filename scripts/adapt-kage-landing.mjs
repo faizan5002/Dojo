@@ -168,6 +168,11 @@ replace(
 	'<p class="body" data-rv="up">The full coaching loop is still being built. This page describes where Dojo is headed: learning from your own sessions, one skill at a time.</p>'
 )
 replace('<span>Cross the threshold</span>', '<span>Why evidence matters</span>')
+// The page lives in an iframe, so the link has to leave the frame to open the app.
+replace(
+	/<a class="arrowlink" href="#[a-z]+"( data-rv="fade" data-cursor>\s*<span>Why evidence matters)/,
+	'<a class="arrowlink" href="/sessions" target="_top" data-rv="fade" data-cursor>\n        <span>Why evidence matters'
+)
 replace(
 	/\s*<div class="gate-stats" data-rv="up">[\s\S]*?<\/div>\s*<\/div>\s*<\/section>/,
 	'\n  </div>\n</section>'

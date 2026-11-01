@@ -28,7 +28,7 @@ There are no tagged releases yet; only the default branch is considered supporte
 
 - Credentials live in environment variables read through `src/lib/env.ts`, never in source. `.env*` files other than `.env.example` are gitignored. See [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) and [`docs/rules/secrets.md`](docs/rules/secrets.md).
 - A secret scanner runs on staged files in the `pre-commit` hook and again over every tracked file in CI (`pnpm check:secrets`). Passing it is a backstop, not a guarantee.
-- Agent session logs (`.claude-logs/`, `.codex-logs/`) can contain private code, names and paths. They are local-only, gitignored and must never be committed or shared, and redaction does not make a log safe to publish. See [`docs/SESSION_LOGGING.md`](docs/SESSION_LOGGING.md).
+- Agent session logs (`.claude-logs/`, `.codex-logs/`) can contain private code, names and paths. They are committed to this private repository, so everyone with access can read them; redaction does not make a log safe to publish, so each one is read before it is committed. See [`docs/SESSION_LOGGING.md`](docs/SESSION_LOGGING.md).
 - The Supabase Data API is meant to stay off, and every table has row-level security enabled with no policies, so no anonymous or authenticated role can read a row directly. `pnpm check:rls` verifies this in CI. See [`docs/rules/auth.md`](docs/rules/auth.md).
 
 A known past exposure of a session log in this repository's Git history is documented in [`docs/PUBLISHED_LOG_EXPOSURE.md`](docs/PUBLISHED_LOG_EXPOSURE.md).

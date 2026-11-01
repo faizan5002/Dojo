@@ -10,15 +10,13 @@ This file holds the two things that genuinely are Claude-Code-specific.
 
 ## Session logs
 
-`.claude-logs/` and `.codex-logs/` are **local-only by default** and gitignored.
-They hold full prompts and answers, so they can contain private code, names and
-paths. Redaction is a best-effort backstop; it does not make a log safe to publish.
+`.claude-logs/` is tracked, not gitignored: the transcript of the session that
+produced a change belongs on the branch that ships it. Stage it immediately before
+every `git push`, separately from the code commit.
 
-- Never stage, commit or push a session log, and never include one in an ordinary
-  commit. No hook or command here does this for you; do not add one. Never
-  `git add -f` a log.
-- Do not share a log, not even a sanitized example, until the owner documents an
-  approval process (`docs/DECISIONS.md`). The log itself stays local.
+Logs hold full prompts and answers, so they can contain private code, names and
+paths, and a pushed log is readable by everyone with access to this private repo. Redaction is a
+best-effort backstop: read the log before you commit it.
 
 The logs are written by the tracked project hooks in `.claude/settings.json` (and
 `.codex/hooks.json` for Codex) through `scripts/session-log.mjs`; both agents write

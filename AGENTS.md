@@ -61,10 +61,8 @@ this before you edit anything:
    `docs/STATUS.md` so the next agent can continue without this conversation.
 
 Session logging (`.claude-logs/`, see `docs/SESSION_LOGGING.md`) is automatic for
-both agents and **local-only**: logs are gitignored, never staged or committed
-automatically, and never part of an ordinary commit. Redaction does not guarantee a
-log is private. Sharing a log, even a sanitized example, is prohibited until the
-owner documents an approval process.
+both agents, and logs are **tracked**: commit the digest of the session on the branch
+that ships its work, in its own commit just before the push. A pushed log is readable by everyone with access to this private repo. Read it first; redaction does not guarantee a log is private.
 
 # This is NOT the Next.js you know
 
@@ -157,9 +155,8 @@ linkable, instead of one monolithic instructions file.
 - **[Secrets](docs/rules/secrets.md)** — credentials live in env vars read
   through `src/lib/env.ts`, never hardcoded or committed; a `check:secrets`
   scanner backstops it at the pre-commit hook and again in CI, over tracked
-  source. Session transcripts (`.claude-logs/`, which every agent writes to) are
-  local-only and gitignored; never commit one. Keep secrets out of a session in the
-  first place — don't lean on redaction or the scanner.
+  source, including the session transcripts committed to `.claude-logs/`. Keep secrets
+  out of a session in the first place — don't lean on redaction or the scanner.
 - **[Analytics](docs/rules/analytics.md)** — PostHog through the typed
   taxonomy in `src/lib/analytics/` (`track`/`trackServer`), never
   `posthog.capture` directly; `object_action` snake_case past-tense names,

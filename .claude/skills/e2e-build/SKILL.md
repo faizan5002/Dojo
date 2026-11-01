@@ -196,4 +196,4 @@ Summarize:
 - This repo has an `AGENTS.md`, so Codex picks up the shared rules
   automatically — the explicit "read AGENTS.md" line in each prompt is belt and
   braces, and it's what points Codex at the specific `docs/rules/` files.
-- Do not stage session logs: `.claude-logs/` is local-only and gitignored, per `CLAUDE.md`.
+- Stage session logs separately from code, just before the push, per `CLAUDE.md`.

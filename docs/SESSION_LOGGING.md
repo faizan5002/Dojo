@@ -1,8 +1,8 @@
 # Session logging
 
 Every Claude Code and Codex session in this repo writes a clean digest of
-itself to **`.claude-logs/`**. The logs are **local-only**: gitignored, never staged or
-committed automatically, and not part of ordinary commits (see "Privacy policy" below).
+itself to **`.claude-logs/`**. The logs are **tracked**: read yours, then commit it on the branch
+that ships the work (see "Commit policy" below).
 One directory and one format for every agent. Source spec:
 `agent-session-logs-setup.md`; implementation: `scripts/session-log.mjs`.
 
@@ -114,32 +114,23 @@ already recorded in the session's log, else `git config github.user`, else
 changes. If the hook shell cannot see `gh` (it happened in the Claude desktop
 app), run `git config --global github.user <your-login>` once.
 
-## Privacy policy (approved)
+## Commit policy
 
-`.claude-logs/` and `.codex-logs/` are **local-only by default**.
+`.claude-logs/` and `.codex-logs/` are tracked, not gitignored (`docs/DECISIONS.md`,
+2026-11-02; this reverses the earlier local-only policy).
 
-- Both directories are in `.gitignore`, at the root and nested. New logs never show up
-  in `git status`.
-- Nothing stages, commits or pushes a log: not the hooks, not `/cicd`, not any skill.
-  Agents must never stage one, never `git add -f` one, and never include one in an
-  ordinary commit. If `git status` ever lists a log, stop and tell the developer.
-- A log holds full prompts and answers. It can contain private code, names, emails,
-  paths and hostnames. Redaction is a pattern backstop (it misses most of those) and
-  **does not make a log private or safe to publish**.
-- **Sharing is prohibited.** Not even a sanitized example may be shared until the
-  owner documents an approval process (who approves, where reviewed examples live, what
-  review is required). Until then a log never leaves the machine it was written on.
-- Do not edit logs by hand.
-- The `session-logs-tracked` standard (`pnpm check:standards`) enforces this: both
-  directories must be gitignored (whether or not they exist yet), no actual log may be
-  tracked (a `.gitkeep` placeholder may), and a directory that exists must be in
-  `.prettierignore`.
-- **Historical log.** The one log committed before this policy
-  (`.claude-logs/2026-10-29_15-37-18_d2eb4960-….md`) was removed from the current Git
-  tree with `git rm --cached`, in the same change as this policy. The file still exists
-  locally and is unchanged. It is **still present in Git history** (commit `2f2f925`), and
-  history has not been rewritten: see `docs/PUBLISHED_LOG_EXPOSURE.md`. The two
-  `.gitkeep` placeholders stay tracked.
+- Commit a session's log on the branch that ships its work, in its own commit,
+  immediately before the push. No hook does this; it is a deliberate step.
+- This repository is private, so a pushed log is readable by everyone with access, and removing one later means rewriting history. Make the repository public only after reviewing every tracked log. A log holds full prompts and answers. It can contain private code,
+  names, emails, paths and hostnames. Redaction is a pattern backstop and **does not
+  make a log private or safe to publish**: read a log before committing it.
+- `check:secrets` scans staged logs at the pre-commit hook and tracked logs in CI.
+- Do not edit logs by hand, other than to remove something that must not be published.
+- The `session-logs-tracked` standard (`pnpm check:standards`) enforces this: neither
+  directory may be gitignored, and a directory that exists must be in `.prettierignore`.
+- **Historical log.** The log from before the local-only policy
+  (`.claude-logs/2026-10-29_15-37-18_d2eb4960-….md`) stays out of the tree and in Git
+  history (commit `2f2f925`): see `docs/PUBLISHED_LOG_EXPOSURE.md`.
 - Product-facing user digests are a different matter with their own rules
   (`docs/PRODUCT_DECISIONS_REVIEW.md`, section 3).
 
@@ -197,7 +188,7 @@ each agent still finds the project hooks from a subfolder has not been tested.
    - your token appears nowhere; the prompt shows `[REDACTED:github-token]` and
      `redactions:` is at least 1;
    - `node scripts/check-secrets.mjs .claude-logs/*.md` prints nothing.
-6. The test log stays local (it is gitignored); delete it if you like. It is never committed.
+6. Delete the test log before you commit: it holds nothing worth keeping.
 
 On the machine that did Phase 0, `codex exec` could not complete this test:
 the model in `~/.codex/config.toml` (`gpt-6.1-sol`) is rejected for the

@@ -881,7 +881,7 @@ test('redaction stays linear on a long run of credential-like letters', () => {
 
 const repoFile = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url))
 
-test('logs written by either agent never show up in git status under the repo .gitignore', () => {
+test('logs written by either agent show up in git status under the repo .gitignore', () => {
 	const repo = tempRepo()
 	rmSync(join(repo, '.git'), { recursive: true, force: true })
 	try {
@@ -902,18 +902,15 @@ test('logs written by either agent never show up in git status under the repo .g
 			writeFileSync(join(nested, dir, 'x.md'), 'x')
 		}
 		const listed = git('status', '--porcelain', '--untracked-files=all').stdout
-		assert.ok(!/claude-logs|codex-logs/.test(listed), `a log is visible to git: ${listed.trim()}`)
-		assert.ok(/\.gitignore/.test(listed), 'sanity: git does see ordinary untracked files')
+		assert.ok(/claude-logs/.test(listed), `logs are hidden from git: ${listed.trim()}`)
 		for (const path of [
 			'.claude-logs/a.md',
 			'.codex-logs/a.md',
 			'packages/app/.claude-logs/a.md',
 			'packages/app/.codex-logs/a.md'
 		]) {
-			assert.equal(git('check-ignore', '-q', path).status, 0, `${path} is not ignored`)
+			assert.notEqual(git('check-ignore', '-q', path).status, 0, `${path} is ignored`)
 		}
-		assert.notEqual(git('check-ignore', '-q', 'docs/SESSION_LOGGING.md').status, 0)
-		assert.notEqual(git('check-ignore', '-q', 'scripts/session-log.mjs').status, 0)
 	} finally {
 		rmSync(repo, { recursive: true, force: true })
 	}
@@ -932,7 +929,7 @@ test('no hook, git hook or logger code stages, commits or pushes anything', () =
 	}
 })
 
-test('no instruction file tells an agent to stage or commit session logs', () => {
+test('the instruction files state the commit policy and none repeats the local-only one', () => {
 	const instructionFiles = [
 		'AGENTS.md',
 		'CLAUDE.md',
@@ -949,14 +946,14 @@ test('no instruction file tells an agent to stage or commit session logs', () =>
 		'docs/PROJECT_CONTEXT.md',
 		'docs/rules/secrets.md'
 	]
-	const instruction =
-		/(^|[^a-z])(always\s+commit|stage|commit)\s+(it\s+|them\s+)?(immediately\s+|separately\s+)?[`"]?\.(claude|codex)-logs|(is|are) tracked, not gitignored|ship(s)? (on|with) the branch/im
 	for (const path of instructionFiles) {
 		const text = readFileSync(repoFile(path), 'utf8')
-		const hit = instruction.exec(text)
-		assert.equal(hit, null, `${path} still instructs staging or committing logs: "${hit?.[0]}"`)
+		assert.ok(
+			!/(logs? (are|is) )?\*\*local-only|never (stage|commit)[^.]*session log/i.test(text),
+			`${path} still states the local-only policy`
+		)
 		if (['AGENTS.md', 'CLAUDE.md', 'docs/SESSION_LOGGING.md'].includes(path)) {
-			assert.ok(/local-only/i.test(text), `${path} does not state the local-only policy`)
+			assert.ok(/\btracked\b/i.test(text), `${path} does not state that logs are tracked`)
 		}
 	}
 })

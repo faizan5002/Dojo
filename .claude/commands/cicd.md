@@ -100,8 +100,8 @@ keeps CI cheap (`docs/rules/commits.md`). If it hasn't, run it first.
      `## Screenshots` section when it changes what people see
      (`docs/rules/pull-requests.md`).
    - **Never** pass `--draft` unless the user asked for a draft.
-10. Do not stage or commit session logs: `.claude-logs/` and `.codex-logs/` are
-    local-only (see `CLAUDE.md`). If `git status` shows one, stop and tell the user.
+10. Read the session log in `.claude-logs/`, then commit it on its own just before the
+    push (see `CLAUDE.md`). A pushed log is readable by everyone with access to this private repo.
 11. Write the title and description **now** — at the end, once the work is
     actually done, per `docs/rules/pull-requests.md`. Conventional Commits
     style title; body covers the change, the tests run, and the review

@@ -60,14 +60,11 @@ fix for a real one is to remove it, not to allowlist it.
 
 ## Session transcripts
 
-`.claude-logs/` and `.codex-logs/` are **local-only and gitignored** (approved
-policy, `docs/DECISIONS.md`): they are never staged or committed automatically,
-and sharing one, even sanitized, is prohibited until an approval process is
-documented. In this repo every agent writes to `.claude-logs/`
-(`docs/SESSION_LOGGING.md`); `.codex-logs/` is kept because the template's checks
-and Prettier ignore still reference it. The one log committed before this policy has
-been untracked (`git rm --cached`); it remains in Git history
-(`docs/PUBLISHED_LOG_EXPOSURE.md`). `pnpm check:standards` (`session-logs-tracked`)
+`.claude-logs/` is tracked (`docs/DECISIONS.md`, 2026-11-02): a session's digest is
+committed on the branch that ships its work, so `check:secrets` scans it at the
+pre-commit hook and again in CI. Read a log before committing it: the scanner covers credential shapes, not private code, names or paths. In this repo
+every agent writes to `.claude-logs/` (`docs/SESSION_LOGGING.md`); `.codex-logs/` is kept
+because the template's checks and Prettier ignore still reference it. `pnpm check:standards` (`session-logs-tracked`)
 enforces that the directories stay ignored and that no real log is tracked.
 `scripts/session-log.mjs` redacts credentials before writing and runs this repo's
 scanner over its own output — a backstop, not a guarantee of privacy and not

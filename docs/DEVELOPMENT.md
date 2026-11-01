@@ -72,7 +72,7 @@ The script refuses to run unless the source file's SHA-256 matches the expected 
 
 ## Session logs
 
-Claude Code and Codex sessions write a redacted digest to `.claude-logs/`. These files are local-only and gitignored, and must never be staged, committed or shared. See [`SESSION_LOGGING.md`](SESSION_LOGGING.md).
+Claude Code and Codex sessions write a redacted digest to `.claude-logs/`. These files are tracked: read yours, then commit it on your branch, in its own commit just before you push. See [`SESSION_LOGGING.md`](SESSION_LOGGING.md).
 
 ## Windows notes
 
@@ -91,4 +91,4 @@ Claude Code and Codex sessions write a redacted digest to `.claude-logs/`. These
 | `Failed to load resource` for `/_vercel/insights/script.js`                | Vercel Analytics is requested but only exists on Vercel. Harmless locally.                                                                                              |
 | `pnpm install` fails in `prisma generate`                                  | The Prisma engines could not be downloaded. Retry with network access; `pnpm prisma:generate` repeats just that step.                                                   |
 | Push is rejected by the `pre-push` hook                                    | Read the failing gate in the output, fix it and push again. Do not bypass it.                                                                                           |
-| `git status` shows a session log                                           | Stop. Logs are gitignored; one showing up means an ignore rule was broken. Do not stage it.                                                                             |
+| `git status` shows a session log                                           | Expected. Read it, then commit it in its own commit just before you push.                                                                                               |
