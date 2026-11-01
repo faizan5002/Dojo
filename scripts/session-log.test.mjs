@@ -7,6 +7,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { zstdCompressSync } from 'node:zlib'
 import { scanText } from './check-secrets.mjs'
+import { cleanGitEnv, withoutGitEnv } from './test-git-env.mjs'
 import {
 	cleanPrompt,
 	logSession,
@@ -696,11 +697,14 @@ test('attribution: env overrides win, gh failure and a missing binary degrade to
 test('real git config is used when no override is set', () => {
 	const repo = tempRepo()
 	try {
-		const git = (...args) => spawnSync('git', args, { cwd: repo })
+		const git = (...args) => spawnSync('git', args, { cwd: repo, env: cleanGitEnv() })
 		git('init', '-q')
 		git('config', 'user.name', 'Real Dev')
 		git('config', 'user.email', 'real@dev.test')
-		const result = resolveAttribution({ cwd: repo, env: { GITHUB_USER: 'someone' } })
+		// resolveAttribution spawns git itself, in this process's environment.
+		const result = withoutGitEnv(() =>
+			resolveAttribution({ cwd: repo, env: { GITHUB_USER: 'someone' } })
+		)
 		assert.equal(result.author, 'Real Dev')
 		assert.equal(result.email, 'real@dev.test')
 	} finally {
@@ -718,7 +722,7 @@ function cli(args, input, cwd) {
 			cwd,
 			input,
 			encoding: 'utf8',
-			env: { ...process.env, GITHUB_USER: 'cli-user', CLAUDE_PROJECT_DIR: '' }
+			env: { ...cleanGitEnv(), GITHUB_USER: 'cli-user', CLAUDE_PROJECT_DIR: '' }
 		}
 	)
 }
@@ -881,7 +885,8 @@ test('logs written by either agent never show up in git status under the repo .g
 	const repo = tempRepo()
 	rmSync(join(repo, '.git'), { recursive: true, force: true })
 	try {
-		const git = (...args) => spawnSync('git', args, { cwd: repo, encoding: 'utf8' })
+		const git = (...args) =>
+			spawnSync('git', args, { cwd: repo, encoding: 'utf8', env: cleanGitEnv() })
 		git('init', '-q')
 		writeFileSync(join(repo, '.gitignore'), readFileSync(repoFile('.gitignore'), 'utf8'))
 		const nested = join(repo, 'packages', 'app')

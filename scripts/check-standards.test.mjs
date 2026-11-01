@@ -18,6 +18,7 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { ESLint } from 'eslint'
 import { CHECKS, runStandardsChecks } from './check-standards.mjs'
+import { cleanGitEnv, withoutGitEnv } from './test-git-env.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SCRIPT = join(REPO_ROOT, 'scripts/check-standards.mjs')
@@ -54,8 +55,10 @@ const FIXTURE_FILES = [
 	'.codex-logs/.gitkeep'
 ]
 
+// Git against a fixture. Hook-exported GIT_* variables would redirect it to the
+// repo that is running the tests, so the fixture gets a clean environment.
 function git(root, ...args) {
-	return spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' })
+	return spawnSync('git', ['-C', root, ...args], { encoding: 'utf8', env: cleanGitEnv() })
 }
 
 function createFixture() {
@@ -83,7 +86,10 @@ function createFixture() {
 // git-index checks see what a Linux or macOS checkout would.
 function matchExecutableModes(root) {
 	if (process.platform !== 'win32') return
-	const listed = git(REPO_ROOT, 'ls-files', '-s', '--', ...FIXTURE_FILES).stdout
+	// The real repo is the target here, so its git environment is left alone.
+	const listed = spawnSync('git', ['-C', REPO_ROOT, 'ls-files', '-s', '--', ...FIXTURE_FILES], {
+		encoding: 'utf8'
+	}).stdout
 	for (const line of listed.split('\n')) {
 		const match = /^100755 \S+ \d\t(.+)$/.exec(line.trim())
 		if (match) git(root, 'update-index', '--chmod=+x', '--', match[1])
@@ -97,7 +103,7 @@ function withFixture(mutate, ids) {
 	const root = createFixture()
 	try {
 		mutate(root)
-		const { results } = runStandardsChecks({ root, ids })
+		const { results } = withoutGitEnv(() => runStandardsChecks({ root, ids }))
 		return Object.fromEntries(results.map((result) => [result.id, result]))
 	} finally {
 		rmSync(root, { recursive: true, force: true })
@@ -613,10 +619,16 @@ test('session-logs-tracked passes a Claude-only repo with no .codex-logs dir', (
 test('git-backed checks fail, not skip, outside a git repository', () => {
 	const root = mkdtempSync(join(tmpdir(), 'check-standards-nogit-'))
 	try {
-		const { results } = runStandardsChecks({
-			root,
-			ids: ['no-machine-local-state-tracked', 'machine-local-state-ignored', 'session-logs-tracked']
-		})
+		const { results } = withoutGitEnv(() =>
+			runStandardsChecks({
+				root,
+				ids: [
+					'no-machine-local-state-tracked',
+					'machine-local-state-ignored',
+					'session-logs-tracked'
+				]
+			})
+		)
 		assert.equal(results.length, 3)
 		for (const result of results) {
 			assert.equal(result.ok, false)
@@ -636,6 +648,7 @@ test('the CLI exits 1 and reports the failure as JSON when a standard is unmet',
 		try {
 			stdout = execFileSync(process.execPath, [SCRIPT, '--root', root, '--json'], {
 				encoding: 'utf8',
+				env: cleanGitEnv(),
 				stdio: ['ignore', 'pipe', 'pipe']
 			})
 		} catch (error) {
