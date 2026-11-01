@@ -1,5 +1,7 @@
 # First public experience — shaping brief
 
+> **Historical planning record (Phase 1A).** Written before any page existed. A landing page has since been built; see `docs/DECISIONS.md` and `docs/ARCHITECTURE.md`. The options and open decisions below are kept as the reasoning behind that work; items not answered in `docs/HANDOFF.md` are still open.
+
 Output of `/impeccable shape landing` (Phase 1A). **Planning only: nothing is built,
 no visual direction is chosen, no architecture is decided.** Review this, then decide
 the items in section 10.

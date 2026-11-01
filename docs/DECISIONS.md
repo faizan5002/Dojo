@@ -3,6 +3,44 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-01 — Git-using tests ignore hook-exported `GIT_*` variables
+
+**Decision.** Tests that run git against a temporary repository take their environment
+from `scripts/test-git-env.mjs` (`cleanGitEnv`, `withoutGitEnv`), which removes `GIT_*`.
+`.githooks/pre-push` is unchanged and does not unset them.
+**Why.** Git exports `GIT_DIR` to hooks when pushing from a linked worktree. The
+session-log and check-standards tests ran `git init` and `git config` in temp directories
+with that environment, so they rewrote the real repository's `core.bare`, `[user]` and
+index. Fixing the tests keeps the hook's environment honest for commands that target the
+real repo, and `scripts/test-git-env.test.mjs` fails if the isolation regresses.
+**Revisit if** a test needs the inherited git environment on purpose.
+
+## 2026-11-01 — LF line endings are enforced by `.gitattributes`
+
+**Decision.** `.gitattributes` contains `* text=auto eol=lf`, and the tree was renormalised.
+`core.autocrlf` is deliberately not changed in the shared repository config.
+**Why.** On Windows with `core.autocrlf=true`, Prettier and the standards tests failed on
+CRLF working files. A repository-level policy fixes it for everyone without a per-machine
+setting. **Revisit if** a tool needs CRLF for a tracked file (add a per-path override).
+
+## 2026-11-01 — The landing page is an adapted Kage page, not a port of the spec
+
+**Decision.** The first public page embeds the Kage landing page from
+`@designcodeio/threeui` 1.2.0, adapted by `scripts/adapt-kage-landing.mjs` (hash-checked,
+exact-once replacements) with Dojo's copy, a dot mark and six skills. It is shown in an
+iframe by `src/features/landing/kage-landing.tsx`. This supersedes the 2026-10-30 entry
+"Landing page: build it inside Next.js, not as static HTML".
+**Why.** The team chose that visual direction; adapting a verified source with a
+reproducible script keeps provenance and avoids hand-editing vendored code. The copy says
+the coaching loop is still being built and invents no customers, numbers or logos.
+**Revisit if** the page needs real interactivity with the app (the iframe isolates it).
+
+## 2026-11-01 — The historical session-log deletion is intentional
+
+**Decision (owner-approved).** `af75f14` removes the one historical log from tracking and it
+stays removed. The history decision (rewrite or recreate) remains open
+(`docs/PUBLISHED_LOG_EXPOSURE.md`).
+
 ## 2026-10-30 (Phase 1D) — Standard aligned; historical log untracked; sharing prohibited (owner-approved)
 
 **Decision (approved by the product owner).**

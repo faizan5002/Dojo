@@ -29,7 +29,7 @@ How session data would reach Dojo (upload, local tooling, or repo access), and i
 
 ## Capabilities and Constraints
 
-- Nothing product-specific is built yet. The repo is the un-customised `template-web` (Next.js 16, React 19, Tailwind v4, Prisma, Supabase Auth, next-intl); the architecture and the rules in `AGENTS.md` and `docs/rules/` stay.
+- Only the public landing page is built. The repo is otherwise the un-customised `template-web` (Next.js 16, React 19, Tailwind v4, Prisma, Supabase Auth, next-intl); the architecture and the rules in `AGENTS.md` and `docs/rules/` stay.
 - **Undecided product facts:** whether Dojo has user accounts at launch (keep or remove Supabase Auth), internal or external facing, any AI provider calls, project name in code, and the first public surface. Recorded in `docs/HANDOFF.md`.
 - A landing-page specification was supplied as a first proposal and audited in `docs/INITIAL_PRODUCT_SPEC_AUDIT.md`. It describes a generic "AI platform", not this product; whether it is the real positioning is undecided.
 
