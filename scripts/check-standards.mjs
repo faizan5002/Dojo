@@ -195,6 +195,10 @@ function ruleFilesIn(ctx) {
 }
 
 function isExecutable(ctx, path) {
+	// Windows filesystems carry no executable bit, so the on-disk check cannot be
+	// answered there. The git-index mode check beside every caller still enforces
+	// 100755, which is what a fresh clone on Linux or macOS receives.
+	if (process.platform === 'win32') return true
 	const EXECUTE_BITS = 0o111
 	return (statSync(join(ctx.root, path)).mode & EXECUTE_BITS) !== 0
 }
@@ -211,6 +215,23 @@ function isIgnored(ctx, path) {
 	return ctx.git('check-ignore', '-q', '--', path).status === 0
 }
 
+// On Windows node_modules/.bin/<name> is an extensionless shell shim that cannot
+// be spawned, and Node refuses to spawn the .cmd shim without a shell. Run the
+// package's own JavaScript entry with node instead: no shell is involved.
+const BIN_PACKAGES = { tsc: 'typescript' }
+
+function windowsEntry(ctx, name) {
+	const pkgName = BIN_PACKAGES[name] ?? name
+	try {
+		const pkgDir = join(ctx.root, 'node_modules', pkgName)
+		const { bin } = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8'))
+		const relative = typeof bin === 'string' ? bin : bin?.[name]
+		return relative ? join(pkgDir, relative) : null
+	} catch {
+		return null
+	}
+}
+
 function runBinary(ctx, name, args) {
 	const bin = join(ctx.root, 'node_modules', '.bin', name)
 	if (!existsSync(bin)) {
@@ -218,9 +239,10 @@ function runBinary(ctx, name, args) {
 			error: `${name} is not installed under node_modules — run the package manager's install first`
 		}
 	}
+	const entry = process.platform === 'win32' ? windowsEntry(ctx, name) : null
 	try {
 		return {
-			stdout: execFileSync(bin, args, {
+			stdout: execFileSync(entry ? process.execPath : bin, entry ? [entry, ...args] : args, {
 				cwd: ctx.root,
 				encoding: 'utf8',
 				stdio: ['ignore', 'pipe', 'pipe']

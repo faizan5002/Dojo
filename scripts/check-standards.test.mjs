@@ -74,7 +74,20 @@ function createFixture() {
 	}
 	git(root, 'init', '-q')
 	git(root, 'add', '-A')
+	matchExecutableModes(root)
 	return root
+}
+
+// Windows has no executable bit, so `git add` records every fixture file as
+// 100644. Give the fixture the modes the real repo's index has, so the
+// git-index checks see what a Linux or macOS checkout would.
+function matchExecutableModes(root) {
+	if (process.platform !== 'win32') return
+	const listed = git(REPO_ROOT, 'ls-files', '-s', '--', ...FIXTURE_FILES).stdout
+	for (const line of listed.split('\n')) {
+		const match = /^100755 \S+ \d\t(.+)$/.exec(line.trim())
+		if (match) git(root, 'update-index', '--chmod=+x', '--', match[1])
+	}
 }
 
 // Mutations that add a file the index must know about call `git add`
@@ -91,8 +104,17 @@ function withFixture(mutate, ids) {
 	}
 }
 
+// Mutations are written against LF text. A checkout with CRLF line endings
+// (Windows with core.autocrlf=true) would silently not match them, so the text
+// is normalised for the edit and the file's own line endings restored after.
+// An edit that changes nothing is a broken test, not a passing one.
 function edit(root, path, transform) {
-	writeFileSync(join(root, path), transform(readFileSync(join(root, path), 'utf8')))
+	const file = join(root, path)
+	const original = readFileSync(file, 'utf8')
+	const lf = original.replace(/\r\n/g, '\n')
+	const next = transform(lf)
+	assert.notEqual(next, lf, `the mutation did not change ${path}`)
+	writeFileSync(file, original.includes('\r\n') ? next.replace(/\n/g, '\r\n') : next)
 }
 
 test('the template itself meets every standard', () => {
@@ -243,7 +265,13 @@ test('per-tool-entry-points fails when an optional per-tool file exists without 
 	assert.match(results['per-tool-entry-points'].detail, /GEMINI\.md exists but/)
 })
 
-test('commit-msg-hook fails when the hook is not executable on disk', () => {
+// Windows cannot clear an on-disk executable bit; the git-index mode is what
+// the neighbouring tests cover there.
+const POSIX_ONLY = {
+	skip: process.platform === 'win32' && 'Windows has no on-disk executable bit'
+}
+
+test('commit-msg-hook fails when the hook is not executable on disk', POSIX_ONLY, () => {
 	const results = withFixture(
 		(root) => chmodSync(join(root, '.githooks/commit-msg'), 0o644),
 		['commit-msg-hook']
