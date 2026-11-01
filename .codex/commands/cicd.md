@@ -115,7 +115,7 @@ when either changes. Only the tool conventions differ:
      (`docs/rules/pull-requests.md`).
    - **Never** pass `--draft` unless the user asked for a draft.
 10. Read the session log in `.claude-logs/`, then commit it on its own just before the
-    push (see `CLAUDE.md`). The repo is public, so a pushed log is published.
+    push (see `CLAUDE.md`). A pushed log is readable by everyone with access to this private repo.
 11. Write the title and description **now** — at the end, once the work is
     actually done, per `docs/rules/pull-requests.md`. Conventional Commits
     style title; body covers the change, the tests run, and the review

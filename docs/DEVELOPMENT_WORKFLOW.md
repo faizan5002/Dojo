@@ -64,7 +64,7 @@ file is only about not stepping on each other.
    with a `Changelog:` line (`docs/rules/commits.md`). The `pre-commit` hook scans
    staged files for secrets; never `--no-verify` it.
 3. Read your session log in `.claude-logs/`, then commit it on its own just before you
-   push (`docs/SESSION_LOGGING.md`). The repo is public, so a pushed log is published;
+   push (`docs/SESSION_LOGGING.md`). A pushed log is readable by everyone with access to this private repo;
    redaction does not guarantee privacy.
 4. Update `docs/STATUS.md` and `docs/HANDOFF.md` if state changed.
 5. Write the PR title/description last (`docs/rules/pull-requests.md`); open it

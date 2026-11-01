@@ -121,8 +121,7 @@ app), run `git config --global github.user <your-login>` once.
 
 - Commit a session's log on the branch that ships its work, in its own commit,
   immediately before the push. No hook does this; it is a deliberate step.
-- This repository is public, so a pushed log is published, and removing one later means
-  rewriting history. A log holds full prompts and answers. It can contain private code,
+- This repository is private, so a pushed log is readable by everyone with access, and removing one later means rewriting history. Make the repository public only after reviewing every tracked log. A log holds full prompts and answers. It can contain private code,
   names, emails, paths and hostnames. Redaction is a pattern backstop and **does not
   make a log private or safe to publish**: read a log before committing it.
 - `check:secrets` scans staged logs at the pre-commit hook and tracked logs in CI.

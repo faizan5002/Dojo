@@ -62,8 +62,7 @@ this before you edit anything:
 
 Session logging (`.claude-logs/`, see `docs/SESSION_LOGGING.md`) is automatic for
 both agents, and logs are **tracked**: commit the digest of the session on the branch
-that ships its work, in its own commit just before the push. The repo is public, so a
-pushed log is published. Read it first; redaction does not guarantee a log is private.
+that ships its work, in its own commit just before the push. A pushed log is readable by everyone with access to this private repo. Read it first; redaction does not guarantee a log is private.
 
 # This is NOT the Next.js you know
 

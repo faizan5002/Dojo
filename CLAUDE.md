@@ -15,7 +15,7 @@ produced a change belongs on the branch that ships it. Stage it immediately befo
 every `git push`, separately from the code commit.
 
 Logs hold full prompts and answers, so they can contain private code, names and
-paths, and this repo is public, so a pushed log is published. Redaction is a
+paths, and a pushed log is readable by everyone with access to this private repo. Redaction is a
 best-effort backstop: read the log before you commit it.
 
 The logs are written by the tracked project hooks in `.claude/settings.json` (and

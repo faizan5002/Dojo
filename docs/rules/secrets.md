@@ -62,8 +62,7 @@ fix for a real one is to remove it, not to allowlist it.
 
 `.claude-logs/` is tracked (`docs/DECISIONS.md`, 2026-11-02): a session's digest is
 committed on the branch that ships its work, so `check:secrets` scans it at the
-pre-commit hook and again in CI. The repo is public, so read a log before committing
-it: the scanner covers credential shapes, not private code, names or paths. In this repo
+pre-commit hook and again in CI. Read a log before committing it: the scanner covers credential shapes, not private code, names or paths. In this repo
 every agent writes to `.claude-logs/` (`docs/SESSION_LOGGING.md`); `.codex-logs/` is kept
 because the template's checks and Prettier ignore still reference it. `pnpm check:standards` (`session-logs-tracked`)
 enforces that the directories stay ignored and that no real log is tracked.

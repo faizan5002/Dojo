@@ -12,8 +12,7 @@ This file holds the things that genuinely are Gemini-CLI-specific.
 
 `.claude-logs/` is tracked: the digest of the session that produced a change is committed
 on the branch that ships it, in its own commit just before the push. Claude Code and
-Codex write these automatically; Gemini CLI does not. The repo is public, so a pushed log is
-published: read it first, and remember redaction does not guarantee a log is private.
+Codex write these automatically; Gemini CLI does not. A pushed log is readable by everyone with access to this private repo: read it first, and remember redaction does not guarantee a log is private.
 
 ## Workflows (the "skills")
 
