@@ -1,5 +1,7 @@
 # Initial product spec audit — landing page
 
+> **Historical audit (Phase 0).** The specification it audits was not built as written; the shipped landing page is described in `docs/ARCHITECTURE.md`. Kept as the record of why.
+
 Audit of the landing-page specification handed over with the Phase 0 brief
 ("single-viewport, full-bleed video-background landing page… static HTML +
 CSS + vanilla JS"). **Nothing here is implemented.** The spec is quoted as

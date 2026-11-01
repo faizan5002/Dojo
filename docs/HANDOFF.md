@@ -8,35 +8,25 @@ trusting anything here.
 
 ## Last updated
 
-2026-10-30, Phase 1F.1 (git state corrected after the commits were made), by a Claude Code session, run from one
-developer account (deliberately not named here). The repo owner and author of the existing commits is
-`faizan5002`. The second developer's identity is deliberately not recorded; add it
-here when known.
+2026-11-01, by a Claude Code session run from one developer account (deliberately not
+named here). The repo owner and author of the existing commits is `faizan5002`. The
+second developer's identity is deliberately not recorded; add it here when known.
 
 ## Git state at handoff
 
-- **Current state (Phase 1F.1).** Branch `chore/phase-0-agent-setup`, created from
-  `2f2f925`, with exactly two commits, both **local and unpushed**: commit 1 is `af75f14`
-  (`chore(logging): add local-only session logging for agents`); commit 2 is the docs commit
-  (`docs: add project context, workflow and planning documents`), whose SHA is not recorded
-  here because it is the commit containing this file; read it with
-  `git log --oneline main..chore/phase-0-agent-setup`. `main` and `origin/main` are
-  still at `2f2f925`. **Linux verification, the pre-push hook, the push, the PR and CI have
-  not happened**; nothing outstanding has passed. `.impeccable/` is not in either commit.
-- The lists below summarise what the two commits contain; they are not exhaustive (17 tracked
-  files were modified), so `git show --stat` is authoritative. The historical log's deletion from
-  tracking (`git rm --cached`, Phase 1D) is part of commit 1; the local file is untouched.
-- New: `scripts/session-log.mjs`, `scripts/session-log.test.mjs`,
-  `.claude/settings.json`, `.codex/hooks.json`, `docs/{SESSION_LOGGING,
-PROJECT_CONTEXT,DEVELOPMENT_WORKFLOW,STATUS,DECISIONS,HANDOFF,
-INITIAL_PRODUCT_SPEC_AUDIT}.md`. This session's own log
-  (`.claude-logs/…416301eb….md`) is local-only and gitignored; it is not part of the PR.
-- Modified: `AGENTS.md`, `CLAUDE.md`, `docs/rules/secrets.md`, `.prettierignore`.
-- `pnpm install` was run (it points `core.hooksPath` at `.githooks`, so the secret
-  scan runs on commit).
-- Per `AGENTS.md`, land this through a branch and PR (suggest
-  `chore/phase-0-agent-setup`), not directly on `main`. Suggested commits: one for
-  code/config/docs. Do not stage `.claude-logs/`: session logs are local-only (Phase 1C).
+- The work is **published** on `chore/phase-0-agent-setup` at
+  `https://github.com/faizan5002/Dojo.git`. `main` and `origin/main` are still at
+  `2f2f925`; the branch has not been merged. Read the current head with
+  `git log --oneline main..origin/chore/phase-0-agent-setup`.
+- The branch contains the session-logging commit (`af75f14`), the planning documents
+  (`b43194a`), the Dojo landing page (`e822bca`) and the commits that make the checks
+  pass on Windows (`7b72307`, `f2147ce`, `8773870`, `42f8b8a`). `git log` is
+  authoritative.
+- The historical session log's deletion from tracking is part of `af75f14`; the log
+  stays in earlier history (`docs/PUBLISHED_LOG_EXPOSURE.md`).
+- Per `AGENTS.md`, land changes through a branch and PR, not directly on `main`.
+- Not committed anywhere: `.impeccable/` (untracked, decision pending, item 19) and
+  local session logs (gitignored).
 
 ## In progress / claimed
 
@@ -50,31 +40,32 @@ Nobody has claimed anything. Add rows as `path or area — branch — who`.
 
 **Developer 1 (whoever holds the working tree):**
 
-1. Review `git diff` and the new files; `pnpm lint && pnpm typecheck &&
-pnpm test`. On Windows expect the known failures in `docs/STATUS.md`; set
-   `git config core.autocrlf input` first to remove the CRLF ones.
-2. (Done locally: the branch and the two Conventional Commits with `Changelog:` lines
-   exist, unpushed.) Move the branch to Linux/WSL, re-run `/local-review` there, push
-   (the pre-push hook runs; logs stay local), open the PR (description last; a
-   `## Production Watch List` is required).
-3. Watch CI to green on Linux — this is the first Linux evidence for the logger
-   tests and the standards checks. Fix anything it shows; do not weaken a check.
-4. Do the Codex manual verification in `docs/SESSION_LOGGING.md` and record the
+1. Open the pull request from `chore/phase-0-agent-setup` to `main` (write the
+   description last; a `## Production Watch List` is required, and a
+   `## Screenshots` section because the PR changes what people see) and watch CI
+   to green. This is the first CI run on Linux for the logger tests and the
+   standards checks. Fix anything it shows; do not weaken a check.
+2. Do the Codex manual verification in `docs/SESSION_LOGGING.md` and record the
    result in `docs/STATUS.md`.
 
 **Developer 2:**
 
-1. `git pull` the branch/main, `pnpm install`, `cp .env.example .env.local`.
+1. `git pull` the branch, `pnpm install`, `cp .env.example .env.local`
+   (`docs/DEVELOPMENT.md`).
 2. Do the Claude **and** Codex manual verification in `docs/SESSION_LOGGING.md`
    (Claude: accept workspace trust; Codex: `/hooks` trust). Record the result.
 3. If you installed the guide's `~/.claude/extract-log.py` hooks, remove them.
 4. Set `git config --global github.user <login>` if your logs say
    `github_user: unknown`.
 
-**Both:** answer "Decisions needed", then run `template-setup` once on a branch;
-only then start the landing page.
+**Both:** answer "Decisions needed" below, then run `template-setup` once on a branch
+to rename the project (`package.json`, `SITE.name`).
 
 ## Decisions needed (both developers)
+
+Items 1 and 3 were raised before the landing page existed. A landing page has since
+been built (`docs/DECISIONS.md`, 2026-11-01), so the parts of them about its copy and
+assets are answered in practice; the product questions behind them are still open.
 
 1. Is the supplied landing page the real positioning for Dojo, or a placeholder?
    (It describes a generic AI platform with enterprise claims.)
@@ -176,49 +167,6 @@ Phase 1D (owner-approved and applied; nothing committed):
 - 25. If sharing logs is ever wanted, the owner documents the approval process first
       (who approves, where reviewed examples live, required review). Until then, no sharing.
 
-## Moving this work to Linux for the first push (rehearsed on a Windows host, not on Linux)
-
-The pre-push hook (`format:check`, `lint`, `typecheck`, `check:env`, `test`; `check:events` is
-not defined here, so it is skipped) cannot pass on Windows, and `--no-verify` is not allowed. Push
-from Linux or WSL (`wsl --install -d Ubuntu` is a human step; no distro is installed here).
-A fresh clone plus copied files does **not** carry the index, so use one of these:
-
-**A. Carry commits (cleanest; the two commits now exist locally).** They were made on Windows
-(`pre-commit` and `commit-msg` ran there). Run
-`git bundle create setup.bundle chore/phase-0-agent-setup` (a full-history bundle) and clone or
-fetch it on Linux. The tree and the deletion travel in the commits. Rebuild the bundle after
-any amend: the old one carries the old SHA.
-
-**B. Carry the uncommitted state (rehearsed).** On Windows, in Git Bash at the repo root:
-
-```bash
-git rev-parse HEAD > base.txt                                   # expect 2f2f925…
-git diff HEAD --binary > tracked.patch                          # tracked edits + the staged deletion, LF-normalised
-git ls-files -o --exclude-standard | grep -v '^\.impeccable/' > untracked.txt
-tar -cf untracked.tar -T untracked.txt                          # 15 new files; .impeccable and ignored files excluded
-```
-
-On Linux/WSL, with the four files copied over:
-
-```bash
-git clone https://github.com/faizan5002/Dojo.git && cd Dojo
-git checkout "$(cat ../base.txt)" && git switch -c chore/phase-0-agent-setup
-git apply --index ../tracked.patch && tar -xf ../untracked.tar
-corepack enable && pnpm install --frozen-lockfile              # also sets core.hooksPath=.githooks
-git diff --cached --name-status | grep '^D'                     # exactly the one historical log
-git ls-files .claude-logs .codex-logs                           # only the two .gitkeep files
-git ls-files -o --exclude-standard | wc -l                      # 15
-```
-
-What does not transfer, on purpose: the staged-versus-unstaged split (apply stages the
-tracked edits too; harmless, they are committed anyway), ignored files (local session logs,
-`node_modules`), `.impeccable/`, and local git config. New files are mode 100644; the
-scripts are run through `node`, and the existing `.githooks/*` stay 100755 in the index.
-Then run `docs/STATUS.md`'s gate list plus `check:rls` against a throwaway Postgres
-(`docker run -d -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16`, then
-`pnpm exec prisma migrate deploy` and `DATABASE_URL=… pnpm check:rls`), commit, and
-`git push` so the hook runs. If the hook fails for a real reason, fix it; do not bypass it.
-
 ## How to run and test
 
 ```bash
@@ -231,11 +179,14 @@ node --test scripts/session-log.test.mjs     # just the logger tests
 
 ## Gotchas
 
-- Windows: `pnpm format:check` and 18 tests fail on an untouched checkout; the
-  causes are CRLF, no exec bit, `.bin` shims and an alias — not regressions
-  (`docs/STATUS.md`). Linux CI is the reference.
+- Windows: line endings are LF (`.gitattributes`), and the checks that depend on an
+  executable bit are skipped there; see `docs/DEVELOPMENT.md` ("Windows notes").
+  Linux CI is the reference.
+- A push from a linked worktree exports `GIT_DIR` to the hooks. Tests that use git
+  on a temporary repository must use `scripts/test-git-env.mjs` (`docs/TESTING.md`).
 - Pre-commit scans staged files for secrets; commit messages must be Conventional
-  Commits with a `Changelog:` line.
+  Commits with a `Changelog:` line. `pre-push` runs format, lint, typecheck, env and
+  the tests; never bypass it.
 - `agent-session-logs-setup.md` is the original spec and is Prettier-ignored.
 - This machine's Codex: `~/.codex/config.toml` selects a model the account rejects
   and its Windows sandbox is half-provisioned (`codex doctor`); fix those before

@@ -57,7 +57,9 @@ file is only about not stepping on each other.
 
 1. Run `/local-review` (or: `pnpm lint`, `typecheck`, `format:check`,
    `check:env`, `check:secrets`, `check:standards`, `test`, then `pnpm build`;
-   `check:rls` needs a local Postgres). CI confirms; it is not your dev loop.
+   `check:rls` needs a local Postgres). CI confirms; it is not your dev loop. The
+   `pre-push` hook runs the format, lint, typecheck, env and test gates for you
+   and must never be bypassed (`docs/DEVELOPMENT.md`).
 2. One feature commit (plus at most one consolidated fix), Conventional Commits,
    with a `Changelog:` line (`docs/rules/commits.md`). The `pre-commit` hook scans
    staged files for secrets; never `--no-verify` it.

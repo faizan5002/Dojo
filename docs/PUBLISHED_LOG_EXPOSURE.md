@@ -1,5 +1,7 @@
 # Published session-log exposure
 
+> **Update (2026-11-01).** The log's removal from tracking is committed (`af75f14`) and published on `chore/phase-0-agent-setup`, so layer A below is now done. Layers B to D are unchanged: `main` still serves the file until the branch is merged, and history still contains it. The history decision remains open.
+
 Report only. **Nothing here has been done:** no history rewrite, no deletion, no
 force-push, no GitHub request, and the historical log is byte-for-byte unchanged. The
 personal information itself is deliberately not reproduced; this report names categories

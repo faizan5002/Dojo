@@ -17,8 +17,8 @@ Everything under `secret-pathways-assets/` is copied unmodified from the package
 What the adaptation changes, and nothing else:
 
 - All visible copy, navigation labels, the preloader text and the rail tooltips.
-- Brand marks: the torii mark is replaced by Dojo's dot mark (same 5x7 grid as
-  `src/components/brand/dot-mark.tsx`).
+- Brand marks: the torii mark is replaced by Dojo's dot mark (a 5x7 dot grid,
+  drawn inline in `scripts/adapt-kage-landing.mjs`).
 - Japanese labels, the stats block and the footer's "Elsewhere" column are removed.
 - The 3-D wordmark reads DOJO. The embedded `Wordmark` font is a subset with no
   D, O or J, so the word is set in Onest 700 (embedded in full Latin by the same

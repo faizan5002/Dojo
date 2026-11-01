@@ -1,5 +1,7 @@
 # Product decisions review, privacy audit and tooling review
 
+> **Historical review (Phase 1B).** Recommendations here are not decisions. The owner-approved outcomes are in `docs/DECISIONS.md` (for example, session logs are local-only); everything else is still a recommendation.
+
 Phase 1B. Documentation and review only: no feature, logger behaviour, database,
 authentication, provider, hook or settings change, no history rewrite, no commit.
 Labels follow `docs/FIRST_PUBLIC_EXPERIENCE.md` section 0: **PRODUCT** (confirmed in
