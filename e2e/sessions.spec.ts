@@ -7,6 +7,7 @@ const CANARY = 'canary-7f3e9b1d-not-for-the-network'
 // The root layout loads Vercel Web Analytics on every page. It is the one
 // third party allowed here, and the canary checks still apply to it.
 const ANALYTICS_SCRIPT_ORIGIN = 'https://va.vercel-scripts.com'
+const LANDING_NAVIGATION_MS = 120_000
 
 function logFile(name: string, sessionId: string) {
 	const text = buildLog({
@@ -62,7 +63,21 @@ test('reads session logs in the browser and shows free metrics without sending t
 	await expect(page.getByRole('table')).toHaveCount(0)
 })
 
-test('the landing page still renders its frame', async ({ page }) => {
+test('the landing page link leaves its sandboxed frame and opens sessions', async ({ page }) => {
+	// The landing scene is heavy, and on a cold dev server so is compiling the route.
+	test.setTimeout(LANDING_NAVIGATION_MS)
 	await page.goto('/')
-	await expect(page.locator('iframe[src="/landing-pages/kage.html"]')).toBeVisible()
+	const frame = page.locator('iframe[src="/landing-pages/kage.html"]')
+	await expect(frame).toBeVisible()
+	// KageLanding's effect sets this title and wires the frame's links.
+	await expect(frame).toHaveAttribute('title', 'Dojo: train how you work with AI agents', {
+		timeout: LANDING_NAVIGATION_MS
+	})
+
+	const link = page
+		.frameLocator('iframe[src="/landing-pages/kage.html"]')
+		.locator('a.arrowlink', { hasText: 'Why evidence matters' })
+	await link.evaluate((element: HTMLElement) => element.click())
+	await page.waitForURL('**/sessions', { timeout: LANDING_NAVIGATION_MS })
+	await expect(page.getByRole('heading', { level: 1, name: 'Your sessions' })).toBeVisible()
 })

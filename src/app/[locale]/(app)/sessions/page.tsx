@@ -16,11 +16,18 @@ export default function SessionsPage() {
 	const t = useTranslations('Sessions')
 
 	return (
-		<main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12">
-			<header className="flex max-w-3xl flex-col gap-3">
-				<h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
-				<p className="text-text-muted">{t('intro')}</p>
-				<p className="text-text-faint text-sm">{t('privacy')}</p>
+		<main className="flex flex-col gap-16 px-5 py-14 md:px-14 md:py-20">
+			<header className="flex flex-col gap-8">
+				<p className="app-eyebrow">
+					<b>01</b> — {t('eyebrow')}
+				</p>
+				<div className="grid items-end gap-8 lg:grid-cols-2">
+					<h1 className="app-display">{t('title')}</h1>
+					<div className="flex max-w-xl flex-col gap-4">
+						<p className="text-lg leading-relaxed">{t('intro')}</p>
+						<p className="text-text-muted text-sm leading-relaxed">{t('privacy')}</p>
+					</div>
+				</div>
 			</header>
 			<SessionIntake />
 		</main>

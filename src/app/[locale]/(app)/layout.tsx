@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Onest } from 'next/font/google'
 import { getTranslations } from 'next-intl/server'
+import { DotMark } from '@/components/brand/dot-mark'
 import { Link } from '@/i18n/routing'
 import { cn } from '@/lib/cn'
 import './app.css'
@@ -18,22 +19,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 	const t = await getTranslations('AppShell')
 
 	return (
-		<div data-surface="app" className={cn(onest.variable, 'bg-bg text-text min-h-dvh')}>
+		<div
+			data-surface="app"
+			className={cn(onest.variable, 'bg-bg text-text relative isolate min-h-dvh')}
+		>
+			<div aria-hidden="true" className="app-backdrop" />
 			<header className="border-border border-b">
-				<nav className="mx-auto flex max-w-6xl items-center gap-8 px-6 py-4">
-					<Link
-						href="/"
-						className="focus-visible:outline-accent text-lg font-semibold tracking-tight focus-visible:outline-2"
-					>
+				<nav className="flex h-20 items-center justify-between gap-6 px-5 md:px-14">
+					<Link href="/" className="app-brand flex items-center gap-3">
 						<span className="sr-only">{t('home')}</span>
-						<span aria-hidden="true">Dojo</span>
+						<DotMark className="h-5 w-16" />
+						<span className="app-eyebrow text-text-faint hidden sm:block">{t('tagline')}</span>
 					</Link>
-					<Link
-						href="/sessions"
-						className="text-text-muted hover:text-text focus-visible:outline-accent text-sm focus-visible:outline-2"
-					>
-						{t('sessions')}
-					</Link>
+					<div className="flex items-center gap-6 md:gap-10">
+						<Link href="/" className="app-nav-link">
+							{t('landing')}
+						</Link>
+						<Link href="/sessions" aria-current="page" className="app-nav-link">
+							{t('sessions')}
+						</Link>
+					</div>
 				</nav>
 			</header>
 			{children}

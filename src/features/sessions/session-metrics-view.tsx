@@ -1,5 +1,5 @@
 import { useFormatter, useTranslations } from 'next-intl'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/cn'
 import type { IntakeResult } from './intake'
 import { byStartTime, metricsOverview, sessionMetrics, type SessionMetrics } from './metrics'
 
@@ -41,34 +41,35 @@ export function SessionMetricsView({
 	const longestAverage = Math.max(1, ...sessions.map((metrics) => metrics.averagePromptWords ?? 0))
 
 	return (
-		<div className="flex flex-col gap-8">
+		<div className="flex flex-col gap-16">
 			{result.rejected.length > 0 ? (
-				<Card>
-					<CardHeader>
-						<CardTitle>{t('rejected.heading')}</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<ul className="flex flex-col gap-2 text-sm">
-							{result.rejected.map((file) => (
-								<li key={`${file.fileName}:${file.reason}`} className="flex flex-wrap gap-x-3">
-									<span className="font-medium break-all">{file.fileName}</span>
-									<span className="text-text-muted">
-										{t(`rejected.${file.reason}`, { maxFiles, maxMegabytes })}
-									</span>
-								</li>
-							))}
-						</ul>
-					</CardContent>
-				</Card>
+				<section aria-labelledby="rejected-heading" className="flex flex-col gap-5">
+					<h2 id="rejected-heading" className="app-eyebrow">
+						{t('rejected.heading')}
+					</h2>
+					<ul className="border-border flex flex-col border-t text-sm">
+						{result.rejected.map((file) => (
+							<li
+								key={`${file.fileName}:${file.reason}`}
+								className="border-border flex flex-wrap gap-x-4 gap-y-1 border-b py-3"
+							>
+								<span className="font-medium break-all">{file.fileName}</span>
+								<span className="text-text-muted">
+									{t(`rejected.${file.reason}`, { maxFiles, maxMegabytes })}
+								</span>
+							</li>
+						))}
+					</ul>
+				</section>
 			) : null}
 
 			{sessions.length > 0 ? (
 				<>
-					<section aria-labelledby="overview-heading" className="flex flex-col gap-4">
-						<h2 id="overview-heading" className="text-xl font-semibold">
+					<section aria-labelledby="overview-heading" className="flex flex-col gap-8">
+						<SectionHeading id="overview-heading" number="02">
 							{t('overview.heading')}
-						</h2>
-						<dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+						</SectionHeading>
+						<dl className="border-border grid grid-cols-2 border-t border-l lg:grid-cols-4">
 							<Stat label={t('overview.sessions')} value={format.number(overview.sessionCount)} />
 							<Stat label={t('overview.prompts')} value={format.number(overview.promptCount)} />
 							<Stat
@@ -86,6 +87,7 @@ export function SessionMetricsView({
 							/>
 							<Stat label={t('overview.averageGap')} value={minutes(overview.averageGapMinutes)} />
 							<Stat
+								className="col-span-2"
 								label={t('overview.perPrompt')}
 								value={t('overview.codeBlocks', { count: decimal(overview.codeBlocksPerPrompt) })}
 								detail={[
@@ -96,46 +98,46 @@ export function SessionMetricsView({
 						</dl>
 					</section>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>{t('trend.heading')}</CardTitle>
-							<CardDescription>{t('trend.description')}</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<ol className="flex flex-col gap-2">
-								{sessions.map((metrics) => (
-									<li
-										key={metrics.sessionId}
-										className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm sm:flex-nowrap"
-									>
-										<span className="text-text-muted w-full truncate sm:w-40 sm:shrink-0">
-											{started(metrics)}
-										</span>
-										<span className="bg-surface-hover h-2 flex-1 overflow-hidden rounded-full">
-											<span
-												className="bg-accent block h-full rounded-full"
-												style={{
-													width: `${((metrics.averagePromptWords ?? 0) / longestAverage) * 100}%`
-												}}
-											/>
-										</span>
-										<span className="w-24 shrink-0 text-right tabular-nums">
-											{t('units.words', { value: decimal(metrics.averagePromptWords) })}
-										</span>
-									</li>
-								))}
-							</ol>
-						</CardContent>
-					</Card>
+					<section aria-labelledby="trend-heading" className="flex flex-col gap-8">
+						<div className="flex flex-col gap-3">
+							<SectionHeading id="trend-heading" number="03">
+								{t('trend.heading')}
+							</SectionHeading>
+							<p className="text-text-muted text-sm">{t('trend.description')}</p>
+						</div>
+						<ol className="border-border flex flex-col border-t">
+							{sessions.map((metrics) => (
+								<li
+									key={metrics.sessionId}
+									className="border-border flex flex-wrap items-center gap-x-4 gap-y-2 border-b py-3 text-sm sm:flex-nowrap"
+								>
+									<span className="text-text-muted w-full truncate sm:w-44 sm:shrink-0">
+										{started(metrics)}
+									</span>
+									<span className="bg-border h-0.5 flex-1">
+										<span
+											className="bg-accent block h-0.5"
+											style={{
+												width: `${((metrics.averagePromptWords ?? 0) / longestAverage) * 100}%`
+											}}
+										/>
+									</span>
+									<span className="w-24 shrink-0 text-right tabular-nums">
+										{t('units.words', { value: decimal(metrics.averagePromptWords) })}
+									</span>
+								</li>
+							))}
+						</ol>
+					</section>
 
-					<section aria-labelledby="table-heading" className="flex flex-col gap-4">
-						<h2 id="table-heading" className="text-xl font-semibold">
+					<section aria-labelledby="table-heading" className="flex flex-col gap-8">
+						<SectionHeading id="table-heading" number="04">
 							{t('table.heading')}
-						</h2>
-						<div className="border-border overflow-x-auto rounded-lg border">
+						</SectionHeading>
+						<div className="overflow-x-auto">
 							<table className="w-full min-w-4xl text-left text-sm">
-								<thead className="bg-surface text-text-muted">
-									<tr>
+								<thead>
+									<tr className="border-border border-y">
 										{[
 											'started',
 											'agent',
@@ -148,7 +150,7 @@ export function SessionMetricsView({
 											'longestGap',
 											'perPrompt'
 										].map((column) => (
-											<th key={column} scope="col" className="px-4 py-3 font-medium">
+											<th key={column} scope="col" className="app-eyebrow py-4 pr-5 align-bottom">
 												{t(`table.${column}`)}
 											</th>
 										))}
@@ -156,27 +158,29 @@ export function SessionMetricsView({
 								</thead>
 								<tbody>
 									{sessions.map((metrics) => (
-										<tr key={metrics.sessionId} className="border-border border-t">
-											<th scope="row" className="px-4 py-3 font-normal whitespace-nowrap">
+										<tr key={metrics.sessionId} className="border-border border-b">
+											<th scope="row" className="py-4 pr-5 font-normal whitespace-nowrap">
 												{started(metrics)}
 											</th>
-											<td className="px-4 py-3">{t(`agents.${metrics.agent}`)}</td>
-											<td className="px-4 py-3 tabular-nums">{metrics.promptCount}</td>
-											<td className="px-4 py-3 tabular-nums">{minutes(metrics.sessionMinutes)}</td>
-											<td className="px-4 py-3 tabular-nums">
+											<td className="py-4 pr-5 whitespace-nowrap">
+												{t(`agents.${metrics.agent}`)}
+											</td>
+											<td className="py-4 pr-5 tabular-nums">{metrics.promptCount}</td>
+											<td className="py-4 pr-5 tabular-nums">{minutes(metrics.sessionMinutes)}</td>
+											<td className="py-4 pr-5 tabular-nums">
 												{decimal(metrics.averagePromptWords)}
 											</td>
-											<td className="px-4 py-3 tabular-nums">{percent(metrics.pasteRatio)}</td>
-											<td className="px-4 py-3 tabular-nums">
+											<td className="py-4 pr-5 tabular-nums">{percent(metrics.pasteRatio)}</td>
+											<td className="py-4 pr-5 tabular-nums">
 												{ratio(metrics.promptToResponseRatio)}
 											</td>
-											<td className="px-4 py-3 tabular-nums">
+											<td className="py-4 pr-5 tabular-nums">
 												{minutes(metrics.averageGapMinutes)}
 											</td>
-											<td className="px-4 py-3 tabular-nums">
+											<td className="py-4 pr-5 tabular-nums">
 												{minutes(metrics.longestGapMinutes)}
 											</td>
-											<td className="px-4 py-3 tabular-nums">
+											<td className="py-4 tabular-nums">
 												{[
 													metrics.codeBlocksPerPrompt,
 													metrics.filePathsPerPrompt,
@@ -197,11 +201,42 @@ export function SessionMetricsView({
 	)
 }
 
-function Stat({ label, value, detail }: { label: string; value: string; detail?: string }) {
+function SectionHeading({
+	id,
+	number,
+	children
+}: {
+	id: string
+	number: string
+	children: React.ReactNode
+}) {
 	return (
-		<div className="border-border bg-surface flex flex-col gap-1 rounded-lg border p-4">
-			<dt className="text-text-muted text-sm">{label}</dt>
-			<dd className="text-2xl font-semibold tabular-nums">{value}</dd>
+		<div className="flex flex-col gap-4">
+			<p aria-hidden="true" className="app-eyebrow">
+				<b>{number}</b>
+			</p>
+			<h2 id={id} className="app-heading">
+				{children}
+			</h2>
+		</div>
+	)
+}
+
+function Stat({
+	label,
+	value,
+	detail,
+	className
+}: {
+	label: string
+	value: string
+	detail?: string
+	className?: string
+}) {
+	return (
+		<div className={cn('border-border flex flex-col gap-3 border-r border-b p-5', className)}>
+			<dt className="app-eyebrow">{label}</dt>
+			<dd className="app-number">{value}</dd>
 			{detail == null ? null : <dd className="text-text-muted text-sm">{detail}</dd>}
 		</div>
 	)

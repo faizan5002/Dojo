@@ -9,12 +9,15 @@
 	},
 	"AppShell": {
 		"home": "Dojo home",
+		"tagline": "Train with AI agents",
+		"landing": "Home",
 		"sessions": "Sessions"
 	},
 	"Sessions": {
 		"meta": {
 			"title": "Your sessions | Dojo"
 		},
+		"eyebrow": "Sessions",
 		"title": "Your sessions",
 		"intro": "Choose session logs from your project's .claude-logs folder to see how you work with your agent, measured without any AI model.",
 		"privacy": "Your files are read in this browser tab only. Nothing is uploaded or saved, and reloading the page clears them.",

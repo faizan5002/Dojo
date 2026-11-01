@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Button } from '@/components/ui/button'
+import { ArrowUpRightIcon } from '@/components/ui/icons'
 import { intakeLogFiles, type IntakeResult } from './intake'
 import { MAX_LOG_FILE_BYTES, MAX_LOG_FILES } from './limits'
 import { SessionMetricsView } from './session-metrics-view'
@@ -38,13 +38,11 @@ export function SessionIntake() {
 
 	return (
 		<section className="flex flex-col gap-8">
-			<div className="border-border bg-surface flex flex-col gap-4 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between">
-				<div className="flex flex-col gap-1">
-					<label
-						htmlFor={inputId}
-						className="bg-accent text-accent-ink hover:bg-accent-hover has-[:focus-visible]:outline-accent inline-flex h-10 w-fit cursor-pointer items-center rounded px-6 font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2"
-					>
+			<div className="border-border flex flex-col gap-5 border-y py-8 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex flex-col gap-3">
+					<label htmlFor={inputId} className="app-pill">
 						{t('pick')}
+						<ArrowUpRightIcon size={14} />
 						<input
 							id={inputId}
 							type="file"
@@ -60,9 +58,9 @@ export function SessionIntake() {
 					</p>
 				</div>
 				{state.status === 'done' ? (
-					<Button variant="outline" onClick={() => setState({ status: 'idle' })}>
+					<button type="button" className="app-pill" onClick={() => setState({ status: 'idle' })}>
 						{t('clear')}
-					</Button>
+					</button>
 				) : null}
 			</div>
 

@@ -65,6 +65,7 @@ src/app/[locale]/page.tsx
 ```
 
 - The visible experience (hero, Sessions, Evidence, Skills, Practice, footer) lives **inside the iframe document**. Its copy is therefore in `public/landing-pages/kage.html`, not in `messages/en.json`. The messages namespace supplies the page metadata (`meta.title`, `meta.description`) and the visually hidden `h1` and description that give the page a heading for assistive technology and crawlers.
+- The package's iframe sandbox blocks top-level navigation, so a link in `kage.html` cannot leave the frame by itself. `KageLanding` follows links marked `target="_top"` from the parent page; "Why evidence matters" opens `/sessions` this way.
 - `KageLanding` renders the package component in a full-height container and corrects the iframe's accessible `title`, which the package hardcodes.
 - `kage.html` is **generated**, not edited by hand: `scripts/adapt-kage-landing.mjs` takes the package's `kage.html`, verifies its SHA-256, and applies exact-once replacements. The script, the hashes and the full list of changes are in [`../public/landing-pages/ADAPTATION.md`](../public/landing-pages/ADAPTATION.md).
 - Everything under `public/landing-pages/secret-pathways-assets/` is copied unmodified from the package. `fonts.css` embeds fonts as base64, so it is the one file on the secret scanner's allow-list (`.secretsallow`). ESLint and Prettier both ignore `public/landing-pages/`.
@@ -76,7 +77,7 @@ Prisma schema files under `prisma/schema/` are the only thing edited by hand; CI
 
 ## Session logger
 
-`scripts/session-log.mjs` is invoked by Claude Code (`.claude/settings.json`) and Codex (`.codex/hooks.json`) hooks. It writes one markdown digest per session to `.claude-logs/`, keeping prompts and final answers and dropping tool calls, reasoning and injected context, and redacts credentials with the same scanner CI uses. It is local tooling and is not part of the web application. Details, limits and the privacy policy: [`SESSION_LOGGING.md`](SESSION_LOGGING.md).
+`scripts/session-log.mjs` is invoked by Claude Code (`.claude/settings.json`) and Codex (`.codex/hooks.json`) hooks. It writes one markdown digest per session to `.claude-logs/`, keeping prompts and final answers and dropping tool calls, reasoning and injected context, and redacts credentials with the same scanner CI uses. It is local tooling and is not part of the web application. Details, limits and the commit policy: [`SESSION_LOGGING.md`](SESSION_LOGGING.md).
 
 ## Security headers
 
