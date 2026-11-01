@@ -63,10 +63,9 @@ file is only about not stepping on each other.
 2. One feature commit (plus at most one consolidated fix), Conventional Commits,
    with a `Changelog:` line (`docs/rules/commits.md`). The `pre-commit` hook scans
    staged files for secrets; never `--no-verify` it.
-3. Do **not** stage or commit session logs: `.claude-logs/` and `.codex-logs/` are
-   local-only and gitignored (`docs/SESSION_LOGGING.md`). If `git status` shows one,
-   stop. Sharing a log, even a sanitized example, is prohibited until the owner
-   documents an approval process; redaction does not guarantee privacy.
+3. Read your session log in `.claude-logs/`, then commit it on its own just before you
+   push (`docs/SESSION_LOGGING.md`). The repo is public, so a pushed log is published;
+   redaction does not guarantee privacy.
 4. Update `docs/STATUS.md` and `docs/HANDOFF.md` if state changed.
 5. Write the PR title/description last (`docs/rules/pull-requests.md`); open it
    as a draft only if it must exist early. `/cicd` (`.claude/commands/cicd.md`,

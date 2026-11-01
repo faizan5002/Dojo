@@ -3,6 +3,18 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-02 — Session logs are committed (owner decision; reverses Phases 1C and 1D)
+
+**Decision.** `.claude-logs/` and `.codex-logs/` are tracked. A session's digest is
+committed on the branch that ships its work, in its own commit just before the push. The
+`session-logs-tracked` standard now fails if either directory is gitignored.
+**Why.** The repository owner requires the logs in the repository.
+**Accepted risk.** The repository is public, so a pushed log is published, including its
+author, email and account paths, and redaction misses personal and business data
+(`docs/PRODUCT_DECISIONS_REVIEW.md`, section 2.3). The earlier prohibition on sharing logs
+no longer applies to committed session logs.
+**Revisit if** the repository's visibility changes, or a log needs to be kept private.
+
 ## 2026-11-01 — Git-using tests ignore hook-exported `GIT_*` variables
 
 **Decision.** Tests that run git against a temporary repository take their environment

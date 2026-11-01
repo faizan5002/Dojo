@@ -102,7 +102,6 @@ const PRETTIER_IGNORE = '.prettierignore'
 // be tracked (a .gitkeep placeholder may be), and a directory that does exist
 // must be formatting-exempt. Neither directory has to exist.
 const SESSION_LOG_DIRS = ['.claude-logs', '.codex-logs']
-const SESSION_LOG_PLACEHOLDER = '.gitkeep'
 
 // Machine-local by construction. Each is probed at the root and nested,
 // because a pattern that catches one and misses the other is how
@@ -657,7 +656,7 @@ export const CHECKS = [
 	},
 	{
 		id: 'session-logs-tracked',
-		title: 'session logs are local-only: gitignored, untracked, and exempt from formatting',
+		title: 'session logs can be committed: not gitignored, and exempt from formatting',
 		run(ctx) {
 			const notGit = requireGit(ctx)
 			if (notGit) return notGit
@@ -668,24 +667,11 @@ export const CHECKS = [
 			for (const dir of SESSION_LOG_DIRS) {
 				// check-ignore needs no existing file, so a directory an agent has not
 				// created yet is still held to the rule.
-				if (!isIgnored(ctx, `${dir}/2026-01-01_00-00-00_probe.md`)) {
-					problems.push(`${dir}/ is not gitignored, so a session log could be committed`)
+				if (isIgnored(ctx, `${dir}/2026-01-01_00-00-00_probe.md`)) {
+					problems.push(`${dir}/ is gitignored, so a session log cannot ship with its work`)
 				}
-				const tracked = ctx.trackedFiles.filter(
-					(file) => file.startsWith(`${dir}/`) && file.split('/').pop() !== SESSION_LOG_PLACEHOLDER
-				)
-				if (tracked.length > 0) {
-					const shown = tracked.slice(0, MAX_LISTED_HITS).join(', ')
-					const more =
-						tracked.length > MAX_LISTED_HITS ? `, +${tracked.length - MAX_LISTED_HITS} more` : ''
-					problems.push(
-						`${tracked.length} session log file(s) are tracked in ${dir}/ (${shown}${more}) — ` +
-							`untrack with git rm --cached; only ${SESSION_LOG_PLACEHOLDER} may stay`
-					)
-				}
-				// Logs are verbatim records. A log that is shared on purpose (or one
-				// still in history) fails `format:check` unless Prettier skips the
-				// directory.
+				// Logs are verbatim records, so a committed one fails `format:check`
+				// unless Prettier skips the directory.
 				if (ctx.has(dir) && !prettierIgnore.includes(dir)) {
 					problems.push(`${PRETTIER_IGNORE} does not list ${dir}/`)
 				}

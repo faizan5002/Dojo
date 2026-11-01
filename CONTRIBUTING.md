@@ -51,7 +51,6 @@ Documentation changes follow the same flow as code. When you change behaviour, u
 ## Things that must never be committed
 
 - Secrets, tokens or populated `.env` files ([`docs/rules/secrets.md`](docs/rules/secrets.md)).
-- Agent session logs (`.claude-logs/`, `.codex-logs/`). They are local-only and gitignored; do not stage them, force-add them or share them ([`docs/SESSION_LOGGING.md`](docs/SESSION_LOGGING.md)).
 
 ## Reporting problems
 

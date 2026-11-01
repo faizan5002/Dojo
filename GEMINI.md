@@ -10,12 +10,10 @@ This file holds the things that genuinely are Gemini-CLI-specific.
 
 ## Session logs
 
-`.claude-logs/` and `.codex-logs/` are **local-only by default** and gitignored; never
-stage, commit or push a session log or include one in an ordinary commit. Claude
-Code and Codex write these automatically; Gemini CLI does not. If you do save a
-transcript or working log, keep it there. Sharing a log, even a sanitized example, is
-prohibited until the owner documents an approval process. Redaction does not guarantee
-a log is private.
+`.claude-logs/` is tracked: the digest of the session that produced a change is committed
+on the branch that ships it, in its own commit just before the push. Claude Code and
+Codex write these automatically; Gemini CLI does not. The repo is public, so a pushed log is
+published: read it first, and remember redaction does not guarantee a log is private.
 
 ## Workflows (the "skills")
 

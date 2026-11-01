@@ -52,7 +52,3 @@ pnpm-debug.log*
 /blob-report/
 /playwright/.cache/
 
-# agent session logs — local only by default (docs/SESSION_LOGGING.md). Never stage
-# or commit these; sharing is prohibited until an approval process is documented.
-.claude-logs/
-.codex-logs/
