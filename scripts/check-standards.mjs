@@ -96,11 +96,13 @@ const PRETTIER_CONFIGS = [
 	'prettier.config.mjs'
 ]
 const PRETTIER_IGNORE = '.prettierignore'
-// One per agent that writes a committed transcript: Claude Code to
-// .claude-logs/, Codex to .codex-logs/. Each is optional on its own (a
-// Claude-only repo has no .codex-logs/), but at least one must exist, and
-// every one that does must be tracked, unignored and formatting-exempt.
+// One per agent that writes a session log: Claude Code to .claude-logs/,
+// Codex to .codex-logs/. Logs are local-only (docs/SESSION_LOGGING.md): both
+// directories must be gitignored whether or not they exist yet, no actual log may
+// be tracked (a .gitkeep placeholder may be), and a directory that does exist
+// must be formatting-exempt. Neither directory has to exist.
 const SESSION_LOG_DIRS = ['.claude-logs', '.codex-logs']
+const SESSION_LOG_PLACEHOLDER = '.gitkeep'
 
 // Machine-local by construction. Each is probed at the root and nested,
 // because a pattern that catches one and misses the other is how
@@ -193,6 +195,10 @@ function ruleFilesIn(ctx) {
 }
 
 function isExecutable(ctx, path) {
+	// Windows filesystems carry no executable bit, so the on-disk check cannot be
+	// answered there. The git-index mode check beside every caller still enforces
+	// 100755, which is what a fresh clone on Linux or macOS receives.
+	if (process.platform === 'win32') return true
 	const EXECUTE_BITS = 0o111
 	return (statSync(join(ctx.root, path)).mode & EXECUTE_BITS) !== 0
 }
@@ -209,6 +215,23 @@ function isIgnored(ctx, path) {
 	return ctx.git('check-ignore', '-q', '--', path).status === 0
 }
 
+// On Windows node_modules/.bin/<name> is an extensionless shell shim that cannot
+// be spawned, and Node refuses to spawn the .cmd shim without a shell. Run the
+// package's own JavaScript entry with node instead: no shell is involved.
+const BIN_PACKAGES = { tsc: 'typescript' }
+
+function windowsEntry(ctx, name) {
+	const pkgName = BIN_PACKAGES[name] ?? name
+	try {
+		const pkgDir = join(ctx.root, 'node_modules', pkgName)
+		const { bin } = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8'))
+		const relative = typeof bin === 'string' ? bin : bin?.[name]
+		return relative ? join(pkgDir, relative) : null
+	} catch {
+		return null
+	}
+}
+
 function runBinary(ctx, name, args) {
 	const bin = join(ctx.root, 'node_modules', '.bin', name)
 	if (!existsSync(bin)) {
@@ -216,9 +239,10 @@ function runBinary(ctx, name, args) {
 			error: `${name} is not installed under node_modules — run the package manager's install first`
 		}
 	}
+	const entry = process.platform === 'win32' ? windowsEntry(ctx, name) : null
 	try {
 		return {
-			stdout: execFileSync(bin, args, {
+			stdout: execFileSync(entry ? process.execPath : bin, entry ? [entry, ...args] : args, {
 				cwd: ctx.root,
 				encoding: 'utf8',
 				stdio: ['ignore', 'pipe', 'pipe']
@@ -633,7 +657,7 @@ export const CHECKS = [
 	},
 	{
 		id: 'session-logs-tracked',
-		title: 'session transcripts are tracked, kept, and exempt from formatting',
+		title: 'session logs are local-only: gitignored, untracked, and exempt from formatting',
 		run(ctx) {
 			const notGit = requireGit(ctx)
 			if (notGit) return notGit
@@ -641,28 +665,30 @@ export const CHECKS = [
 			const prettierIgnore = (ctx.read(PRETTIER_IGNORE) ?? '')
 				.split('\n')
 				.map((line) => line.trim().replace(/\/$/, ''))
-			const present = SESSION_LOG_DIRS.filter((dir) => ctx.has(dir))
-			if (present.length === 0) {
-				problems.push(
-					`no session-log directory exists (${SESSION_LOG_DIRS.map((dir) => `${dir}/`).join(' or ')})`
-				)
-			}
-			let anyTracked = false
-			for (const dir of present) {
-				if (isIgnored(ctx, `${dir}/2026-01-01_00-00-00_probe.md`)) {
-					problems.push(`${dir}/ is gitignored, so transcripts never ship with the branch`)
+			for (const dir of SESSION_LOG_DIRS) {
+				// check-ignore needs no existing file, so a directory an agent has not
+				// created yet is still held to the rule.
+				if (!isIgnored(ctx, `${dir}/2026-01-01_00-00-00_probe.md`)) {
+					problems.push(`${dir}/ is not gitignored, so a session log could be committed`)
 				}
-				if (ctx.trackedFiles.some((file) => file.startsWith(`${dir}/`))) anyTracked = true
-				// Transcripts are verbatim records. The first one committed fails
-				// `format:check` unless Prettier is told to leave the directory alone.
-				if (!prettierIgnore.includes(dir)) {
+				const tracked = ctx.trackedFiles.filter(
+					(file) => file.startsWith(`${dir}/`) && file.split('/').pop() !== SESSION_LOG_PLACEHOLDER
+				)
+				if (tracked.length > 0) {
+					const shown = tracked.slice(0, MAX_LISTED_HITS).join(', ')
+					const more =
+						tracked.length > MAX_LISTED_HITS ? `, +${tracked.length - MAX_LISTED_HITS} more` : ''
+					problems.push(
+						`${tracked.length} session log file(s) are tracked in ${dir}/ (${shown}${more}) — ` +
+							`untrack with git rm --cached; only ${SESSION_LOG_PLACEHOLDER} may stay`
+					)
+				}
+				// Logs are verbatim records. A log that is shared on purpose (or one
+				// still in history) fails `format:check` unless Prettier skips the
+				// directory.
+				if (ctx.has(dir) && !prettierIgnore.includes(dir)) {
 					problems.push(`${PRETTIER_IGNORE} does not list ${dir}/`)
 				}
-			}
-			if (present.length > 0 && !anyTracked) {
-				problems.push(
-					`no session-log directory has anything tracked — add a .gitkeep so the directory survives a clone`
-				)
 			}
 			return problems.length > 0 ? fail(problems.join('; ')) : pass()
 		}

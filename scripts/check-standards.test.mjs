@@ -18,6 +18,7 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { ESLint } from 'eslint'
 import { CHECKS, runStandardsChecks } from './check-standards.mjs'
+import { cleanGitEnv, withoutGitEnv } from './test-git-env.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SCRIPT = join(REPO_ROOT, 'scripts/check-standards.mjs')
@@ -54,8 +55,10 @@ const FIXTURE_FILES = [
 	'.codex-logs/.gitkeep'
 ]
 
+// Git against a fixture. Hook-exported GIT_* variables would redirect it to the
+// repo that is running the tests, so the fixture gets a clean environment.
 function git(root, ...args) {
-	return spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' })
+	return spawnSync('git', ['-C', root, ...args], { encoding: 'utf8', env: cleanGitEnv() })
 }
 
 function createFixture() {
@@ -74,7 +77,23 @@ function createFixture() {
 	}
 	git(root, 'init', '-q')
 	git(root, 'add', '-A')
+	matchExecutableModes(root)
 	return root
+}
+
+// Windows has no executable bit, so `git add` records every fixture file as
+// 100644. Give the fixture the modes the real repo's index has, so the
+// git-index checks see what a Linux or macOS checkout would.
+function matchExecutableModes(root) {
+	if (process.platform !== 'win32') return
+	// The real repo is the target here, so its git environment is left alone.
+	const listed = spawnSync('git', ['-C', REPO_ROOT, 'ls-files', '-s', '--', ...FIXTURE_FILES], {
+		encoding: 'utf8'
+	}).stdout
+	for (const line of listed.split('\n')) {
+		const match = /^100755 \S+ \d\t(.+)$/.exec(line.trim())
+		if (match) git(root, 'update-index', '--chmod=+x', '--', match[1])
+	}
 }
 
 // Mutations that add a file the index must know about call `git add`
@@ -84,15 +103,24 @@ function withFixture(mutate, ids) {
 	const root = createFixture()
 	try {
 		mutate(root)
-		const { results } = runStandardsChecks({ root, ids })
+		const { results } = withoutGitEnv(() => runStandardsChecks({ root, ids }))
 		return Object.fromEntries(results.map((result) => [result.id, result]))
 	} finally {
 		rmSync(root, { recursive: true, force: true })
 	}
 }
 
+// Mutations are written against LF text. A checkout with CRLF line endings
+// (Windows with core.autocrlf=true) would silently not match them, so the text
+// is normalised for the edit and the file's own line endings restored after.
+// An edit that changes nothing is a broken test, not a passing one.
 function edit(root, path, transform) {
-	writeFileSync(join(root, path), transform(readFileSync(join(root, path), 'utf8')))
+	const file = join(root, path)
+	const original = readFileSync(file, 'utf8')
+	const lf = original.replace(/\r\n/g, '\n')
+	const next = transform(lf)
+	assert.notEqual(next, lf, `the mutation did not change ${path}`)
+	writeFileSync(file, original.includes('\r\n') ? next.replace(/\n/g, '\r\n') : next)
 }
 
 test('the template itself meets every standard', () => {
@@ -243,7 +271,13 @@ test('per-tool-entry-points fails when an optional per-tool file exists without 
 	assert.match(results['per-tool-entry-points'].detail, /GEMINI\.md exists but/)
 })
 
-test('commit-msg-hook fails when the hook is not executable on disk', () => {
+// Windows cannot clear an on-disk executable bit; the git-index mode is what
+// the neighbouring tests cover there.
+const POSIX_ONLY = {
+	skip: process.platform === 'win32' && 'Windows has no on-disk executable bit'
+}
+
+test('commit-msg-hook fails when the hook is not executable on disk', POSIX_ONLY, () => {
 	const results = withFixture(
 		(root) => chmodSync(join(root, '.githooks/commit-msg'), 0o644),
 		['commit-msg-hook']
@@ -497,13 +531,60 @@ test('machine-local-state-ignored flags patterns that only match at the root', (
 	assert.match(results['machine-local-state-ignored'].detail, /nested\/node_modules\/x\.js/)
 })
 
-test('session-logs-tracked fails when transcripts are gitignored', () => {
+test('session-logs-tracked fails when a session-log directory is not gitignored', () => {
 	const results = withFixture(
-		(root) => edit(root, '.gitignore', (text) => `${text}\n.claude-logs/\n`),
+		(root) => edit(root, '.gitignore', (text) => text.replace(/\.claude-logs\/\r?\n/, '')),
 		['session-logs-tracked']
 	)
 	assert.equal(results['session-logs-tracked'].ok, false)
-	assert.match(results['session-logs-tracked'].detail, /gitignored/)
+	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is not gitignored/)
+})
+
+test('session-logs-tracked names each log directory that is not gitignored', () => {
+	const results = withFixture(
+		(root) =>
+			edit(root, '.gitignore', (text) =>
+				text.replace(/\.claude-logs\/\r?\n/, '').replace(/\.codex-logs\/\r?\n/, '')
+			),
+		['session-logs-tracked']
+	)
+	assert.equal(results['session-logs-tracked'].ok, false)
+	assert.match(results['session-logs-tracked'].detail, /\.claude-logs\/ is not gitignored/)
+	assert.match(results['session-logs-tracked'].detail, /\.codex-logs\/ is not gitignored/)
+})
+
+test('session-logs-tracked fails when an actual session log is tracked', () => {
+	const results = withFixture(
+		(root) => {
+			writeFileSync(join(root, '.claude-logs', '2026-01-01_00-00-00_probe.md'), 'x')
+			git(root, 'add', '-f', '.claude-logs/2026-01-01_00-00-00_probe.md')
+		},
+		['session-logs-tracked']
+	)
+	assert.equal(results['session-logs-tracked'].ok, false)
+	assert.match(results['session-logs-tracked'].detail, /1 session log file\(s\) are tracked/)
+	assert.match(results['session-logs-tracked'].detail, /git rm --cached/)
+})
+
+test('session-logs-tracked allows .gitkeep placeholders and a repo with no log directories', () => {
+	const withPlaceholders = withFixture(() => {}, ['session-logs-tracked'])
+	assert.equal(
+		withPlaceholders['session-logs-tracked'].ok,
+		true,
+		withPlaceholders['session-logs-tracked'].detail
+	)
+	const noDirs = withFixture(
+		(root) => {
+			rmSync(join(root, '.claude-logs'), { recursive: true, force: true })
+			rmSync(join(root, '.codex-logs'), { recursive: true, force: true })
+			git(root, 'add', '-A')
+			edit(root, '.prettierignore', (text) =>
+				text.replace(/\.claude-logs\/\r?\n/, '').replace(/\.codex-logs\/\r?\n/, '')
+			)
+		},
+		['session-logs-tracked']
+	)
+	assert.equal(noDirs['session-logs-tracked'].ok, true, noDirs['session-logs-tracked'].detail)
 })
 
 test('session-logs-tracked fails when Prettier is not told to skip the transcripts', () => {
@@ -538,10 +619,16 @@ test('session-logs-tracked passes a Claude-only repo with no .codex-logs dir', (
 test('git-backed checks fail, not skip, outside a git repository', () => {
 	const root = mkdtempSync(join(tmpdir(), 'check-standards-nogit-'))
 	try {
-		const { results } = runStandardsChecks({
-			root,
-			ids: ['no-machine-local-state-tracked', 'machine-local-state-ignored', 'session-logs-tracked']
-		})
+		const { results } = withoutGitEnv(() =>
+			runStandardsChecks({
+				root,
+				ids: [
+					'no-machine-local-state-tracked',
+					'machine-local-state-ignored',
+					'session-logs-tracked'
+				]
+			})
+		)
 		assert.equal(results.length, 3)
 		for (const result of results) {
 			assert.equal(result.ok, false)
@@ -561,6 +648,7 @@ test('the CLI exits 1 and reports the failure as JSON when a standard is unmet',
 		try {
 			stdout = execFileSync(process.execPath, [SCRIPT, '--root', root, '--json'], {
 				encoding: 'utf8',
+				env: cleanGitEnv(),
 				stdio: ['ignore', 'pipe', 'pipe']
 			})
 		} catch (error) {

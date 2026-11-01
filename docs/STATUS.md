@@ -1,0 +1,61 @@
+# Status
+
+Last updated: 2026-11-01. Update this whenever state changes; keep it short and factual. Who is doing what lives in [`HANDOFF.md`](HANDOFF.md); why choices were made lives in [`DECISIONS.md`](DECISIONS.md).
+
+## Where the project is
+
+Dojo is in early development. The **public landing page is implemented**; the coaching product behind it (session intake, review, feedback, accounts) is **not built** and its key questions are undecided (see [`HANDOFF.md`](HANDOFF.md), "Decisions needed").
+
+The work so far is published on the branch `chore/phase-0-agent-setup` of `https://github.com/faizan5002/Dojo.git`. `main` still points at `2f2f925` (the template plus one historical commit); the branch has not been merged into it.
+
+## Implemented
+
+| Item                                                                | Notes                                                                                                                                                                                      |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Landing page at `/`                                                 | Adapted from the Kage page in `@designcodeio/threeui` 1.2.0. Provenance and hashes: `public/landing-pages/ADAPTATION.md`. Copy states plainly that the coaching loop is still being built. |
+| Local session logger for Claude Code and Codex                      | `scripts/session-log.mjs`, `.claude/settings.json`, `.codex/hooks.json`. Local-only, gitignored, redacted. See [`SESSION_LOGGING.md`](SESSION_LOGGING.md).                                 |
+| Windows-capable test suite and checks                               | CRLF checkouts, the missing executable bit, `.bin` shims and the `@/` alias no longer fail tests on Windows. LF is enforced by `.gitattributes`.                                           |
+| Test isolation from git hooks                                       | Git-using tests no longer inherit `GIT_*` variables from a hook, so a push from a linked worktree cannot corrupt the repository's config or index. See [`TESTING.md`](TESTING.md).         |
+| Engineering foundation: rules, CI, hooks, skills, standards checker | Inherited from `8xsocial/template-web`. See [`../AGENTS.md`](../AGENTS.md) and [`STANDARDS.md`](STANDARDS.md).                                                                             |
+| Documentation set                                                   | [`README.md`](README.md) is the index.                                                                                                                                                     |
+
+## Not implemented
+
+- Everything product-specific beyond the landing page: accounts, session upload or intake, review, coaching, progress.
+- Project customisation: `package.json` is still named `template-web`, and `SITE.name` in `src/lib/seo/site.ts` is still `Web template`. The `template-setup` skill has not been run, deliberately, until the product questions in [`HANDOFF.md`](HANDOFF.md) are answered.
+- A configured production URL. `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
+- Automated coverage of the landing page itself. The only Playwright test is a smoke test of `/` and the locale redirect.
+
+## Verified
+
+Last full local run (Windows, LF working tree, Node 24 locally; CI uses Node 22):
+
+| Check                                                                   | Result                                                                              |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `pnpm format:check`, `lint`, `typecheck`, `check:env`                   | pass                                                                                |
+| `pnpm check:secrets`                                                    | pass                                                                                |
+| `pnpm test`                                                             | 228 tests: 227 pass, 0 fail, 1 skipped (on-disk executable bit)                     |
+| `pnpm build` (placeholder `DATABASE_URL`)                               | pass                                                                                |
+| The real `pre-push` hook, from a plain clone and from a linked worktree | pass, and the repository's config, index and tracked files are unchanged afterwards |
+
+**Not run locally:** Linux, `pnpm check:rls` (needs Postgres with migrations applied; CI runs it) and `pnpm test:e2e`. The CI workflow results for the published branch have not been recorded here; read them on GitHub.
+
+**Session logger, verified live with a real agent:** Claude Code hooks fire in a real session; prompts and final answers are captured, narration, tool output and reasoning are excluded, a session keeps one file, attribution is recorded, and redaction leaves no secret. Evidence is in a local log that is not shared (see the privacy policy in [`SESSION_LOGGING.md`](SESSION_LOGGING.md)).
+
+**Session logger, verified by automated tests only:** parsing for Claude and Codex shapes, malformed input, tool and sidechain exclusion, redaction, idempotency, session separation, attribution fallbacks and CLI exit codes (`scripts/session-log.test.mjs`).
+
+## Pending verification
+
+| Item                                                   | Why it is open                                                                                                                                                                      |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex hooks firing in a real Codex session             | Needs the interactive `/hooks` trust review by the developer. Manual steps are in [`SESSION_LOGGING.md`](SESSION_LOGGING.md). A Codex turn that runs tools has not been logged yet. |
+| Claude hooks on the second developer's machine         | Needs their workspace-trust acceptance.                                                                                                                                             |
+| Linux results for the full suite and `check:standards` | Not run on Linux locally; CI is the reference.                                                                                                                                      |
+
+## Known limitations
+
+See "Known limitations" in [`SESSION_LOGGING.md`](SESSION_LOGGING.md): Codex logs only the turns its hooks saw, resuming or clearing can split a conversation across files, Git Bash is needed for the Claude hook on Windows, and `github_user` can be `unknown` until `gh` or `git config github.user` is available.
+
+## Open exposure
+
+A personal session log was published in Git history before the local-only policy existed. The current tree no longer tracks it, but it remains in history and on `main` until the branch is merged. The history decision belongs to the repository owner and is open. See [`PUBLISHED_LOG_EXPOSURE.md`](PUBLISHED_LOG_EXPOSURE.md).

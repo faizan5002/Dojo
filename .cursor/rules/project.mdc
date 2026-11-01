@@ -36,12 +36,11 @@ instead of routing around the Compiler.
 
 ## Session logs
 
-`.claude-logs/` is tracked, not gitignored — the transcript for the session
-that produced a change belongs on the branch that ships it. Cursor doesn't
-write one automatically, so there's usually nothing to stage from a Cursor
-session. If you do save a transcript or working log, put it there with the
-same `YYYY-MM-DD_HH-MM-SS_<id>.md` naming and stage it immediately before
-`git push`, separately from the code commit.
+`.claude-logs/` and `.codex-logs/` are **local-only by default** and gitignored; never
+stage, commit or push a session log or include one in an ordinary commit. Cursor
+doesn't write one automatically. If you do save a transcript or working log, keep it
+there. Sharing a log, even a sanitized example, is prohibited until the owner documents
+an approval process. Redaction does not guarantee a log is private.
 
 ## Workflows
 

@@ -89,7 +89,14 @@ const LOGGER_IMPORTS = {
 const eslintConfig = defineConfig([
 	...nextVitals,
 	...nextTypescript,
-	globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'src/generated/**']),
+	globalIgnores([
+		'.next/**',
+		'out/**',
+		'build/**',
+		'next-env.d.ts',
+		'src/generated/**',
+		'public/landing-pages/**'
+	]),
 	{
 		// See docs/rules/code-quality.md for the rationale behind both rules.
 		rules: {

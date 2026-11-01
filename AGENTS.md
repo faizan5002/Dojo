@@ -43,6 +43,29 @@ for everyone.
 
 <!-- END:merge-on-green -->
 
+# Before you start — two developers share this repo
+
+Two people, each with their own agent (Claude Code or Codex), work here. Do
+this before you edit anything:
+
+1. Read this file, then `docs/PROJECT_CONTEXT.md`, `docs/STATUS.md` and
+   `docs/HANDOFF.md` (current state, who owns what, decisions needed).
+   `docs/DEVELOPMENT_WORKFLOW.md` has the full collaboration rules.
+2. **Inspect `git status`, the current branch and recent commits
+   (`git fetch`, then `git log origin/main`). Never assume the other developer
+   has not made changes.** Pull before starting new work; read what changed
+   before you rebase or merge; never force-push a shared branch; never
+   overwrite uncommitted work you did not make.
+3. Check `docs/HANDOFF.md` for files another developer has claimed.
+4. When you stop with work unfinished, update `docs/HANDOFF.md` and
+   `docs/STATUS.md` so the next agent can continue without this conversation.
+
+Session logging (`.claude-logs/`, see `docs/SESSION_LOGGING.md`) is automatic for
+both agents and **local-only**: logs are gitignored, never staged or committed
+automatically, and never part of an ordinary commit. Redaction does not guarantee a
+log is private. Sharing a log, even a sanitized example, is prohibited until the
+owner documents an approval process.
+
 # This is NOT the Next.js you know
 
 Next.js 16 and React 19 are the pinned versions in this template. Both have
@@ -133,10 +156,10 @@ linkable, instead of one monolithic instructions file.
   `captureError` (that's what Sentry is for).
 - **[Secrets](docs/rules/secrets.md)** — credentials live in env vars read
   through `src/lib/env.ts`, never hardcoded or committed; a `check:secrets`
-  scanner backstops it at the pre-commit hook and again in CI, over source
-  and over the `.claude-logs/`/`.codex-logs/` transcripts that ship on the
-  branch. Redact a secret out of a transcript before logging the session —
-  don't lean on the scanner.
+  scanner backstops it at the pre-commit hook and again in CI, over tracked
+  source. Session transcripts (`.claude-logs/`, which every agent writes to) are
+  local-only and gitignored; never commit one. Keep secrets out of a session in the
+  first place — don't lean on redaction or the scanner.
 - **[Analytics](docs/rules/analytics.md)** — PostHog through the typed
   taxonomy in `src/lib/analytics/` (`track`/`trackServer`), never
   `posthog.capture` directly; `object_action` snake_case past-tense names,

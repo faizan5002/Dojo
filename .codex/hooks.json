@@ -1,0 +1,27 @@
+{
+	"description": "Session logging: prompts and final answers to .claude-logs/ (docs/SESSION_LOGGING.md). Review and trust these in Codex with /hooks.",
+	"hooks": {
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node \"$(git rev-parse --show-toplevel)/scripts/session-log.mjs\" codex",
+						"timeout": 30
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node \"$(git rev-parse --show-toplevel)/scripts/session-log.mjs\" codex",
+						"timeout": 30
+					}
+				]
+			}
+		]
+	}
+}
