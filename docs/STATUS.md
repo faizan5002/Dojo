@@ -21,7 +21,7 @@ The work so far is published on the branch `chore/phase-0-agent-setup` of `https
 
 ## Not implemented
 
-- Everything product-specific beyond the landing page: accounts, session upload or intake, review, coaching, progress.
+- Everything product-specific beyond the landing page and session intake (`/sessions`, on `feat/session-intake-free-metrics`, not merged): accounts, stored data, redaction review, scoring, coaching, progress.
 - Project customisation: `package.json` is still named `template-web`, and `SITE.name` in `src/lib/seo/site.ts` is still `Web template`. The `template-setup` skill has not been run, deliberately, until the product questions in [`HANDOFF.md`](HANDOFF.md) are answered.
 - A configured production URL. `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
 - Automated coverage of the landing page itself. The only Playwright test is a smoke test of `/` and the locale redirect.

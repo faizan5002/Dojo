@@ -41,7 +41,8 @@ The locale layout validates the `[locale]` segment and calls `notFound()` for an
 
 | Route                                       | What it is                                                                                                                |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                         | The landing page (the only product page)                                                                                  |
+| `/`                                         | The landing page                                                                                                          |
+| `/sessions`                                 | Session log intake and free metrics. `noindex`. Files are read in the browser; nothing is uploaded or stored.             |
 | `/analytics-demo`                           | Template reference page for the analytics taxonomy. `noindex`. Intended to be deleted once the taxonomy is understood.    |
 | `/api/health`                               | `200` when every check passes, `503` otherwise. The body names a failing check but never the reason. Checks the database. |
 | `/robots.txt`, `/sitemap.xml`               | Generated. `robots.txt` disallows everything unless the deployment is indexable.                                          |

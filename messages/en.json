@@ -7,6 +7,76 @@
 		"title": "Train how you work with AI agents.",
 		"description": "Dojo is being built to help developers improve how they work with AI coding agents through real work, reflection, skill development and practice."
 	},
+	"AppShell": {
+		"home": "Dojo home",
+		"sessions": "Sessions"
+	},
+	"Sessions": {
+		"meta": {
+			"title": "Your sessions | Dojo"
+		},
+		"title": "Your sessions",
+		"intro": "Choose session logs from your project's .claude-logs folder to see how you work with your agent, measured without any AI model.",
+		"privacy": "Your files are read in this browser tab only. Nothing is uploaded or saved, and reloading the page clears them.",
+		"pick": "Choose log files",
+		"pickHint": "Markdown files (.md) from .claude-logs, up to {maxFiles} files of {maxMegabytes} MB each.",
+		"reading": "Reading your logs…",
+		"clear": "Clear",
+		"empty": "No sessions yet. Choose one or more log files to begin.",
+		"overview": {
+			"heading": "Across your sessions",
+			"sessions": "Sessions",
+			"prompts": "Prompts",
+			"averagePromptWords": "Average prompt length",
+			"pasteRatio": "Likely pasted",
+			"promptToResponseRatio": "Prompt-to-response ratio",
+			"averageGap": "Average gap between prompts",
+			"perPrompt": "Per prompt",
+			"codeBlocks": "{count} code blocks",
+			"filePaths": "{count} file paths",
+			"urls": "{count} URLs"
+		},
+		"trend": {
+			"heading": "Prompt length trend",
+			"description": "Average words per prompt in each session, oldest first."
+		},
+		"table": {
+			"heading": "Session by session",
+			"started": "Started",
+			"agent": "Agent",
+			"prompts": "Prompts",
+			"length": "Session length",
+			"averageWords": "Avg words",
+			"pasted": "Pasted",
+			"ratio": "Prompt / response",
+			"gap": "Avg gap",
+			"longestGap": "Longest gap",
+			"perPrompt": "Code · paths · URLs per prompt",
+			"undated": "Undated"
+		},
+		"units": {
+			"words": "{value} words",
+			"minutes": "{value} min"
+		},
+		"agents": {
+			"claude": "Claude Code",
+			"codex": "Codex",
+			"unknown": "Unknown"
+		},
+		"notAvailable": "n/a",
+		"rejected": {
+			"heading": "Files not read",
+			"not-markdown": "Not a Markdown (.md) file.",
+			"too-large": "Larger than {maxMegabytes} MB.",
+			"empty": "The file is empty.",
+			"unreadable": "The file could not be read.",
+			"too-many-files": "More than {maxFiles} files were chosen at once.",
+			"duplicate-session": "Another file holds a newer copy of this session.",
+			"no-frontmatter": "Not a session log: no header block.",
+			"no-session-id": "Not a session log: no valid session id.",
+			"no-entries": "The log has no prompts or responses."
+		}
+	},
 	"SiteFooter": {
 		"privacy": "Privacy",
 		"terms": "Terms",

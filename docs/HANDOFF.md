@@ -30,11 +30,11 @@ second developer's identity is deliberately not recorded; add it here when known
 
 ## In progress / claimed
 
-Nobody has claimed anything. Add rows as `path or area — branch — who`.
+Add rows as `path or area — branch — who`.
 
-| Area | Branch | Who |
-| ---- | ------ | --- |
-| —    | —      | —   |
+| Area                                                                             | Branch                             | Who                   |
+| -------------------------------------------------------------------------------- | ---------------------------------- | --------------------- |
+| Session intake: `src/features/sessions/`, `src/app/[locale]/(app)/`, `/sessions` | `feat/session-intake-free-metrics` | Developer 1's session |
 
 ## Exact remaining actions
 

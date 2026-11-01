@@ -1,0 +1,26 @@
+/* Dojo's palette for the application pages, taken from the landing page's
+   own tokens (public/landing-pages/kage.html: ink, bone, vermilion, line).
+   It re-points the semantic tokens from globals.css under the app surface
+   only, so the shared ui/ components take Dojo's look here while
+   globals.css, and the landing page, stay exactly as they are. Dark only,
+   like the landing page. Vermilion is a fill and focus colour, never body
+   text: on ink it is below AA contrast for small type. */
+[data-surface='app'] {
+	--bg: #05070a;
+	--surface: #0a0e12;
+	--surface-hover: #121820;
+	--border: rgba(223, 231, 224, 0.13);
+	--border-strong: rgba(223, 231, 224, 0.26);
+	--text: #dfe7e0;
+	--text-muted: #aab4ad;
+	--text-faint: #8a958d;
+	--accent: #e0231c;
+	--accent-hover: #c41d17;
+	--accent-ink: #ffffff;
+	--success: #7cc79a;
+	--warning: #c9a24a;
+	--danger: #ff5a3c;
+
+	color-scheme: dark;
+	font-family: var(--font-onest), var(--font-sans);
+}
