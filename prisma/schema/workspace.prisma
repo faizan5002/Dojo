@@ -1,0 +1,125 @@
+// A user's Dojo workspace: what they uploaded, the free metrics of it, and
+// every rubric assessment of it. Every row carries user_id, so a query can be
+// scoped to its owner without a join, and every row is deleted with its owner.
+//
+// What is stored is the parsed, secret-redacted conversation — never the raw
+// uploaded file (docs/DECISIONS.md, 2026-11-02, session persistence).
+
+// One choice of files on /sessions.
+model Upload {
+	id             String         @id @default(uuid()) @db.Uuid
+	userId         String         @map("user_id") @db.Uuid
+	user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+	/// Every file chosen, kept or not: [{ fileName, status, reason? }].
+	files          Json
+	sessionCount   Int            @map("session_count")
+	promptCount    Int            @map("prompt_count")
+	redactionCount Int            @map("redaction_count")
+	createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+	sessions       AgentSession[]
+	metrics        UploadMetrics?
+	assessments    Assessment[]
+
+	@@index([userId, createdAt])
+	@@map("uploads")
+}
+
+// One coding-agent session from an upload, redacted. Named for the agent's
+// session so it is never confused with a sign-in session.
+model AgentSession {
+	id          String    @id @default(uuid()) @db.Uuid
+	uploadId    String    @map("upload_id") @db.Uuid
+	upload      Upload    @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+	userId      String    @map("user_id") @db.Uuid
+	user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+	/// The session id the log itself records.
+	externalId  String    @map("external_id")
+	agent       String
+	project     String?
+	generatedAt String?   @map("generated_at")
+	startedAt   DateTime? @map("started_at") @db.Timestamptz(6)
+	promptCount Int       @map("prompt_count")
+	/// The redacted conversation: [{ prompt, response }] of { timestamp, text }.
+	turns       Json
+	createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+	@@unique([uploadId, externalId])
+	@@index([userId])
+	@@map("agent_sessions")
+}
+
+// The free metrics of one upload, as computed when it was saved.
+model UploadMetrics {
+	id                    String   @id @default(uuid()) @db.Uuid
+	uploadId              String   @unique @map("upload_id") @db.Uuid
+	upload                Upload   @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+	userId                String   @map("user_id") @db.Uuid
+	user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+	sessionCount          Int      @map("session_count")
+	promptCount           Int      @map("prompt_count")
+	responseCount         Int      @map("response_count")
+	averagePromptWords    Float?   @map("average_prompt_words")
+	pasteRatio            Float?   @map("paste_ratio")
+	promptToResponseRatio Float?   @map("prompt_to_response_ratio")
+	averageGapMinutes     Float?   @map("average_gap_minutes")
+	longestGapMinutes     Float?   @map("longest_gap_minutes")
+	codeBlocksPerPrompt   Float?   @map("code_blocks_per_prompt")
+	filePathsPerPrompt    Float?   @map("file_paths_per_prompt")
+	urlsPerPrompt         Float?   @map("urls_per_prompt")
+	/// Per-session metrics, in session order.
+	sessions              Json
+	createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+	@@index([userId])
+	@@map("upload_metrics")
+}
+
+// One rubric run over an upload. A snapshot: a new run adds a row and never
+// rewrites an old one, so history keeps the scores and rubric version it had.
+model Assessment {
+	id              String            @id @default(uuid()) @db.Uuid
+	userId          String            @map("user_id") @db.Uuid
+	user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+	uploadId        String            @map("upload_id") @db.Uuid
+	upload          Upload            @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+	rubricVersion   String            @map("rubric_version")
+	overallScore    Int?              @map("overall_score")
+	proficiency     String?
+	skillsAssessed  Int               @map("skills_assessed")
+	strongestSkill  String?           @map("strongest_skill")
+	weakestSkill    String?           @map("weakest_skill")
+	sessionCount    Int               @map("session_count")
+	promptCount     Int               @map("prompt_count")
+	redactionCount  Int               @map("redaction_count")
+	profile         Json
+	recommendations Json
+	createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+	skills          SkillAssessment[]
+
+	@@index([userId, createdAt])
+	@@index([uploadId])
+	@@map("assessments")
+}
+
+// One of the five skills in an assessment, with its evidence.
+model SkillAssessment {
+	id           String     @id @default(uuid()) @db.Uuid
+	assessmentId String     @map("assessment_id") @db.Uuid
+	assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+	userId       String     @map("user_id") @db.Uuid
+	user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+	skill        String
+	/// Null when the evidence was insufficient to score.
+	score        Int?
+	proficiency  String?
+	confidence   String
+	observations Int
+	tallies      Json
+	/// Quotes with their session id, prompt number and offsets into the stored
+	/// redacted prompt, so each one can be traced back to its source.
+	evidence     Json
+
+	@@unique([assessmentId, skill])
+	@@index([userId])
+	@@map("skill_assessments")
+}

@@ -39,16 +39,19 @@ The locale layout validates the `[locale]` segment and calls `notFound()` for an
 
 ## Routes
 
-| Route                                       | What it is                                                                                                                                                                                                     |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                         | The landing page                                                                                                                                                                                               |
-| `/sessions`                                 | Session log intake and free metrics. `noindex`. Files are read in the browser; nothing is uploaded or stored.                                                                                                  |
-| `/assessment`                               | Rubric scoring of the sessions loaded on `/sessions`: five skills, evidence, workflow profile, recommendations. `noindex`. Scored in the browser by `src/features/assessment/`; nothing is uploaded or stored. |
-| `/analytics-demo`                           | Template reference page for the analytics taxonomy. `noindex`. Intended to be deleted once the taxonomy is understood.                                                                                         |
-| `/api/health`                               | `200` when every check passes, `503` otherwise. The body names a failing check but never the reason. Checks the database.                                                                                      |
-| `/robots.txt`, `/sitemap.xml`               | Generated. `robots.txt` disallows everything unless the deployment is indexable.                                                                                                                               |
-| `/llms.txt`, `/llms-full.txt`               | Generated from the page registry. `404` unless the deployment is indexable.                                                                                                                                    |
-| `/manifest.webmanifest`, icons, share image | Generated.                                                                                                                                                                                                     |
+| Route                                                         | What it is                                                                                                                                                                                                                       |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                                           | The landing page                                                                                                                                                                                                                 |
+| `/sessions`                                                   | Upload, the free metrics of a saved upload, and the upload list. `noindex`, signed in. Raw files stay in the browser; the redacted sessions are saved.                                                                           |
+| `/assessment`                                                 | Rubric scoring of a saved upload, and the history of saved assessments: five skills, evidence, workflow profile, recommendations. `noindex`. Scored in the browser by `src/features/assessment/`; nothing is uploaded or stored. |
+| `/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password` | Supabase Auth pages. `noindex`.                                                                                                                                                                                                  |
+| `/account`                                                    | What is stored, the user's uploads, and account deletion. `noindex`, signed in.                                                                                                                                                  |
+| `/api/auth/callback`                                          | Where Supabase email links land: exchanges the code for a session.                                                                                                                                                               |
+| `/analytics-demo`                                             | Template reference page for the analytics taxonomy. `noindex`. Intended to be deleted once the taxonomy is understood.                                                                                                           |
+| `/api/health`                                                 | `200` when every check passes, `503` otherwise. The body names a failing check but never the reason. Checks the database.                                                                                                        |
+| `/robots.txt`, `/sitemap.xml`                                 | Generated. `robots.txt` disallows everything unless the deployment is indexable.                                                                                                                                                 |
+| `/llms.txt`, `/llms-full.txt`                                 | Generated from the page registry. `404` unless the deployment is indexable.                                                                                                                                                      |
+| `/manifest.webmanifest`, icons, share image                   | Generated.                                                                                                                                                                                                                       |
 
 A deployment is **indexable** only when `SITE.indexable` is true and `VERCEL_ENV` is `production` (`src/lib/seo/site.ts`), so local builds and previews are always `noindex`. `src/app/[locale]/admin/layout.tsx` defines the admin console's providers and an auth gate, but there are no admin pages yet.
 
@@ -78,10 +81,22 @@ Prisma schema files under `prisma/schema/` are the only thing edited by hand; CI
 
 ## Sessions and assessment
 
-The app pages live in the `(app)` route group, whose layout holds `SessionStoreProvider`
-(`src/features/sessions/session-store.tsx`): the parsed upload and its assessment, in
-memory only, shared by `/sessions` and `/assessment` across client-side navigation. A
-reload clears both. Nothing is uploaded, stored, or sent to a model.
+Each signed-in user has a private workspace in PostgreSQL (`prisma/schema/workspace.prisma`):
+`uploads`, `agent_sessions` (the redacted conversation, JSONB), `upload_metrics`,
+`assessments` and `skill_assessments`. Every table carries `user_id` and cascades from
+`users`. `src/features/workspace/repository.ts` is the only code that reads or writes
+them, and scopes every query to the caller's user id; it takes the Prisma client as an
+argument so `repository.test.mts` runs it against a test database.
+
+The upload path: `SessionIntake` reads and parses the chosen files in the browser,
+redacts them (`src/features/workspace/redact-sessions.ts`), and sends only the redacted
+sessions to `saveUploadAction`. The server validates them with Zod
+(`src/features/workspace/stored.ts`), redacts again, computes the free metrics and saves
+the upload, its sessions and its metrics in one transaction. `runAssessmentAction` loads
+the stored sessions, scores them with the rules engine and saves a new assessment; old
+ones are never rewritten. `/sessions` and `/assessment` are server-rendered from the
+database. Auth is Supabase (`src/server/auth/current-user.ts`, `src/server/actions/auth.ts`,
+`/api/auth/callback` for email links); `/account` has the privacy notice and deletion.
 
 `src/features/assessment/` is the rubric engine, independent of the UI:
 

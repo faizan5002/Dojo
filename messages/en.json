@@ -12,7 +12,10 @@
 		"tagline": "Train with AI agents",
 		"landing": "Home",
 		"sessions": "Sessions",
-		"assessment": "Assessment"
+		"assessment": "Assessment",
+		"account": "Account",
+		"signIn": "Sign in",
+		"signOut": "Sign out"
 	},
 	"Sessions": {
 		"meta": {
@@ -21,12 +24,12 @@
 		"eyebrow": "Sessions",
 		"title": "Your sessions",
 		"intro": "Choose session logs from your project's .claude-logs folder to see how you work with your agent, measured without any AI model.",
-		"privacy": "Your files are read in this browser tab only. Nothing is uploaded or saved, and reloading the page clears them.",
+		"privacy": "Your files are parsed and redacted in this tab; the raw files are never uploaded. The redacted conversations and their metrics are saved to your account automatically.",
 		"pick": "Choose log files",
 		"pickHint": "Markdown files (.md) from .claude-logs, up to {maxFiles} files of {maxMegabytes} MB each.",
 		"reading": "Reading your logs…",
 		"clear": "Clear",
-		"empty": "No sessions yet. Choose one or more log files to begin.",
+		"empty": "No uploads yet. Choose one or more log files to begin.",
 		"overview": {
 			"heading": "Across your sessions",
 			"sessions": "Sessions",
@@ -80,7 +83,13 @@
 			"no-session-id": "Not a session log: no valid session id.",
 			"no-entries": "The log has no prompts or responses."
 		},
-		"scoreWorkflow": "Score my workflow"
+		"scoreWorkflow": "Score my workflow",
+		"saving": "Saving your redacted sessions…",
+		"saveFailed": "Your logs were read, but they couldn't be saved. Try again.",
+		"tooLarge": "These logs are too large to save at once (over {maxMegabytes} MB redacted). Choose fewer files.",
+		"saved": "Saved to your account. {redactions, plural, =0 {No credentials were found.} one {# credential was redacted before saving.} other {# credentials were redacted before saving.}}",
+		"uploadMissing": "That upload could not be found in your account.",
+		"history": "Your uploads"
 	},
 	"Assessment": {
 		"meta": {
@@ -89,15 +98,15 @@
 		"eyebrow": "Assessment",
 		"title": "Your workflow",
 		"intro": "A rubric score for five skills, built from your own prompts. Every score links to the lines that produced it.",
-		"privacy": "Scored in this browser tab with rules, not an AI model. Nothing is uploaded or saved, and reloading the page clears it.",
+		"privacy": "Scored on the server with rules, not an AI model, from your redacted sessions. Each run is saved to your account as its own snapshot.",
 		"empty": {
 			"title": "No sessions to assess yet",
-			"body": "Choose your session logs on the Sessions page first. Dojo reads them in this tab and scores them here.",
+			"body": "Upload your session logs on the Sessions page first. Once they are saved, you can score them here.",
 			"action": "Go to sessions"
 		},
 		"ready": {
 			"title": "Your sessions are ready to score",
-			"body": "{sessions, plural, one {# session} other {# sessions}} loaded. Scoring reads your prompts against the five-skill rubric.",
+			"body": "{sessions, plural, one {# session} other {# sessions}} in this upload. Scoring reads your prompts against the five-skill rubric and saves the result.",
 			"action": "Analyze my workflow"
 		},
 		"running": "Scoring your prompts…",
@@ -419,6 +428,108 @@
 		"about": {
 			"heading": "About this score",
 			"body": "Rubric {version} scores wording patterns: what your prompts name, ask for and check. It can miss intent a person would see, so read each score with its evidence. An AI judge for the softer qualities is planned, and needs a decision on which provider may see your prompts first."
+		},
+		"saved": "This assessment is saved. Scoring again adds a new one and keeps this one in your history.",
+		"history": {
+			"heading": "Past assessments",
+			"viewing": "Viewing",
+			"open": "Open",
+			"score": "{score} out of 100 · rubric {version}",
+			"noScore": "No overall score · rubric {version}"
+		}
+	},
+	"Uploads": {
+		"none": "No uploads yet.",
+		"viewing": "Viewing",
+		"view": "View",
+		"delete": "Delete",
+		"confirmDelete": "Confirm delete",
+		"deleteFailed": "That upload couldn't be deleted. Try again.",
+		"summary": "{sessions, plural, one {# session} other {# sessions}} · {prompts, plural, one {# prompt} other {# prompts}} · {redactions, plural, =0 {nothing redacted} other {# redacted}} · {assessments, plural, =0 {not scored} one {# assessment} other {# assessments}}"
+	},
+	"Auth": {
+		"eyebrow": "Account",
+		"signIn": {
+			"meta": "Sign in | Dojo",
+			"title": "Sign in",
+			"intro": "Your uploads, metrics and assessments are kept in your own private workspace.",
+			"submit": "Sign in",
+			"noAccount": "New to Dojo?",
+			"signUpLink": "Create an account",
+			"forgot": "Forgot your password?"
+		},
+		"signUp": {
+			"meta": "Create an account | Dojo",
+			"title": "Create your account",
+			"intro": "A private workspace for your session logs, their metrics and every assessment of them.",
+			"privacy": "Uploaded logs are redacted, then saved to your account automatically. The raw files are never stored. You can delete any upload, or your whole account, at any time.",
+			"submit": "Create account",
+			"passwordHint": "At least {min} characters.",
+			"haveAccount": "Already have an account?",
+			"signInLink": "Sign in"
+		},
+		"forgot": {
+			"meta": "Reset your password | Dojo",
+			"title": "Reset your password",
+			"intro": "Enter your email and we'll send a link to set a new password.",
+			"submit": "Send reset link",
+			"back": "Back to sign in"
+		},
+		"reset": {
+			"meta": "Set a new password | Dojo",
+			"title": "Set a new password",
+			"intro": "Choose a new password for your account.",
+			"submit": "Save password"
+		},
+		"fields": {
+			"email": "Email",
+			"password": "Password",
+			"newPassword": "New password"
+		},
+		"linkError": "That link has expired or was already used. Sign in, or request a new one.",
+		"codes": {
+			"invalidInput": "Check the email address and try again.",
+			"weakPassword": "Use a password of at least 10 characters.",
+			"emailTaken": "An account with this email already exists. Sign in instead.",
+			"invalidCredentials": "Email or password is incorrect.",
+			"emailNotConfirmed": "Confirm your email first: check your inbox for the link.",
+			"notConfigured": "Sign-in isn't configured on this server yet.",
+			"unavailable": "Something went wrong. Try again in a moment.",
+			"checkEmail": "Check your inbox: we sent a link to confirm your account.",
+			"resetSent": "If an account exists for that address, a reset link is on its way.",
+			"confirmMismatch": "That doesn't match your account's email."
+		}
+	},
+	"Account": {
+		"meta": {
+			"title": "Your account | Dojo"
+		},
+		"eyebrow": "Account",
+		"title": "Your account",
+		"signedInAs": "Signed in as {email}.",
+		"privacy": {
+			"heading": "What Dojo stores",
+			"storedHeading": "Saved to your account",
+			"notStoredHeading": "Never saved",
+			"items": {
+				"parsed": "Your prompts and the agent's answers, parsed from each log and redacted.",
+				"metrics": "The free metrics of each upload, as calculated when it was saved.",
+				"assessments": "Every rubric assessment, with its scores, evidence and recommendations.",
+				"account": "Your email address and your sign-in, held by Supabase Auth.",
+				"rawFiles": "The raw log files you choose. They are read in your browser and never uploaded.",
+				"secrets": "Credentials the redactor recognises: keys, tokens, passwords in URLs, auth headers.",
+				"identity": "The author name, email and GitHub login recorded in a log's header.",
+				"thirdParties": "Nothing is sent to an AI provider. Scoring runs on Dojo's own server, by rules."
+			},
+			"redaction": "Redaction recognises common credential formats. It cannot recognise every secret, and it does not remove names, private code or file paths. Avoid pasting secrets into agent sessions in the first place."
+		},
+		"uploads": "Your uploads",
+		"delete": {
+			"heading": "Delete your account",
+			"body": "This deletes every upload, session, metric and assessment in your workspace, then your sign-in. It cannot be undone.",
+			"confirmLabel": "Confirm with your email",
+			"confirmHint": "Type {email} to confirm.",
+			"submit": "Delete my account and data"
 		}
 	},
 	"SiteFooter": {

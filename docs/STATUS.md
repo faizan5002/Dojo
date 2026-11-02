@@ -21,7 +21,7 @@ The work so far is published on the branch `chore/phase-0-agent-setup` of `https
 
 ## Not implemented
 
-- Everything product-specific beyond the landing page, session intake and free metrics (`/sessions`) and rules-based rubric scoring (`/assessment`, on `feat/rubric-scoring`, not merged): accounts, stored data and score history, the LLM judge, Prompting Guru, the personalized loop, progress and sharing, the project constitution.
+- Everything product-specific beyond the landing page, intake and free metrics, rules-based scoring, and accounts with a saved workspace (on `feat/auth-db-persistence`, not merged): the LLM judge, Prompting Guru, the personalized loop, progress and sharing, the project constitution.
 - Project customisation: `package.json` is still named `template-web`, and `SITE.name` in `src/lib/seo/site.ts` is still `Web template`. The `template-setup` skill has not been run, deliberately, until the product questions in [`HANDOFF.md`](HANDOFF.md) are answered.
 - A configured production URL. `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
 - Automated coverage of the landing page itself. The only Playwright test is a smoke test of `/` and the locale redirect.

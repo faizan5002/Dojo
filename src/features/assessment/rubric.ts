@@ -49,6 +49,15 @@ type CriteriaOf<S extends SkillId> =
 	(typeof CRITERIA)[S]['strength'][number] | (typeof CRITERIA)[S]['opportunity'][number]
 export type CriterionId = { [S in SkillId]: CriteriaOf<S> }[SkillId]
 
+const CRITERION_IDS: readonly CriterionId[] = Object.values(CRITERIA).flatMap((criteria) => [
+	...criteria.strength,
+	...criteria.opportunity
+])
+
+export function isCriterionId(value: unknown): value is CriterionId {
+	return typeof value === 'string' && CRITERION_IDS.some((criterion) => criterion === value)
+}
+
 export type Proficiency = 'needsImprovement' | 'developing' | 'proficient' | 'strong'
 
 /** Highest band first; a score belongs to the first band whose minimum it meets. */

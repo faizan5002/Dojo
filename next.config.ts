@@ -37,6 +37,13 @@ const nextConfig: NextConfig = {
 			}
 		]
 	},
+	// A Server Action body is capped at 1MB by default. An upload carries the
+	// parsed, redacted sessions of up to MAX_LOG_FILES logs, so the cap is
+	// raised to MAX_UPLOAD_BYTES (src/features/sessions/limits.ts), which the
+	// browser checks before sending.
+	experimental: {
+		serverActions: { bodySizeLimit: '20mb' }
+	},
 	reactStrictMode: true,
 	// Top-level as of Next.js 16, not under `experimental`. Strictest
 	// setting: any Compiler bailout fails the build instead of silently

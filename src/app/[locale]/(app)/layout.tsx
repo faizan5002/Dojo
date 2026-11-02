@@ -3,7 +3,7 @@ import { Onest } from 'next/font/google'
 import { getTranslations } from 'next-intl/server'
 import { DotMark } from '@/components/brand/dot-mark'
 import { AppNav } from '@/features/app-shell/app-nav'
-import { SessionStoreProvider } from '@/features/sessions/session-store'
+import { getCurrentUser } from '@/server/auth/current-user'
 import { Link } from '@/i18n/routing'
 import { cn } from '@/lib/cn'
 import './app.css'
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-	const t = await getTranslations('AppShell')
+	const [t, user] = await Promise.all([getTranslations('AppShell'), getCurrentUser()])
 
 	return (
 		<div
@@ -33,10 +33,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 						<DotMark className="h-5 w-16" />
 						<span className="app-eyebrow text-text-faint hidden sm:block">{t('tagline')}</span>
 					</Link>
-					<AppNav />
+					<AppNav isSignedIn={user != null} />
 				</nav>
 			</header>
-			<SessionStoreProvider>{children}</SessionStoreProvider>
+			{children}
 		</div>
 	)
 }
