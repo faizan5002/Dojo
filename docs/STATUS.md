@@ -4,7 +4,7 @@ Last updated: 2026-11-01. Update this whenever state changes; keep it short and 
 
 ## Where the project is
 
-Dojo is in early development. The **public landing page is implemented**; the coaching product behind it (session intake, review, feedback, accounts) is **not built** and its key questions are undecided (see [`HANDOFF.md`](HANDOFF.md), "Decisions needed").
+Dojo is in early development. The **public landing page is implemented**, and so is a first signed-in workspace: accounts, session upload, rules-based assessment, PDF reports and a coaching-first dashboard. The LLM judge, progress sharing and a production deployment are **not built**, and some product questions remain open (see [`HANDOFF.md`](HANDOFF.md), "Decisions needed"). Direction and sequencing: [`PRODUCT_STRATEGY.md`](PRODUCT_STRATEGY.md), [`FUTURE_ARCHITECTURE.md`](FUTURE_ARCHITECTURE.md), [`ROADMAP.md`](ROADMAP.md).
 
 The work so far is published on the branch `chore/phase-0-agent-setup` of `https://github.com/faizan5002/Dojo.git`. `main` still points at `2f2f925` (the template plus one historical commit); the branch has not been merged into it.
 
@@ -24,7 +24,7 @@ The work so far is published on the branch `chore/phase-0-agent-setup` of `https
 - Everything product-specific beyond the landing page, intake and free metrics, rules-based scoring, accounts with a saved workspace, and PDF reports of assessments (on `feat/assessment-pdf-export`, not merged): the LLM judge, Prompting Guru, the personalized loop, progress and sharing, the project constitution.
 - Project customisation: `package.json` is still named `template-web`, and `SITE.name` in `src/lib/seo/site.ts` is still `Web template`. The `template-setup` skill has not been run, deliberately, until the product questions in [`HANDOFF.md`](HANDOFF.md) are answered.
 - A configured production URL. `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
-- Automated coverage of the landing page itself. The only Playwright test is a smoke test of `/` and the locale redirect.
+- Automated coverage of the landing page itself. Playwright covers the smoke test, sign-in/up, the PDF route, the dashboard and the dev frontend mode (see [`TESTING.md`](TESTING.md)).
 
 ## Verified
 
@@ -34,7 +34,7 @@ Last full local run (Windows, LF working tree, Node 24 locally; CI uses Node 22)
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `pnpm format:check`, `lint`, `typecheck`, `check:env`                   | pass                                                                                |
 | `pnpm check:secrets`                                                    | pass                                                                                |
-| `pnpm test`                                                             | 228 tests: 227 pass, 0 fail, 1 skipped (on-disk executable bit)                     |
+| `pnpm test`                                                             | 338 tests: 337 pass, 0 fail, 1 skipped (on-disk executable bit)                     |
 | `pnpm build` (placeholder `DATABASE_URL`)                               | pass                                                                                |
 | The real `pre-push` hook, from a plain clone and from a linked worktree | pass, and the repository's config, index and tracked files are unchanged afterwards |
 
@@ -59,3 +59,7 @@ See "Known limitations" in [`SESSION_LOGGING.md`](SESSION_LOGGING.md): Codex log
 ## Open exposure
 
 A personal session log was published in Git history before the local-only policy existed. The current tree no longer tracks it, but it remains in history and on `main` until the branch is merged. The history decision belongs to the repository owner and is open. See [`PUBLISHED_LOG_EXPOSURE.md`](PUBLISHED_LOG_EXPOSURE.md).
+
+## Playwright status at hand-off
+
+**Not verified on this branch.** A flag-on run (`DOJO_DEV_FRONTEND_MODE=true`, dev server on port 3001, 51 specs) did not complete cleanly: 26 passed, 3 skipped, 9 did not run, and several specs failed (for example `assessment-pdf`, `assessment`, `auth` wrong-password and `dashboard` fixture specs). The cause was not investigated before this hand-off, and the flag-off run and a production-build safety re-check were not run in this pass. Earlier runs of the same specs reported 48 pass and 0 fail with the flag on; treat that as unconfirmed for the final commit. Unit-test count: 338 (337 pass, 1 skipped) against 343 recorded earlier; the 5-test difference is unexplained. CI does not run the auth-backed or dashboard specs for lack of Supabase credentials and the flag.

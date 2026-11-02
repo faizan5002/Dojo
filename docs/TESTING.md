@@ -4,7 +4,7 @@
 
 ```bash
 pnpm test        # unit tests, node --test, no browser
-pnpm test:e2e    # Playwright smoke test; boots the app itself unless E2E_BASE_URL is set
+pnpm test:e2e    # Playwright; boots the app itself unless E2E_BASE_URL is set
 ```
 
 Run a single file while iterating:
@@ -13,7 +13,7 @@ Run a single file while iterating:
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts.mjs --test scripts/session-log.test.mjs
 ```
 
-`pnpm test` is `node --test` over `scripts/*.test.mjs` and `src/**/*.test.mts`. The `register-ts.mjs` import lets the runner load TypeScript and resolve the `@/` alias; there is no separate test framework. A full run on Windows currently reports 228 tests: 227 pass and 1 is skipped (the check for an on-disk executable bit, which NTFS cannot express).
+`pnpm test` is `node --test` over `scripts/*.test.mjs` and `src/**/*.test.mts`. The `register-ts.mjs` import lets the runner load TypeScript and resolve the `@/` alias; there is no separate test framework. A full run on Windows reports 338 tests: 337 pass, 0 fail and 1 is skipped (the check for an on-disk executable bit, which NTFS cannot express).
 
 ## What is covered
 
@@ -30,7 +30,7 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-
 | Feature flags, RBAC, logger, AI usage, cron auth     | `src/lib/flags/`, `src/lib/rbac/`, `src/server/lib/logger/`, `src/server/lib/ai-usage/`, `src/server/api/` |
 | SEO registry (every public page has metadata)        | `src/lib/seo/seo.test.mts`                                                                                 |
 
-There is one Playwright test, `e2e/smoke.spec.ts`: the root serves the default locale unprefixed with a visible `h1`, and `/en` redirects to `/`. The landing page itself (a WebGL scene in an iframe) is not covered by an automated test; it is checked by looking at it, and the screenshots in the README come from a real production build.
+Playwright specs live in `e2e/`: `smoke.spec.ts` (root serves the default locale, `/en` redirects), `auth.spec.ts`, `assessment-pdf.spec.ts`, `dashboard.spec.ts` and `dev-frontend-mode.spec.ts`. Specs that need a real Supabase session skip themselves when it is not configured, which is always the case in CI. The dashboard and dev-mode specs run against the sample-data mode when `DOJO_DEV_FRONTEND_MODE=true` and are skipped otherwise, so run the suite twice (flag on, flag off) to exercise everything; see [`TEAM_SETUP.md`](TEAM_SETUP.md). The landing page itself (a WebGL scene in an iframe) is not covered by an automated test; it is checked by looking at it, and the screenshots in the README come from a real production build.
 
 ## Writing tests that use git
 
