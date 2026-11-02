@@ -47,6 +47,7 @@ The locale layout validates the `[locale]` segment and calls `notFound()` for an
 | `/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password` | Supabase Auth pages. `noindex`.                                                                                                                                                                                                  |
 | `/account`                                                    | What is stored, the user's uploads, and account deletion. `noindex`, signed in.                                                                                                                                                  |
 | `/api/auth/callback`                                          | Where Supabase email links land: exchanges the code for a session.                                                                                                                                                               |
+| `/api/assessments/[id]/pdf`                                   | The PDF report of one of the signed-in user's assessments: 401 signed out, 404 for anyone else's. Built in memory with `@react-pdf/renderer`.                                                                                    |
 | `/analytics-demo`                                             | Template reference page for the analytics taxonomy. `noindex`. Intended to be deleted once the taxonomy is understood.                                                                                                           |
 | `/api/health`                                                 | `200` when every check passes, `503` otherwise. The body names a failing check but never the reason. Checks the database.                                                                                                        |
 | `/robots.txt`, `/sitemap.xml`                                 | Generated. `robots.txt` disallows everything unless the deployment is indexable.                                                                                                                                                 |
@@ -109,6 +110,12 @@ database. Auth is Supabase (`src/server/auth/current-user.ts`, `src/server/actio
 - `observation.ts` turns observations into a score, a confidence and quoted evidence;
   `assess.ts` aggregates, drops any quote that is not an exact slice of the prompt it
   cites, and builds the profile (`profile.ts`) and recommendations (`recommendations.ts`).
+
+`src/features/assessment/report/` turns a saved assessment into a PDF: `report-model.ts`
+builds every string and number from the stored assessment and the app's own copy (no
+scoring), `report-document.ts` lays it out with `@react-pdf/renderer` (written with
+`createElement`, not JSX, so `node --test` can render it), and `render-report.ts` renders
+it to a buffer. `report.test.mts` reads the generated PDFs back with `pdfjs-dist`.
 
 ## Session logger
 

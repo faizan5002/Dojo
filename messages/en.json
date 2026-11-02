@@ -436,6 +436,11 @@
 			"open": "Open",
 			"score": "{score} out of 100 · rubric {version}",
 			"noScore": "No overall score · rubric {version}"
+		},
+		"download": {
+			"action": "Download PDF report",
+			"running": "Preparing your report…",
+			"failed": "The report couldn't be prepared. Try again."
 		}
 	},
 	"Uploads": {
@@ -531,6 +536,39 @@
 			"confirmHint": "Type {email} to confirm.",
 			"submit": "Delete my account and data"
 		}
+	},
+	"Report": {
+		"title": "Assessment report",
+		"subtitle": "Train how you work with AI agents",
+		"headerTitle": "DOJO · ASSESSMENT REPORT",
+		"preparedFor": "Prepared for",
+		"assessedOn": "Assessed",
+		"reference": "Reference",
+		"summary": "{proficiency} overall across {count} of 5 assessed skills. Strongest skill: {strongest}. Biggest opportunity: {weakest}.",
+		"summaryNoScore": "{count} of 5 skills could be assessed from this upload, too few for an overall score. The skills that were assessed are below.",
+		"sections": {
+			"overview": "Assessment overview",
+			"skills": "Five-skill breakdown",
+			"evidence": "Evidence and evaluation",
+			"profile": "Workflow profile",
+			"recommendations": "Improvement recommendations",
+			"metrics": "Free metrics context",
+			"about": "Assessment information"
+		},
+		"yourPrompt": "Your prompt, quoted from the redacted session",
+		"dojoReads": "Dojo's evaluation",
+		"suggestion": "Suggested prompt structure, not a prompt you submitted",
+		"metrics": {
+			"note": "Descriptive statistics of the upload this assessment scored. They describe the sessions; they are not rubric scores.",
+			"none": "The metrics of this upload are not available.",
+			"perPrompt": "Per prompt"
+		},
+		"rubricVersion": "Rubric version",
+		"methodology": "Methodology",
+		"methodologyBody": "Rules-based evaluation of the redacted prompts. No AI model was used.",
+		"disclaimer": "Dojo scores are coaching signals drawn from the evidence in the uploaded sessions. They are not an objective measurement of engineering competence.",
+		"footer": "Dojo · A coaching signal, not a measure of engineering ability",
+		"page": "Page {page} of {total}"
 	},
 	"SiteFooter": {
 		"privacy": "Privacy",

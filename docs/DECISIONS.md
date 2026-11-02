@@ -3,6 +3,25 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-04 — Assessment reports are PDFs rendered on the server with @react-pdf/renderer
+
+**Decision.** "Download PDF report" on `/assessment` fetches
+`/api/assessments/[id]/pdf`, which checks the signed-in user owns the assessment, builds a
+report model from the saved assessment and its upload's saved metrics
+(`src/features/assessment/report/report-model.ts`), and renders it in memory with
+`@react-pdf/renderer` (`report-document.ts`). Nothing is re-scored; no file is written.
+Users' quoted text is set in Geist (shipped with Next, `next/dist/compiled/@vercel/og`),
+falling back to Helvetica if it is absent. `pdfjs-dist` is a dev dependency so the tests
+read the generated PDFs back.
+**Why.** react-pdf paginates, keeps blocks and headings together, repeats headers and
+footers and numbers pages, which pdfkit would leave to us; it is on Next's list of
+server-external packages, so it needs no bundler setup. Server-side, ownership is checked
+before anything is rendered. A browser print dialog or HTML-to-PDF (Chromium) was heavier
+and less predictable.
+**Limits.** Geist covers Latin and some other scripts, not all of them; text outside it
+renders as missing glyphs. A single token longer than a line is split, with a hyphen.
+**Revisit if** reports need non-Latin scripts, or a second report format.
+
 ## 2026-11-03 — Accounts, and a saved workspace per user (owner decisions)
 
 **Decision.** Dojo has user accounts through Supabase Auth (the repo default,
