@@ -2,10 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { renderReportPdf } from '@/features/assessment/report/render-report'
-import { getAssessment } from '@/features/workspace/repository'
+import { getAssessment } from '@/features/workspace/workspace-data'
 import { routing } from '@/i18n/routing'
 import { captureError } from '@/lib/observability/capture-error'
-import { getCurrentUser } from '@/server/auth/current-user'
+import { isDevMockUser } from '@/server/auth/dev-frontend-mode'
+import { getAppUser } from '@/server/auth/current-user'
 import { db } from '@/server/db/client'
 
 // A report is the signed-in user's own data: never cached, never shared.
@@ -21,19 +22,21 @@ const failure = (status: number, error: string) =>
  * the stored assessment; nothing is re-scored and no file is written.
  */
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	const user = await getCurrentUser()
+	const user = await getAppUser()
 	if (user == null) return failure(401, 'Sign in to download this report.')
 	const id = z
 		.string()
 		.uuid()
 		.safeParse((await params).id)
 	if (!id.success) return failure(404, 'That assessment could not be found.')
-	const stored = await getAssessment({ db, userId: user.id, assessmentId: id.data })
+	const stored = await getAssessment(user, id.data)
 	if (stored == null) return failure(404, 'That assessment could not be found.')
 
 	try {
 		const [profile, t] = await Promise.all([
-			db.user.findUnique({ where: { id: user.id }, select: { name: true } }),
+			isDevMockUser(user)
+				? Promise.resolve({ name: 'Frontend dev user' })
+				: db.user.findUnique({ where: { id: user.id }, select: { name: true } }),
 			getTranslations({ locale: routing.defaultLocale })
 		])
 		const { pdf, filename } = await renderReportPdf({

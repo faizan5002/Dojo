@@ -7,7 +7,8 @@ import { siteUrl } from '@/lib/seo/site'
 import { createSecretKeyClient } from '@/lib/supabase/secret-key'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { deleteUserData } from '@/features/workspace/repository'
-import { isAuthConfigured, requireActionUser } from '@/server/auth/current-user'
+import { getCurrentUser, isAuthConfigured, requireActionUser } from '@/server/auth/current-user'
+import { isDevFrontendMode } from '@/server/auth/dev-frontend-mode'
 import { provisionUser } from '@/server/auth/provision-user'
 import { db } from '@/server/db/client'
 
@@ -26,6 +27,7 @@ export type AuthFormCode =
 	| 'checkEmail'
 	| 'resetSent'
 	| 'confirmMismatch'
+	| 'devFrontendMode'
 
 export interface AuthFormState {
 	readonly status: 'idle' | 'error' | 'notice'
@@ -159,6 +161,8 @@ export async function deleteAccount(
 	_previous: AuthFormState,
 	formData: FormData
 ): Promise<AuthFormState> {
+	// Frontend dev mode has no account to delete; say so instead of throwing.
+	if ((await getCurrentUser()) == null && isDevFrontendMode()) return error('devFrontendMode')
 	const user = await requireActionUser()
 	if (field(formData, 'confirm').trim().toLowerCase() !== user.email.toLowerCase()) {
 		return error('confirmMismatch')
