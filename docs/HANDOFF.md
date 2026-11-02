@@ -32,9 +32,9 @@ second developer's identity is deliberately not recorded; add it here when known
 
 Add rows as `path or area — branch — who`.
 
-| Area                                                                             | Branch                             | Who                   |
-| -------------------------------------------------------------------------------- | ---------------------------------- | --------------------- |
-| Session intake: `src/features/sessions/`, `src/app/[locale]/(app)/`, `/sessions` | `feat/session-intake-free-metrics` | Developer 1's session |
+| Area                                                                               | Branch                | Who                   |
+| ---------------------------------------------------------------------------------- | --------------------- | --------------------- |
+| Rubric scoring and assessment dashboard: `src/features/assessment/`, `/assessment` | `feat/rubric-scoring` | Developer 1's session |
 
 ## Exact remaining actions
 

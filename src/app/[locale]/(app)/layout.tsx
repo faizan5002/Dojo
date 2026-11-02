@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Onest } from 'next/font/google'
 import { getTranslations } from 'next-intl/server'
 import { DotMark } from '@/components/brand/dot-mark'
+import { AppNav } from '@/features/app-shell/app-nav'
+import { SessionStoreProvider } from '@/features/sessions/session-store'
 import { Link } from '@/i18n/routing'
 import { cn } from '@/lib/cn'
 import './app.css'
@@ -31,17 +33,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 						<DotMark className="h-5 w-16" />
 						<span className="app-eyebrow text-text-faint hidden sm:block">{t('tagline')}</span>
 					</Link>
-					<div className="flex items-center gap-6 md:gap-10">
-						<Link href="/" className="app-nav-link">
-							{t('landing')}
-						</Link>
-						<Link href="/sessions" aria-current="page" className="app-nav-link">
-							{t('sessions')}
-						</Link>
-					</div>
+					<AppNav />
 				</nav>
 			</header>
-			{children}
+			<SessionStoreProvider>{children}</SessionStoreProvider>
 		</div>
 	)
 }

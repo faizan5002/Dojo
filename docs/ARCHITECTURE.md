@@ -39,15 +39,16 @@ The locale layout validates the `[locale]` segment and calls `notFound()` for an
 
 ## Routes
 
-| Route                                       | What it is                                                                                                                |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                         | The landing page                                                                                                          |
-| `/sessions`                                 | Session log intake and free metrics. `noindex`. Files are read in the browser; nothing is uploaded or stored.             |
-| `/analytics-demo`                           | Template reference page for the analytics taxonomy. `noindex`. Intended to be deleted once the taxonomy is understood.    |
-| `/api/health`                               | `200` when every check passes, `503` otherwise. The body names a failing check but never the reason. Checks the database. |
-| `/robots.txt`, `/sitemap.xml`               | Generated. `robots.txt` disallows everything unless the deployment is indexable.                                          |
-| `/llms.txt`, `/llms-full.txt`               | Generated from the page registry. `404` unless the deployment is indexable.                                               |
-| `/manifest.webmanifest`, icons, share image | Generated.                                                                                                                |
+| Route                                       | What it is                                                                                                                                                                                                     |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                         | The landing page                                                                                                                                                                                               |
+| `/sessions`                                 | Session log intake and free metrics. `noindex`. Files are read in the browser; nothing is uploaded or stored.                                                                                                  |
+| `/assessment`                               | Rubric scoring of the sessions loaded on `/sessions`: five skills, evidence, workflow profile, recommendations. `noindex`. Scored in the browser by `src/features/assessment/`; nothing is uploaded or stored. |
+| `/analytics-demo`                           | Template reference page for the analytics taxonomy. `noindex`. Intended to be deleted once the taxonomy is understood.                                                                                         |
+| `/api/health`                               | `200` when every check passes, `503` otherwise. The body names a failing check but never the reason. Checks the database.                                                                                      |
+| `/robots.txt`, `/sitemap.xml`               | Generated. `robots.txt` disallows everything unless the deployment is indexable.                                                                                                                               |
+| `/llms.txt`, `/llms-full.txt`               | Generated from the page registry. `404` unless the deployment is indexable.                                                                                                                                    |
+| `/manifest.webmanifest`, icons, share image | Generated.                                                                                                                                                                                                     |
 
 A deployment is **indexable** only when `SITE.indexable` is true and `VERCEL_ENV` is `production` (`src/lib/seo/site.ts`), so local builds and previews are always `noindex`. `src/app/[locale]/admin/layout.tsx` defines the admin console's providers and an auth gate, but there are no admin pages yet.
 
@@ -74,6 +75,25 @@ src/app/[locale]/page.tsx
 ## Data and migrations
 
 Prisma schema files under `prisma/schema/` are the only thing edited by hand; CI generates and commits the migration for a schema diff. Models today: `User` (template example), `AdminMember` and `AdminRole`, `FeatureFlag` and `FeatureFlagOverride`, `AiUsage`, and `RunOnceSql`. None holds Dojo product data yet. Every table has row-level security enabled with no policies, which `pnpm check:rls` verifies in CI. One-off SQL goes in `prisma/run-once.sql`. Full rules: [`rules/migrations.md`](rules/migrations.md), [`rules/database.md`](rules/database.md).
+
+## Sessions and assessment
+
+The app pages live in the `(app)` route group, whose layout holds `SessionStoreProvider`
+(`src/features/sessions/session-store.tsx`): the parsed upload and its assessment, in
+memory only, shared by `/sessions` and `/assessment` across client-side navigation. A
+reload clears both. Nothing is uploaded, stored, or sent to a model.
+
+`src/features/assessment/` is the rubric engine, independent of the UI:
+
+- `rubric.ts`: the version, the five skills and their criteria, score bands, evidence
+  thresholds and the overall-score rule. Change these and bump `RUBRIC_VERSION`.
+- `interactions.ts` cleans and redacts each prompt (`redact.ts`) and classifies it in
+  context (task, question, follow-up, approval).
+- `skills/*.ts`: one evaluator per skill. Each turns prompts into observations (a 0–1
+  value plus the signals that justify it); `signals.ts` holds the shared patterns.
+- `observation.ts` turns observations into a score, a confidence and quoted evidence;
+  `assess.ts` aggregates, drops any quote that is not an exact slice of the prompt it
+  cites, and builds the profile (`profile.ts`) and recommendations (`recommendations.ts`).
 
 ## Session logger
 
