@@ -8,10 +8,9 @@ import { AssessmentHistory } from '@/features/assessment/ui/assessment-history'
 import { AssessmentReport } from '@/features/assessment/ui/assessment-report'
 import { DownloadReportButton } from '@/features/assessment/ui/download-report-button'
 import { RunAssessmentPanel } from '@/features/assessment/ui/run-assessment-panel'
-import { getAssessment, listAssessments, listUploads } from '@/features/workspace/repository'
+import { getAssessment, listAssessments, listUploads } from '@/features/workspace/workspace-data'
 import { Link } from '@/i18n/routing'
 import { requireUser } from '@/server/auth/current-user'
-import { db } from '@/server/db/client'
 
 const uuid = z.string().uuid()
 
@@ -37,10 +36,7 @@ export default async function AssessmentPage({
 	const params = await searchParams
 	const requestedAssessment = uuid.safeParse(params.id)
 	const requestedUpload = uuid.safeParse(params.upload)
-	const [assessments, uploads] = await Promise.all([
-		listAssessments({ db, userId: user.id }),
-		listUploads({ db, userId: user.id })
-	])
+	const [assessments, uploads] = await Promise.all([listAssessments(user), listUploads(user)])
 
 	const uploadToScore = requestedUpload.success
 		? uploads.find((upload) => upload.id === requestedUpload.data)
@@ -49,11 +45,10 @@ export default async function AssessmentPage({
 	const selected =
 		uploadToScore != null
 			? null
-			: await getAssessment({
-					db,
-					userId: user.id,
-					assessmentId: requestedAssessment.success ? requestedAssessment.data : undefined
-				})
+			: await getAssessment(
+					user,
+					requestedAssessment.success ? requestedAssessment.data : undefined
+				)
 	if (requestedAssessment.success && selected == null) notFound()
 	const latestUpload = uploads[0]
 

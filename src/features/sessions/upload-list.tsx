@@ -20,6 +20,7 @@ export function DeleteUploadButton({ uploadId }: { uploadId: string }) {
 	const router = useRouter()
 	const [isConfirming, setIsConfirming] = useState(false)
 	const [hasFailed, setHasFailed] = useState(false)
+	const [note, setNote] = useState<string | null>(null)
 	const [isPending, startTransition] = useTransition()
 
 	function handleClick() {
@@ -30,6 +31,7 @@ export function DeleteUploadButton({ uploadId }: { uploadId: string }) {
 		startTransition(async () => {
 			const result = await deleteUploadAction({ uploadId })
 			if (!result.ok) {
+				setNote(result.status === 403 ? result.error : null)
 				setHasFailed(true)
 				setIsConfirming(false)
 				return
@@ -50,7 +52,7 @@ export function DeleteUploadButton({ uploadId }: { uploadId: string }) {
 			>
 				{isConfirming ? t('confirmDelete') : t('delete')}
 			</button>
-			{hasFailed ? <span className="text-danger text-xs">{t('deleteFailed')}</span> : null}
+			{hasFailed ? <span className="text-danger text-xs">{note ?? t('deleteFailed')}</span> : null}
 		</span>
 	)
 }
