@@ -6,6 +6,7 @@ import { ArrowUpRightIcon } from '@/components/ui/icons'
 import { PageHeader, SectionHeading } from '@/features/app-shell/section'
 import { AssessmentHistory } from '@/features/assessment/ui/assessment-history'
 import { AssessmentReport } from '@/features/assessment/ui/assessment-report'
+import { DownloadReportButton } from '@/features/assessment/ui/download-report-button'
 import { RunAssessmentPanel } from '@/features/assessment/ui/run-assessment-panel'
 import { getAssessment, listAssessments, listUploads } from '@/features/workspace/repository'
 import { Link } from '@/i18n/routing'
@@ -73,6 +74,7 @@ export default async function AssessmentPage({
 							{t('overall.rerun')}
 							<ArrowUpRightIcon size={14} />
 						</Link>
+						<DownloadReportButton assessmentId={selected.id} />
 						<p className="text-text-muted text-sm">{t('saved')}</p>
 					</div>
 					<AssessmentReport assessment={selected.assessment} overview={selected.overview} />

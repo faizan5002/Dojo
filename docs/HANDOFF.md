@@ -32,9 +32,9 @@ second developer's identity is deliberately not recorded; add it here when known
 
 Add rows as `path or area — branch — who`.
 
-| Area                                                                                                                      | Branch                     | Who                   |
-| ------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------------- |
-| Accounts and saved workspace: `prisma/schema/workspace.prisma`, `src/features/workspace/`, `src/server/auth/`, auth pages | `feat/auth-db-persistence` | Developer 1's session |
+| Area                                                                                   | Branch                       | Who                   |
+| -------------------------------------------------------------------------------------- | ---------------------------- | --------------------- |
+| Assessment PDF reports: `src/features/assessment/report/`, `/api/assessments/[id]/pdf` | `feat/assessment-pdf-export` | Developer 1's session |
 
 ## Exact remaining actions
 
