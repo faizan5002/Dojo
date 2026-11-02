@@ -3,6 +3,21 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-02 — Rubric scoring is rules-based and local (rubric rules-1.0)
+
+**Decision.** The five-skill rubric is scored in the browser by deterministic rules
+(`src/features/assessment/`), with no AI model. Every score is backed by quotes that are
+exact slices of the user's redacted prompts; a skill with too little evidence is left
+unscored rather than scored low; the overall score is the equal-weighted mean of the scored
+skills, and needs at least three. Rewrites are labelled templates around the user's own
+opening sentence, not generated text. Uploads and assessments live in memory only.
+**Why.** No LLM integration exists and no provider has been approved to see users' prompts;
+the PDF keeps processing local and reserves the LLM judge for the softer qualities. Rules
+are testable, free and private, and honest about what they read.
+**Limits.** Rules read wording, not intent, and are English-only. The LLM judge, stronger
+rewrites and score history across uploads need a provider and a storage decision.
+**Revisit when** a provider (and consent model) is approved, or scores need to persist.
+
 ## 2026-11-02 — Session logs are committed (owner decision; reverses Phases 1C and 1D)
 
 **Decision.** `.claude-logs/` and `.codex-logs/` are tracked. A session's digest is

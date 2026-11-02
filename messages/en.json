@@ -11,7 +11,8 @@
 		"home": "Dojo home",
 		"tagline": "Train with AI agents",
 		"landing": "Home",
-		"sessions": "Sessions"
+		"sessions": "Sessions",
+		"assessment": "Assessment"
 	},
 	"Sessions": {
 		"meta": {
@@ -78,6 +79,346 @@
 			"no-frontmatter": "Not a session log: no header block.",
 			"no-session-id": "Not a session log: no valid session id.",
 			"no-entries": "The log has no prompts or responses."
+		},
+		"scoreWorkflow": "Score my workflow"
+	},
+	"Assessment": {
+		"meta": {
+			"title": "Your assessment | Dojo"
+		},
+		"eyebrow": "Assessment",
+		"title": "Your workflow",
+		"intro": "A rubric score for five skills, built from your own prompts. Every score links to the lines that produced it.",
+		"privacy": "Scored in this browser tab with rules, not an AI model. Nothing is uploaded or saved, and reloading the page clears it.",
+		"empty": {
+			"title": "No sessions to assess yet",
+			"body": "Choose your session logs on the Sessions page first. Dojo reads them in this tab and scores them here.",
+			"action": "Go to sessions"
+		},
+		"ready": {
+			"title": "Your sessions are ready to score",
+			"body": "{sessions, plural, one {# session} other {# sessions}} loaded. Scoring reads your prompts against the five-skill rubric.",
+			"action": "Analyze my workflow"
+		},
+		"running": "Scoring your prompts…",
+		"failed": {
+			"title": "Scoring didn't finish",
+			"body": "Something went wrong while scoring these logs. Your files are still loaded, so you can try again.",
+			"action": "Try again"
+		},
+		"overall": {
+			"heading": "Overall",
+			"outOf": "out of 100",
+			"noScore": "No overall score",
+			"noScoreDetail": "An overall score needs at least {min} of the five skills; this upload supports {count}. The skills it could score are below.",
+			"sessions": "Sessions analyzed",
+			"prompts": "Prompts analyzed",
+			"coverage": "Skills assessed",
+			"coverageValue": "{count} of 5",
+			"strongest": "Strongest skill",
+			"weakest": "Biggest opportunity",
+			"notComparable": "Needs two scored skills",
+			"summary": "What your sessions show",
+			"summaryEmpty": "No habit came up often enough to name yet.",
+			"coaching": "A coaching signal, not a measure of engineering ability. Rules-based scoring, rubric {version}.",
+			"redactions": "{count, plural, =0 {No credentials were found in your prompts.} one {# credential was redacted before scoring.} other {# credentials were redacted before scoring.}}",
+			"rerun": "Score again"
+		},
+		"context": {
+			"heading": "From your free metrics",
+			"note": "Context only. These numbers describe your sessions; none of them is scored."
+		},
+		"breakdown": {
+			"heading": "Five skills",
+			"description": "Each score is the share of what the rubric looks for that your prompts showed. Open a skill to see the lines behind it.",
+			"lookFor": "Looks for",
+			"seen": "Seen",
+			"missed": "Missing",
+			"evidence": "Evidence ({count})",
+			"noEvidence": "No quotable lines for this skill in this upload."
+		},
+		"skills": {
+			"promptClarity": {
+				"name": "Prompt clarity",
+				"unit": "{count, plural, one {request} other {requests}}",
+				"summary": "Whether a request says what to do, where, within what limits, and how done looks."
+			},
+			"planning": {
+				"name": "Planning before coding",
+				"unit": "{count, plural, one {larger build} other {larger builds}}",
+				"summary": "Whether larger builds start from a plan, a requirements list or named edge cases."
+			},
+			"verification": {
+				"name": "Verifying AI output",
+				"unit": "{count, plural, one {delivered change} other {delivered changes}}",
+				"summary": "Whether delivered work is tested, checked or questioned before moving on."
+			},
+			"iteration": {
+				"name": "Iteration quality",
+				"unit": "{count, plural, one {follow-up} other {follow-ups}}",
+				"summary": "Whether follow-ups give the agent something new and specific to act on."
+			},
+			"scopeControl": {
+				"name": "Scope control",
+				"unit": "{count, plural, one {request} other {requests}}",
+				"summary": "Whether requests name their targets and limits instead of sweeping wide."
+			}
+		},
+		"criteria": {
+			"statesGoal": {
+				"label": "States the task",
+				"shows": "Names the action and what it applies to.",
+				"missing": "The request doesn't say what should happen.",
+				"why": "An agent can only aim at a goal it can read.",
+				"practice": "Open with one sentence: the action and its target."
+			},
+			"givesContext": {
+				"label": "Gives concrete context",
+				"shows": "Points at something specific: a file, route, identifier or error.",
+				"missing": "Nothing specific is named, so the agent has to guess where to look.",
+				"why": "Concrete anchors stop the agent searching, or inventing, what you meant.",
+				"practice": "Name the file, page, function or exact error message."
+			},
+			"statesConstraints": {
+				"label": "States constraints",
+				"shows": "Says what must, or must not, change.",
+				"missing": "A larger request with no limits stated.",
+				"why": "Without limits, an agent fills the gaps with its own assumptions.",
+				"practice": "Add one line: what must not change."
+			},
+			"definesDone": {
+				"label": "Defines done",
+				"shows": "Describes the result the work will be checked against.",
+				"missing": "A larger request with no description of the finished result.",
+				"why": "A stated outcome is what you and the agent both check the work against.",
+				"practice": "Add \"Done when…\" with something you can observe."
+			},
+			"vagueReference": {
+				"label": "Vague reference",
+				"shows": "Refers to \"it\" or \"this\" without naming it.",
+				"missing": "Refers to \"it\" or \"this\" without saying what that is.",
+				"why": "The agent resolves \"it\" from its own context, which may not be yours.",
+				"practice": "Replace \"it\" with the name of the thing."
+			},
+			"asksForPlan": {
+				"label": "Plans before building",
+				"shows": "Asks for a plan, analysis or options before any code.",
+				"missing": "No plan was asked for before the build.",
+				"why": "Reviewing a plan is cheaper than reviewing a wrong implementation.",
+				"practice": "Ask for a plan first, and approve it before any code is written."
+			},
+			"structuredRequirements": {
+				"label": "Structured requirements",
+				"shows": "Lays the work out as a list of requirements or steps.",
+				"missing": "The requirements arrived as one block of prose.",
+				"why": "A list makes each requirement checkable on its own.",
+				"practice": "Put the requirements in a numbered list."
+			},
+			"considersEdgeCases": {
+				"label": "Considers edge cases",
+				"shows": "Raises failure cases or limits up front.",
+				"missing": "No failure cases or limits were raised.",
+				"why": "Edge cases named up front are handled in the first version, not found later.",
+				"practice": "Name two ways the feature could fail."
+			},
+			"straightToBuild": {
+				"label": "Straight to building",
+				"shows": "A larger build started with no plan.",
+				"missing": "A larger build was requested with no plan, requirements list or edge cases first.",
+				"why": "Without a plan, the first review is of finished code, when changes cost the most.",
+				"practice": "Ask for a plan first, and approve it before any code is written."
+			},
+			"asksForVerification": {
+				"label": "Asks for verification",
+				"shows": "Asks for tests, checks or proof as part of the work.",
+				"missing": "The request did not ask for any check.",
+				"why": "Asking for proof up front makes checking part of the work, not an afterthought.",
+				"practice": "End larger requests with how the result should be checked."
+			},
+			"checksResult": {
+				"label": "Checks the result",
+				"shows": "Follows up by testing, checking, or reporting what actually happened.",
+				"missing": "The result was not checked.",
+				"why": "A change is done when it is seen to work, not when the agent says so.",
+				"practice": "Run it, then tell the agent what you saw."
+			},
+			"challengesClaims": {
+				"label": "Challenges claims",
+				"shows": "Questions the agent's claims, or asks how it knows.",
+				"missing": "The agent's claims were taken as given.",
+				"why": "Agents state results confidently whether or not they checked them.",
+				"practice": "Ask \"how did you verify that?\" before moving on."
+			},
+			"acceptedWithoutCheck": {
+				"label": "Moved on without checking",
+				"shows": "Work was delivered and the next prompts moved on.",
+				"missing": "Work was delivered, and the next prompts moved on without a check.",
+				"why": "An unchecked change becomes the foundation for the next one.",
+				"practice": "Before the next task, ask for the test output, or check it yourself and say what you saw."
+			},
+			"specificFeedback": {
+				"label": "Specific feedback",
+				"shows": "The follow-up includes the exact error, output, file or value.",
+				"missing": "The follow-up named nothing specific.",
+				"why": "The agent can only fix what it can see.",
+				"practice": "Paste the exact error or output."
+			},
+			"statesExpectedVsActual": {
+				"label": "Expected versus actual",
+				"shows": "Says what was expected and what happened instead.",
+				"missing": "The follow-up did not say what was expected.",
+				"why": "The gap between expected and actual is the bug report.",
+				"practice": "Write one line each: what you expected, what happened."
+			},
+			"refinesRequirement": {
+				"label": "Refines the request",
+				"shows": "Adjusts the requirement in light of the result.",
+				"missing": "The requirement was not adjusted.",
+				"why": "Changing the requirement directly beats repeating the old one.",
+				"practice": "Say what to change, starting with \"Instead…\"."
+			},
+			"vagueFeedback": {
+				"label": "Vague feedback",
+				"shows": "Says something is wrong without saying what.",
+				"missing": "Says something is wrong without saying what.",
+				"why": "The agent has to guess at the problem, and often guesses a different one.",
+				"practice": "Paste the error or output, and say what you expected."
+			},
+			"repeatedPrompt": {
+				"label": "Repeated prompt",
+				"shows": "Sends nearly the same prompt again.",
+				"missing": "Sends nearly the same prompt again.",
+				"why": "The same prompt tends to produce the same answer.",
+				"practice": "If a prompt didn't work, change it: add what went wrong."
+			},
+			"namesTargets": {
+				"label": "Names its targets",
+				"shows": "Names the files, routes or components in play.",
+				"missing": "No file, route or component was named.",
+				"why": "Named targets keep the change where you want it.",
+				"practice": "Name the file or component the change belongs in."
+			},
+			"setsBoundaries": {
+				"label": "Sets boundaries",
+				"shows": "Limits the change: only this, not that.",
+				"missing": "Nothing was ruled out of the change.",
+				"why": "Boundaries stop an agent \"improving\" things you did not ask about.",
+				"practice": "Add \"Only change…\" or \"Don't touch…\"."
+			},
+			"broadRequest": {
+				"label": "Broad request",
+				"shows": "Asks for sweeping change: everything, the whole app, from scratch.",
+				"missing": "Asks for sweeping change: everything, the whole app, from scratch.",
+				"why": "Sweeping requests produce sweeping diffs that are hard to review.",
+				"practice": "Split it: one component or one behaviour per request."
+			},
+			"bundledRequest": {
+				"label": "Several tasks at once",
+				"shows": "Bundles many separate tasks into one prompt.",
+				"missing": "Bundles many separate tasks into one prompt.",
+				"why": "Bundled tasks are done unevenly, and are hard to check one by one.",
+				"practice": "Send one task, check it, then send the next."
+			}
+		},
+		"proficiency": {
+			"needsImprovement": "Needs improvement",
+			"developing": "Developing",
+			"proficient": "Proficient",
+			"strong": "Strong"
+		},
+		"confidence": {
+			"strong": {
+				"label": "Strong evidence",
+				"detail": "Based on {count} {unit}."
+			},
+			"limited": {
+				"label": "Limited evidence",
+				"detail": "Based on {count} {unit}. Treat the score as provisional."
+			},
+			"insufficient": {
+				"label": "Insufficient evidence",
+				"detail": "Not enough evidence in this upload to assess this skill confidently."
+			}
+		},
+		"profile": {
+			"heading": "Workflow profile",
+			"description": "Habits that came up repeatedly, with the lines that show them.",
+			"strengths": "Strengths",
+			"risks": "Risks",
+			"none": "Nothing yet",
+			"patterns": {
+				"plansFirst": {
+					"name": "Plans first",
+					"detail": "Asked for a plan before {count} of {total} larger builds."
+				},
+				"buildsBeforePlanning": {
+					"name": "Builds before planning",
+					"detail": "{count} of {total} larger builds started without a plan."
+				},
+				"checksTheWork": {
+					"name": "Checks the work",
+					"detail": "Checked {count} of {total} delivered changes."
+				},
+				"movesOnWithoutChecking": {
+					"name": "Moves on without checking",
+					"detail": "{count} of {total} delivered changes went unchecked."
+				},
+				"specificFeedback": {
+					"name": "Specific follow-ups",
+					"detail": "{count} of {total} follow-ups named the exact problem."
+				},
+				"vagueFeedback": {
+					"name": "Vague follow-ups",
+					"detail": "{count} of {total} follow-ups didn't say what was wrong."
+				},
+				"namesTargets": {
+					"name": "Names its targets",
+					"detail": "{count} of {total} requests named a file, route or component."
+				},
+				"broadRequests": {
+					"name": "Broad requests",
+					"detail": "{count} of {total} requests were sweeping or bundled."
+				}
+			}
+		},
+		"explorer": {
+			"heading": "Evidence explorer",
+			"description": "The lines each score is built on, quoted from your logs.",
+			"strengths": "What worked",
+			"opportunities": "What to change"
+		},
+		"evidence": {
+			"yourPrompt": "Your prompt",
+			"location": "Session {session} · prompt {number}",
+			"shows": "What it shows",
+			"why": "Why it counts",
+			"better": "What to try",
+			"suggestion": "Suggested structure",
+			"suggestionNote": "A template built from your opening sentence, not a rewrite by an AI. Fill in the brackets."
+		},
+		"rewrite": {
+			"context": "Context: [the file, page or error this is about]",
+			"constraints": "Constraints: [what must not change]",
+			"doneWhen": "Done when: [what you will check]",
+			"planFirst": "Before writing code, propose a plan: the steps, the files you'll touch and the risks. Wait for my go-ahead.",
+			"verify": "When you're done, run the tests, show me the output, and tell me how you checked it works.",
+			"scope": "Scope: only [the file or component]. Don't change anything else.",
+			"expectedActual": "Expected: [what should happen]. Actual: [the exact error or output]. Where: [file or page]."
+		},
+		"recommendations": {
+			"heading": "What to practise next",
+			"description": "From your weakest reliably scored skills, each built on a line from your own sessions.",
+			"none": "No recommendations: every reliably scored skill is at 80 or above, or has too little evidence to judge.",
+			"observed": "{count, plural, one {Seen once} other {Seen # times}} across {total} {unit}.",
+			"problem": "What we saw",
+			"evidence": "From your session",
+			"matters": "Why it matters",
+			"practice": "Practise this",
+			"example": "Try this structure"
+		},
+		"about": {
+			"heading": "About this score",
+			"body": "Rubric {version} scores wording patterns: what your prompts name, ask for and check. It can miss intent a person would see, so read each score with its evidence. An AI judge for the softer qualities is planned, and needs a decision on which provider may see your prompts first."
 		}
 	},
 	"SiteFooter": {

@@ -3,38 +3,39 @@
 import { useId, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { ArrowUpRightIcon } from '@/components/ui/icons'
-import { intakeLogFiles, type IntakeResult } from './intake'
+import { Link } from '@/i18n/routing'
+import { intakeLogFiles } from './intake'
 import { MAX_LOG_FILE_BYTES, MAX_LOG_FILES } from './limits'
 import { SessionMetricsView } from './session-metrics-view'
+import { useSessionStore } from './session-store'
 
 const BYTES_PER_MEGABYTE = 1024 * 1024
 const MAX_MEGABYTES = MAX_LOG_FILE_BYTES / BYTES_PER_MEGABYTE
 
-type IntakeState =
-	| { readonly status: 'idle' }
-	| { readonly status: 'reading' }
-	| { readonly status: 'done'; readonly result: IntakeResult }
-
-// Files are read with the File API and kept only in this component's state:
+// Files are read with the File API and kept only in memory (the session store):
 // no request carries their content, and nothing is written to storage.
 export function SessionIntake() {
 	const t = useTranslations('Sessions')
 	const inputId = useId()
 	const hintId = useId()
-	const [state, setState] = useState<IntakeState>({ status: 'idle' })
+	const { intake, setIntake } = useSessionStore()
+	const [isReading, setIsReading] = useState(false)
 
 	async function handleFiles(event: React.ChangeEvent<HTMLInputElement>) {
 		const input = event.currentTarget
 		const files = Array.from(input.files ?? [])
 		if (files.length === 0) return
-		setState({ status: 'reading' })
+		setIsReading(true)
 		const result = await intakeLogFiles(
 			files.map((file) => ({ name: file.name, size: file.size, read: () => file.text() }))
 		)
 		// Lets the same files be chosen again after a Clear.
 		input.value = ''
-		setState({ status: 'done', result })
+		setIntake(result)
+		setIsReading(false)
 	}
+
+	const result = isReading ? null : intake
 
 	return (
 		<section className="flex flex-col gap-8">
@@ -57,25 +58,29 @@ export function SessionIntake() {
 						{t('pickHint', { maxFiles: MAX_LOG_FILES, maxMegabytes: MAX_MEGABYTES })}
 					</p>
 				</div>
-				{state.status === 'done' ? (
-					<button type="button" className="app-pill" onClick={() => setState({ status: 'idle' })}>
-						{t('clear')}
-					</button>
-				) : null}
+				{result == null ? null : (
+					<div className="flex flex-wrap gap-3">
+						{result.sessions.length > 0 ? (
+							<Link href="/assessment" className="app-pill">
+								{t('scoreWorkflow')}
+								<ArrowUpRightIcon size={14} />
+							</Link>
+						) : null}
+						<button type="button" className="app-pill" onClick={() => setIntake(null)}>
+							{t('clear')}
+						</button>
+					</div>
+				)}
 			</div>
 
 			<div aria-live="polite" className="empty:hidden">
-				{state.status === 'reading' ? <p className="text-text-muted">{t('reading')}</p> : null}
-				{state.status === 'idle' ? <p className="text-text-muted">{t('empty')}</p> : null}
+				{isReading ? <p className="text-text-muted">{t('reading')}</p> : null}
+				{!isReading && intake == null ? <p className="text-text-muted">{t('empty')}</p> : null}
 			</div>
 
-			{state.status === 'done' ? (
-				<SessionMetricsView
-					result={state.result}
-					maxFiles={MAX_LOG_FILES}
-					maxMegabytes={MAX_MEGABYTES}
-				/>
-			) : null}
+			{result == null ? null : (
+				<SessionMetricsView result={result} maxFiles={MAX_LOG_FILES} maxMegabytes={MAX_MEGABYTES} />
+			)}
 		</section>
 	)
 }
