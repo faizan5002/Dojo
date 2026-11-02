@@ -1,7 +1,6 @@
 import { useFormatter, useTranslations } from 'next-intl'
 import { SectionHeading, Stat } from '@/features/app-shell/section'
-import { metricsOverview } from '@/features/sessions/metrics'
-import type { ParsedSession } from '@/features/sessions/types'
+import type { MetricsOverview } from '@/features/sessions/metrics'
 import { MIN_SKILLS_FOR_OVERALL } from '../rubric'
 import type { Assessment, Evidence } from '../types'
 import { EvidenceExplorer } from './evidence-explorer'
@@ -14,11 +13,10 @@ const TWO_DECIMALS = { maximumFractionDigits: 2 } as const
 const WHOLE_PERCENT = { style: 'percent', maximumFractionDigits: 0 } as const
 
 // The free metrics, beside the rubric as context only: none of them feeds a score.
-function MetricsContext({ sessions }: { sessions: readonly ParsedSession[] }) {
+function MetricsContext({ overview }: { overview: MetricsOverview }) {
 	const t = useTranslations('Assessment.context')
 	const tSessions = useTranslations('Sessions')
 	const format = useFormatter()
-	const overview = metricsOverview(sessions)
 	const show = (
 		value: number | null,
 		options: typeof ONE_DECIMAL | typeof TWO_DECIMALS | typeof WHOLE_PERCENT
@@ -59,10 +57,10 @@ function MetricsContext({ sessions }: { sessions: readonly ParsedSession[] }) {
 
 export function AssessmentReport({
 	assessment,
-	sessions
+	overview
 }: {
 	assessment: Assessment
-	sessions: readonly ParsedSession[]
+	overview: MetricsOverview | null
 }) {
 	const t = useTranslations('Assessment')
 	const { overall } = assessment
@@ -136,7 +134,7 @@ export function AssessmentReport({
 					<p>{t('overall.coaching', { version: assessment.rubricVersion })}</p>
 					<p>{t('overall.redactions', { count: assessment.redactions })}</p>
 				</div>
-				<MetricsContext sessions={sessions} />
+				{overview == null ? null : <MetricsContext overview={overview} />}
 			</section>
 
 			<section aria-labelledby="skills-heading" className="flex flex-col gap-8">

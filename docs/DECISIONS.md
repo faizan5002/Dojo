@@ -3,6 +3,24 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-03 — Accounts, and a saved workspace per user (owner decisions)
+
+**Decision.** Dojo has user accounts through Supabase Auth (the repo default,
+`docs/rules/auth.md`; `User.id` is the Supabase user id). Application data is in
+PostgreSQL through Prisma: uploads, their redacted sessions, their free metrics, and every
+rubric assessment as a snapshot (`prisma/schema/workspace.prisma`). An upload is saved
+automatically once redacted, without a separate confirmation. The raw file is never
+stored: the browser parses and redacts it and sends only the redacted sessions; the
+server validates them, redacts again, recomputes the metrics and stores them. Scoring
+still uses the rules engine, now on the server, with no AI provider. Every query is scoped
+to the session's user id; users can delete an upload or their whole account.
+**Why.** The owner chose accounts, PostgreSQL, automatic saving after redaction, saved
+history, and no raw-file storage.
+**Supersedes.** "Uploads and assessments live in memory only" in the rubric entry below.
+**Limits.** Redaction recognises credential formats, not every secret, and does not remove
+names, private code or paths. Sign-in depends on Supabase being reachable.
+**Revisit if** raw files need keeping, or auth moves off Supabase.
+
 ## 2026-11-02 — Rubric scoring is rules-based and local (rubric rules-1.0)
 
 **Decision.** The five-skill rubric is scored in the browser by deterministic rules

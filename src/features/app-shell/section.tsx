@@ -41,3 +41,31 @@ export function Stat({
 		</div>
 	)
 }
+
+/** The numbered eyebrow, display title and intro that open every app page. */
+export function PageHeader({
+	eyebrow,
+	title,
+	intro,
+	note
+}: {
+	eyebrow: string
+	title: string
+	intro: string
+	note?: string
+}) {
+	return (
+		<header className="flex flex-col gap-8">
+			<p className="app-eyebrow">
+				<b>01</b> — {eyebrow}
+			</p>
+			<div className="grid items-end gap-8 lg:grid-cols-2">
+				<h1 className="app-display">{title}</h1>
+				<div className="flex max-w-xl flex-col gap-4">
+					<p className="text-lg leading-relaxed">{intro}</p>
+					{note == null ? null : <p className="text-text-muted text-sm leading-relaxed">{note}</p>}
+				</div>
+			</div>
+		</header>
+	)
+}

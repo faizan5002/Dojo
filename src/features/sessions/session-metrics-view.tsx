@@ -1,27 +1,30 @@
 import { useFormatter, useTranslations } from 'next-intl'
 import { SectionHeading, Stat } from '@/features/app-shell/section'
-import type { IntakeResult } from './intake'
-import { byStartTime, metricsOverview, sessionMetrics, type SessionMetrics } from './metrics'
+import { byStartTime, type MetricsOverview, type SessionMetrics } from './metrics'
+import type { RejectionReason } from './types'
 
 const ONE_DECIMAL = { maximumFractionDigits: 1 } as const
 const TWO_DECIMALS = { maximumFractionDigits: 2 } as const
 const WHOLE_PERCENT = { style: 'percent', maximumFractionDigits: 0 } as const
 
-// Renders the free metrics only. Prompt and response text is never shown here,
-// so nothing a log holds reaches the page until redaction review exists.
+// Renders the free metrics saved with an upload. Prompt and response text is
+// never shown here.
 export function SessionMetricsView({
-	result,
+	overview,
+	sessions: unsorted,
+	rejected,
 	maxFiles,
 	maxMegabytes
 }: {
-	result: IntakeResult
+	overview: MetricsOverview
+	sessions: readonly SessionMetrics[]
+	rejected: readonly { readonly fileName: string; readonly reason: RejectionReason }[]
 	maxFiles: number
 	maxMegabytes: number
 }) {
 	const t = useTranslations('Sessions')
 	const format = useFormatter()
-	const sessions = result.sessions.map(sessionMetrics).sort(byStartTime)
-	const overview = metricsOverview(result.sessions)
+	const sessions = [...unsorted].sort(byStartTime)
 	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 	const decimal = (value: number | null) =>
@@ -42,13 +45,13 @@ export function SessionMetricsView({
 
 	return (
 		<div className="flex flex-col gap-16">
-			{result.rejected.length > 0 ? (
+			{rejected.length > 0 ? (
 				<section aria-labelledby="rejected-heading" className="flex flex-col gap-5">
 					<h2 id="rejected-heading" className="app-eyebrow">
 						{t('rejected.heading')}
 					</h2>
 					<ul className="border-border flex flex-col border-t text-sm">
-						{result.rejected.map((file) => (
+						{rejected.map((file) => (
 							<li
 								key={`${file.fileName}:${file.reason}`}
 								className="border-border flex flex-wrap gap-x-4 gap-y-1 border-b py-3"
