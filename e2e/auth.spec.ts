@@ -10,7 +10,9 @@ import {
 } from './workspace-helpers'
 
 test('the workspace pages send a signed-out visitor to sign in', async ({ page }) => {
-	for (const path of ['/sessions', '/assessment', '/account']) {
+	// With the dev frontend mode on, a signed-out visitor is shown fixtures by design.
+	test.skip(process.env.DOJO_DEV_FRONTEND_MODE === 'true', 'frontend dev mode is on')
+	for (const path of ['/dashboard', '/sessions', '/assessment', '/account']) {
 		await page.goto(path)
 		await expect(page).toHaveURL(/\/sign-in$/)
 	}
@@ -53,6 +55,7 @@ test.describe('accounts', () => {
 	})
 
 	test('signing in opens the workspace, and signing out closes it', async ({ page }) => {
+		test.skip(process.env.DOJO_DEV_FRONTEND_MODE === 'true', 'frontend dev mode is on')
 		await signIn(page, user)
 		await expect(page.getByRole('heading', { level: 1, name: 'Your sessions' })).toBeVisible()
 		await page.getByRole('button', { name: 'Sign out' }).click()
