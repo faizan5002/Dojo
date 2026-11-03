@@ -61,8 +61,10 @@ test.describe('dashboard with fixture data', () => {
 		await expect(block.locator('blockquote')).toContainText(focus?.quote.excerpt ?? '')
 		await expect(block).toContainText(focus?.quote.sessionId ?? '')
 		await expect(block).toContainText('Practise this')
-		await expect(block.getByRole('link')).toHaveCount(1)
+		// One primary action (the evidence), and one drill on the same habit.
+		await expect(block.getByRole('link')).toHaveCount(2)
 		await expect(block.getByRole('link', { name: 'See evidence' })).toBeVisible()
+		await expect(block.getByRole('link', { name: 'Try a rewrite drill' })).toBeVisible()
 	})
 
 	test('the coaching block is in the first screen at desktop and phone widths', async ({

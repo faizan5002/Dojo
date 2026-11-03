@@ -12,7 +12,7 @@ import {
 test('the workspace pages send a signed-out visitor to sign in', async ({ page }) => {
 	// With the dev frontend mode on, a signed-out visitor is shown fixtures by design.
 	test.skip(process.env.DOJO_DEV_FRONTEND_MODE === 'true', 'frontend dev mode is on')
-	for (const path of ['/dashboard', '/sessions', '/assessment', '/account']) {
+	for (const path of ['/dashboard', '/sessions', '/assessment', '/practice', '/account']) {
 		await page.goto(path)
 		await expect(page).toHaveURL(/\/sign-in$/)
 	}
