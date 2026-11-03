@@ -14,6 +14,9 @@ export interface RewriteDrillProps {
 	quote: { excerpt: string; clippedBefore: boolean; clippedAfter: boolean }
 	suggestion: Suggestion | null
 	assessment: { id: string; score: number; observations: number }
+	/** Where the result's links go; the defaults are the signed-in workspace's routes. */
+	evidenceHref?: string
+	uploadHref?: string
 }
 
 const CONTEXT_NOTES = new Set<SkillId>(['verification', 'iteration'])
@@ -27,7 +30,9 @@ export function RewriteDrill({
 	criterion,
 	quote,
 	suggestion,
-	assessment
+	assessment,
+	evidenceHref,
+	uploadHref
 }: RewriteDrillProps) {
 	const t = useTranslations('Practice')
 	const tAssessment = useTranslations('Assessment')
@@ -175,10 +180,13 @@ export function RewriteDrill({
 					)}
 					<p className="text-text-muted text-sm">{t('next.saved')}</p>
 					<div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-						<Link href="/sessions" className="app-pill">
+						<Link href={uploadHref ?? '/sessions'} className="app-pill">
 							{t('next.upload')}
 						</Link>
-						<Link href={`/assessment?id=${assessment.id}#skill-${skill}`} className="app-nav-link">
+						<Link
+							href={evidenceHref ?? `/assessment?id=${assessment.id}#skill-${skill}`}
+							className="app-nav-link"
+						>
 							{t('next.evidence')}
 						</Link>
 					</div>

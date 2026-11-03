@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { PageHeader } from '@/features/app-shell/section'
 import { AuthForm } from '@/features/auth/auth-form'
+import { SampleCallout } from '@/features/sample/ui/sample-callout'
 import { Link } from '@/i18n/routing'
 import { signIn } from '@/server/actions/auth'
 import { getCurrentUser, isAuthConfigured } from '@/server/auth/current-user'
@@ -28,6 +29,7 @@ export default async function SignInPage({
 	return (
 		<main className="flex flex-col gap-12 px-5 py-14 md:px-14 md:py-20">
 			<PageHeader eyebrow={t('eyebrow')} title={t('signIn.title')} intro={t('signIn.intro')} />
+			<SampleCallout />
 			{hasLinkError ? <p className="text-danger text-sm">{t('linkError')}</p> : null}
 			{isAuthConfigured() ? null : (
 				<p className="text-danger text-sm">{t('codes.notConfigured')}</p>

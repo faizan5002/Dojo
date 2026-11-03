@@ -11,7 +11,22 @@ const FRAME = 'border-border-strong bg-surface border p-6 md:p-8'
  * shown is the assessment's own recommendation and evidence; when either is missing
  * it says so and shows nothing in its place.
  */
-export function FocusNext({ focus, assessmentId }: { focus: Focus; assessmentId: string }) {
+/** Where each link goes; the defaults are the signed-in workspace's own routes. */
+export interface FocusLinks {
+	readonly overview: string
+	readonly evidence: string
+	readonly practise: string
+}
+
+export function FocusNext({
+	focus,
+	assessmentId,
+	links
+}: {
+	focus: Focus
+	assessmentId: string
+	links?: FocusLinks
+}) {
 	const t = useTranslations('Dashboard.focus')
 	const tAssessment = useTranslations('Assessment')
 	const tLevel = useTranslations('Assessment.proficiency')
@@ -37,7 +52,7 @@ export function FocusNext({ focus, assessmentId }: { focus: Focus; assessmentId:
 						: t('none.body')}
 				</p>
 				<div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-					<Link href={`/assessment?id=${assessmentId}`} className="app-pill">
+					<Link href={links?.overview ?? `/assessment?id=${assessmentId}`} className="app-pill">
 						{missing ? t('missingQuote.action') : t('none.action')}
 						<ArrowUpRightIcon size={14} />
 					</Link>
@@ -126,11 +141,17 @@ export function FocusNext({ focus, assessmentId }: { focus: Focus; assessmentId:
 			</div>
 
 			<div className="flex flex-wrap items-center gap-x-6 gap-y-3 lg:col-start-1 lg:row-start-2 lg:self-end">
-				<Link href={`/assessment?id=${assessmentId}#skill-${focus.skill}`} className="app-pill">
+				<Link
+					href={links?.evidence ?? `/assessment?id=${assessmentId}#skill-${focus.skill}`}
+					className="app-pill"
+				>
 					{t('action')}
 					<ArrowUpRightIcon size={14} />
 				</Link>
-				<Link href={`/practice?assessment=${assessmentId}`} className="app-nav-link">
+				<Link
+					href={links?.practise ?? `/practice?assessment=${assessmentId}`}
+					className="app-nav-link"
+				>
 					{t('practise')}
 				</Link>
 			</div>

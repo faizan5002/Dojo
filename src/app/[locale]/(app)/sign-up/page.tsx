@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { PageHeader } from '@/features/app-shell/section'
 import { AuthForm } from '@/features/auth/auth-form'
+import { SampleCallout } from '@/features/sample/ui/sample-callout'
 import { Link } from '@/i18n/routing'
 import { signUp } from '@/server/actions/auth'
 import { getCurrentUser, isAuthConfigured } from '@/server/auth/current-user'
@@ -30,6 +31,7 @@ export default async function SignUpPage() {
 				intro={t('signUp.intro')}
 				note={t('signUp.privacy')}
 			/>
+			<SampleCallout />
 			{isAuthConfigured() ? null : (
 				<p className="text-danger text-sm">{t('codes.notConfigured')}</p>
 			)}

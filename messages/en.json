@@ -23,7 +23,8 @@
 		"uploadAction": "Upload sessions",
 		"signedInAs": "Signed in as {email}",
 		"sidebar": "Sidebar",
-		"pageHeader": "Page header"
+		"pageHeader": "Page header",
+		"sample": "Try a sample"
 	},
 	"Sessions": {
 		"meta": {
@@ -784,6 +785,42 @@
 			"title": "Nothing to practise yet",
 			"body": "Practice starts from a habit your assessment flagged, quoted from your own prompt. Score some sessions first.",
 			"action": "Go to the dashboard"
+		}
+	},
+	"Sample": {
+		"meta": {
+			"title": "Try a sample session | Dojo",
+			"assessmentTitle": "Sample assessment | Dojo",
+			"practiceTitle": "Sample practice | Dojo"
+		},
+		"banner": "Demonstration data: an invented sample session, not yours. Nothing is saved and nothing is added to any account.",
+		"eyebrow": "Sample session",
+		"title": "Try Dojo with a sample",
+		"intro": "No account and no upload needed. This is one invented coding-agent session, run through the same checks as a file you would upload, so you can see how an assessment works.",
+		"session": {
+			"heading": "The session",
+			"note": "Invented for this demonstration. It is not a real log and is about no real person or project. Only your prompts are read; the rules never judge the agent's replies.",
+			"file": "File: {name}",
+			"count": "{count} prompts",
+			"prompt": "Prompt {number}"
+		},
+		"how": {
+			"heading": "What happens next",
+			"body": "The sample goes through the same steps as your own files: it is checked as a log, secrets are redacted, then the five-skill rules (rules-1.0) score it. No AI model is involved, and the rules read wording, not intent."
+		},
+		"run": "Run the assessment",
+		"ownLogs": "Use my own logs instead",
+		"assessment": {
+			"eyebrow": "Sample assessment",
+			"title": "What the rules found",
+			"intro": "Scored just now from the sample session, with the same rules as a real assessment. Every quote below is from the sample's own prompts.",
+			"focusHeading": "Your next step, from this sample",
+			"backToSample": "Back to the sample session",
+			"useOwn": "Use my own sessions"
+		},
+		"callout": {
+			"text": "New to Dojo? Try a sample session first: demonstration data, no account needed.",
+			"action": "Try a sample session"
 		}
 	}
 }

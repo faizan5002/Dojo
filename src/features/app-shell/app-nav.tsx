@@ -13,7 +13,12 @@ const SIGNED_IN_LINKS = [
 export function AppNav({ isSignedIn }: { isSignedIn: boolean }) {
 	const t = useTranslations('AppShell')
 	const pathname = usePathname()
-	const links = isSignedIn ? SIGNED_IN_LINKS : ([{ href: '/sign-in', key: 'signIn' }] as const)
+	const links = isSignedIn
+		? SIGNED_IN_LINKS
+		: ([
+				{ href: '/sample', key: 'sample' },
+				{ href: '/sign-in', key: 'signIn' }
+			] as const)
 
 	return (
 		<div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 md:gap-x-10">
