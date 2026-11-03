@@ -83,6 +83,12 @@ jobs:
       - name: Apply run-once SQL to production
         if: steps.db.outputs.ready == 'true'
         run: node scripts/run-once-sql.mjs
+      # The Prompting Guru challenge library. Idempotent: unchanged challenges
+      # are skipped, edited ones become new versions, nothing is deleted.
+      # Picks up DIRECT_URL/DATABASE_URL from the job env above.
+      - name: Seed the practice challenge library
+        if: steps.db.outputs.ready == 'true'
+        run: pnpm db:seed:practice
       - name: Verify zero drift against the live database
         if: steps.db.outputs.ready == 'true'
         run: pnpm exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema --exit-code

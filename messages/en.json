@@ -15,7 +15,8 @@
 		"assessment": "Assessment",
 		"account": "Account",
 		"signIn": "Sign in",
-		"signOut": "Sign out"
+		"signOut": "Sign out",
+		"promptingGuru": "Prompting Guru"
 	},
 	"Sessions": {
 		"meta": {
@@ -569,6 +570,198 @@
 		"disclaimer": "Dojo scores are coaching signals drawn from the evidence in the uploaded sessions. They are not an objective measurement of engineering competence.",
 		"footer": "Dojo · A coaching signal, not a measure of engineering ability",
 		"page": "Page {page} of {total}"
+	},
+	"Guru": {
+		"meta": {
+			"title": "Prompting Guru | Dojo",
+			"challengesTitle": "Challenges | Prompting Guru | Dojo",
+			"challengeTitle": "{title} | Prompting Guru | Dojo"
+		},
+		"eyebrow": "Prompting Guru",
+		"title": "Practice",
+		"intro": "Short exercises aimed at the skills your workflow assessment found weakest. Write a prompt, get it scored, see what to change, try again.",
+		"note": "Exercise scores measure one answer to one challenge. They are not your workflow assessment score, and the two are shown apart.",
+		"modes": {
+			"general": {
+				"title": "Practice is not personalized yet",
+				"body": "Personalized challenges need a workflow assessment. Upload your session logs and score them, and Prompting Guru will aim practice at your weakest skills. Until then you can try a general exercise.",
+				"sessions": "Upload session logs",
+				"assessment": "Go to assessment"
+			},
+			"limited": {
+				"title": "Your assessment could only score a few skills",
+				"body": "With fewer than three skills scored there is no reliable ranking, so practice is weighted only by the skills that were scored, and the rest get general practice. Upload more sessions for a fuller picture."
+			}
+		},
+		"next": {
+			"heading": "Your next challenge",
+			"start": "Start this challenge",
+			"none": "No challenge is available right now.",
+			"reasons": {
+				"introduction": "A general exercise to start with. It is not personalized: there is no assessment yet.",
+				"review": "Due for review: your last attempt at this one left room to improve.",
+				"focus": "Chosen for {skill}, one of the skills your assessment scored lowest.",
+				"general": "Chosen to keep your practice balanced across the skills."
+			}
+		},
+		"summary": {
+			"heading": "Your practice",
+			"attempted": "Challenges tried",
+			"completed": "Challenges completed",
+			"completedHint": "Scored {score} or more at least once.",
+			"attempts": "Attempts",
+			"average": "Average exercise score",
+			"best": "Best exercise score",
+			"streak": "Day streak",
+			"streakValue": "{days, plural, =0 {None yet} one {# day} other {# days}}"
+		},
+		"skills": {
+			"heading": "Five skills",
+			"description": "Your workflow assessment sets each skill's share of practice; your exercise results adjust it. The two scores measure different things.",
+			"assessment": "Workflow assessment",
+			"practice": "Exercise average",
+			"notScored": "Not scored",
+			"noPractice": "Not practised yet",
+			"share": "{share}% of practice",
+			"attempts": "{count, plural, one {# attempt} other {# attempts}}",
+			"focus": "Focus"
+		},
+		"priority": {
+			"critical": "Critical",
+			"high": "High",
+			"moderate": "Moderate",
+			"maintenance": "Maintenance",
+			"unassessed": "Not assessed"
+		},
+		"trend": {
+			"improving": "Improving on retries",
+			"steady": "Steady on retries",
+			"declining": "Lower on retries"
+		},
+		"due": {
+			"heading": "Due for review",
+			"none": "Nothing is due. Reviews come back on their own, sooner after a low score.",
+			"since": "Due since {date}"
+		},
+		"recent": {
+			"heading": "Recent attempts",
+			"none": "No attempts yet.",
+			"open": "Open"
+		},
+		"browse": "Browse all challenges",
+		"library": {
+			"title": "Challenges",
+			"intro": "Every active challenge, from the library. Filter by skill, difficulty or exercise type, or search. Your recommended next challenge is marked.",
+			"recommended": "Recommended next",
+			"best": "Best {score}",
+			"untried": "Not tried",
+			"minutes": "{minutes} min",
+			"filters": {
+				"label": "Filter challenges",
+				"skill": "Skill",
+				"difficulty": "Difficulty",
+				"type": "Exercise type",
+				"any": "Any",
+				"search": "Search",
+				"searchPlaceholder": "Title, description or tag",
+				"apply": "Apply",
+				"clear": "Clear filters"
+			},
+			"loading": "Loading challenges…",
+			"count": "{total, plural, one {# challenge} other {# challenges}}",
+			"empty": "No challenges are available yet.",
+			"noMatch": "No challenges match these filters.",
+			"error": "The challenges couldn't be loaded.",
+			"invalid": "Those filters are not valid.",
+			"sessionExpired": "Your session has expired. Sign in again to see the challenges.",
+			"retry": "Try again",
+			"pagination": "Pages",
+			"pageOf": "Page {page} of {pages}",
+			"previous": "Previous",
+			"next": "Next"
+		},
+		"difficulty": {
+			"beginner": "Beginner",
+			"intermediate": "Intermediate",
+			"advanced": "Advanced"
+		},
+		"types": {
+			"improveVaguePrompt": "Improve a vague prompt",
+			"planBeforeCoding": "Plan before coding",
+			"verifyOutput": "Verify the AI output",
+			"improveIteration": "Improve the follow-up",
+			"controlScope": "Control the scope"
+		},
+		"exercise": {
+			"scenario": "Scenario",
+			"instructions": "Your task",
+			"heading": "Write your answer",
+			"answerLabel": "Your prompt",
+			"placeholder": "Write the prompt you would send to the coding agent…",
+			"count": "{words, plural, one {# word} other {# words}} · {chars} of {max} characters",
+			"submit": "Submit for scoring",
+			"submitting": "Scoring your prompt…",
+			"retry": "Try again",
+			"exit": "Back to Prompting Guru",
+			"failed": "Your answer couldn't be scored. It is still here; try again.",
+			"tooLong": "Keep it under {max} characters.",
+			"privacy": "Your answer is scored on Dojo's server by rules, not an AI model, and saved to your account with credentials redacted.",
+			"version": "Version {version}",
+			"retired": "This challenge has been retired. Your attempts are kept below, but it can't be attempted again.",
+			"sessionExpired": "Your session has expired. Sign in again in the new tab, then submit: your answer is still here.",
+			"signIn": "Sign in again",
+			"unavailable": "This challenge is no longer available."
+		},
+		"result": {
+			"heading": "Your result",
+			"yourAnswer": "Your answer, as submitted",
+			"scoreLabel": "Exercise score",
+			"outOf": "out of 100",
+			"notWorkflow": "An exercise score for this one answer, not your workflow assessment.",
+			"caps": "Score limits",
+			"criteria": "How it was scored",
+			"status": {
+				"met": "Met",
+				"partial": "Partly met",
+				"missing": "Missing"
+			},
+			"points": "{points} of {weight}",
+			"evidence": "From your answer",
+			"pitfalls": "Points taken off",
+			"pitfallPoints": "−{penalty}",
+			"strengths": "What you did well",
+			"missing": "What to add",
+			"noneMissing": "Nothing: every criterion was met.",
+			"noneStrengths": "No criterion was fully met yet.",
+			"suggestion": "Your prompt, with what is missing",
+			"suggestionNote": "A template-based suggestion: your own words, followed by lines for each missing criterion. It is not an AI rewrite. Fill in the brackets.",
+			"copy": "Copy",
+			"copied": "Copied",
+			"example": "A strong answer",
+			"exampleNote": "Written by Dojo for this challenge, shown after you have tried it yourself.",
+			"why": "Why it works",
+			"method": "Scored by Dojo's rules ({version}). They read the wording of your prompt, not its intent, so check each criterion against what you meant.",
+			"next": "Next challenge",
+			"overview": "Back to Prompting Guru",
+			"history": "Your attempts at this challenge",
+			"latest": "Latest",
+			"viewing": "Viewing",
+			"attemptLine": "Attempt {number} · {score} · {date}",
+			"olderVersion": "Scored against version {version} of this challenge, which has changed since. The strong answer below is the one for that version."
+		},
+		"band": {
+			"needsImprovement": "Needs improvement",
+			"developing": "Developing",
+			"proficient": "Proficient",
+			"strong": "Strong"
+		},
+		"loading": "Loading your practice…",
+		"error": {
+			"title": "Prompting Guru couldn't load",
+			"body": "Your practice history is safe; nothing was lost. Try again, and if it keeps happening, come back in a moment.",
+			"retry": "Try again",
+			"back": "Go to Sessions"
+		}
 	},
 	"SiteFooter": {
 		"privacy": "Privacy",

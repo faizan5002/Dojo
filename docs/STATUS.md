@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-01. Update this whenever state changes; keep it short and factual. Who is doing what lives in [`HANDOFF.md`](HANDOFF.md); why choices were made lives in [`DECISIONS.md`](DECISIONS.md).
+Last updated: 2026-11-03. Update this whenever state changes; keep it short and factual. Who is doing what lives in [`HANDOFF.md`](HANDOFF.md); why choices were made lives in [`DECISIONS.md`](DECISIONS.md).
 
 ## Where the project is
 
@@ -10,18 +10,19 @@ The work so far is published on the branch `chore/phase-0-agent-setup` of `https
 
 ## Implemented
 
-| Item                                                                | Notes                                                                                                                                                                                      |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Landing page at `/`                                                 | Adapted from the Kage page in `@designcodeio/threeui` 1.2.0. Provenance and hashes: `public/landing-pages/ADAPTATION.md`. Copy states plainly that the coaching loop is still being built. |
-| Local session logger for Claude Code and Codex                      | `scripts/session-log.mjs`, `.claude/settings.json`, `.codex/hooks.json`. Redacted, committed with the work. See [`SESSION_LOGGING.md`](SESSION_LOGGING.md).                                |
-| Windows-capable test suite and checks                               | CRLF checkouts, the missing executable bit, `.bin` shims and the `@/` alias no longer fail tests on Windows. LF is enforced by `.gitattributes`.                                           |
-| Test isolation from git hooks                                       | Git-using tests no longer inherit `GIT_*` variables from a hook, so a push from a linked worktree cannot corrupt the repository's config or index. See [`TESTING.md`](TESTING.md).         |
-| Engineering foundation: rules, CI, hooks, skills, standards checker | Inherited from `8xsocial/template-web`. See [`../AGENTS.md`](../AGENTS.md) and [`STANDARDS.md`](STANDARDS.md).                                                                             |
-| Documentation set                                                   | [`README.md`](README.md) is the index.                                                                                                                                                     |
+| Item                                                                | Notes                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Landing page at `/`                                                 | Adapted from the Kage page in `@designcodeio/threeui` 1.2.0. Provenance and hashes: `public/landing-pages/ADAPTATION.md`. Copy states plainly that the coaching loop is still being built.                                                                                                |
+| Local session logger for Claude Code and Codex                      | `scripts/session-log.mjs`, `.claude/settings.json`, `.codex/hooks.json`. Redacted, committed with the work. See [`SESSION_LOGGING.md`](SESSION_LOGGING.md).                                                                                                                               |
+| Windows-capable test suite and checks                               | CRLF checkouts, the missing executable bit, `.bin` shims and the `@/` alias no longer fail tests on Windows. LF is enforced by `.gitattributes`.                                                                                                                                          |
+| Test isolation from git hooks                                       | Git-using tests no longer inherit `GIT_*` variables from a hook, so a push from a linked worktree cannot corrupt the repository's config or index. See [`TESTING.md`](TESTING.md).                                                                                                        |
+| Engineering foundation: rules, CI, hooks, skills, standards checker | Inherited from `8xsocial/template-web`. See [`../AGENTS.md`](../AGENTS.md) and [`STANDARDS.md`](STANDARDS.md).                                                                                                                                                                            |
+| Documentation set                                                   | [`README.md`](README.md) is the index.                                                                                                                                                                                                                                                    |
+| Prompting Guru (`feat/prompting-guru-db-library`, not merged)       | `/prompting-guru`: 40 challenges across five skills, stored as versioned rows in PostgreSQL and served by `/api/prompting-guru/*`, scored by rules on the server, personalized from the latest assessment; attempts and progress in PostgreSQL. See [`ARCHITECTURE.md`](ARCHITECTURE.md). |
 
 ## Not implemented
 
-- Everything product-specific beyond the landing page, intake and free metrics, rules-based scoring, accounts with a saved workspace, and PDF reports of assessments (on `feat/assessment-pdf-export`, not merged): the LLM judge, Prompting Guru, the personalized loop, progress and sharing, the project constitution.
+- Everything product-specific beyond the landing page, intake and free metrics, rules-based scoring, accounts with a saved workspace, and PDF reports of assessments, and rules-scored Prompting Guru practice (on `feat/prompting-guru-db-library`, not merged): the LLM judge, an LLM evaluator for practice answers, an admin interface for editing challenges, progress and sharing, the project constitution.
 - Project customisation: `package.json` is still named `template-web`, and `SITE.name` in `src/lib/seo/site.ts` is still `Web template`. The `template-setup` skill has not been run, deliberately, until the product questions in [`HANDOFF.md`](HANDOFF.md) are answered.
 - A configured production URL. `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
 - Automated coverage of the landing page itself. The only Playwright test is a smoke test of `/` and the locale redirect.

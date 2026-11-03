@@ -27,7 +27,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 		>
 			<div aria-hidden="true" className="app-backdrop" />
 			<header className="border-border border-b">
-				<nav className="flex h-20 items-center justify-between gap-6 px-5 md:px-14">
+				{/* At least 80px tall, and taller when the links wrap on a phone, rather than clipping them. */}
+				<nav className="flex min-h-20 items-center justify-between gap-6 px-5 py-4 md:px-14">
 					<Link href="/" className="app-brand flex items-center gap-3">
 						<span className="sr-only">{t('home')}</span>
 						<DotMark className="h-5 w-16" />
