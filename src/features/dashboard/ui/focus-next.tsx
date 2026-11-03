@@ -125,10 +125,13 @@ export function FocusNext({ focus, assessmentId }: { focus: Focus; assessmentId:
 				</dl>
 			</div>
 
-			<div className="lg:col-start-1 lg:row-start-2 lg:self-end">
+			<div className="flex flex-wrap items-center gap-x-6 gap-y-3 lg:col-start-1 lg:row-start-2 lg:self-end">
 				<Link href={`/assessment?id=${assessmentId}#skill-${focus.skill}`} className="app-pill">
 					{t('action')}
 					<ArrowUpRightIcon size={14} />
+				</Link>
+				<Link href={`/practice?assessment=${assessmentId}`} className="app-nav-link">
+					{t('practise')}
 				</Link>
 			</div>
 		</section>

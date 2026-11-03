@@ -17,7 +17,7 @@ import { evaluateScope } from './skills/scope'
 import { evaluateVerification } from './skills/verification'
 import type { Assessment, OverallAssessment, SkillAssessment } from './types'
 
-const EVALUATORS = {
+export const EVALUATORS = {
 	promptClarity: evaluateClarity,
 	planning: evaluatePlanning,
 	verification: evaluateVerification,

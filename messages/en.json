@@ -630,7 +630,8 @@
 				"title": "{skill} is the focus, but its quote is not in the saved evidence",
 				"body": "This assessment points to {skill} at {score}, but the line it quotes could not be found, so there is nothing honest to show here. Open the assessment to review its evidence.",
 				"action": "Open assessment"
-			}
+			},
+			"practise": "Try a rewrite drill"
 		},
 		"performance": {
 			"heading": "Your performance",
@@ -722,5 +723,67 @@
 			"retry": "Try again"
 		},
 		"loading": "Loading your dashboard"
+	},
+	"Practice": {
+		"meta": {
+			"title": "Practice | Dojo"
+		},
+		"eyebrow": "Practice",
+		"heading": "Rewrite one prompt",
+		"intro": "Your assessment flagged one habit. Rewrite the prompt below so it no longer shows that habit, and Dojo checks your rewrite with the same rules that scored you.",
+		"honesty": {
+			"title": "How this is checked",
+			"body": "A rule-based check, not AI. It looks for the same wording patterns as your assessment (rules-1.0). It reads wording, not intent, so it shows whether the pattern is gone, not whether the prompt is good. Your rewrite stays in this browser tab and is not saved."
+		},
+		"habit": "The habit to change",
+		"skill": "Skill",
+		"context": {
+			"verification": "Scored as a request to change something, followed by a different task, to see whether the request itself asks for a check.",
+			"iteration": "Scored as your reply to an answer the agent just gave.",
+			"default": "Scored as a request sent on its own."
+		},
+		"form": {
+			"label": "Your rewrite",
+			"placeholder": "Write the prompt again, with the habit fixed.",
+			"check": "Check my rewrite",
+			"reset": "Start again"
+		},
+		"result": {
+			"heading": "Result",
+			"verdict": {
+				"improved": "The habit is not detected in your rewrite, and the rules found something positive.",
+				"weaknessRemains": "The habit is still detected in your rewrite.",
+				"noEvidence": "The habit is not detected, but the rules found nothing positive either.",
+				"notEvaluable": "The rules could not score this text."
+			},
+			"stillFlagged": "Still flagged",
+			"found": "What the rules found",
+			"foundNone": "Nothing positive was detected.",
+			"notEvaluable": {
+				"promptClarity": "Write it as a request: start with what to do, for example \"Fix…\" or \"Add…\".",
+				"planning": "Planning is scored on larger build requests, such as \"Build…\" or \"Implement…\". A small fix is not scored.",
+				"verification": "Verification is scored on a request to change something. Start with what to change.",
+				"iteration": "Iteration is scored on a reply to the agent's answer, such as saying what is wrong or what you expected.",
+				"scopeControl": "Write it as a request: start with what to do, for example \"Rename…\" or \"Add…\"."
+			}
+		},
+		"compare": {
+			"heading": "Compared with your assessment",
+			"before": "Your assessment",
+			"beforeDetail": "{count} {unit}, averaged",
+			"after": "This rewrite",
+			"afterDetail": "one prompt",
+			"note": "One prompt is not a skill level. This shows how the same rules read this prompt, not how you will work."
+		},
+		"next": {
+			"saved": "Practice is not saved and does not change your scores. To see whether the habit changes in your real work, upload new sessions and score them again.",
+			"upload": "Upload sessions",
+			"evidence": "Back to the evidence"
+		},
+		"empty": {
+			"title": "Nothing to practise yet",
+			"body": "Practice starts from a habit your assessment flagged, quoted from your own prompt. Score some sessions first.",
+			"action": "Go to the dashboard"
+		}
 	}
 }
