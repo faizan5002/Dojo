@@ -37,7 +37,7 @@ The landing page shows a loading screen for several seconds while its 3D scene a
 | `pnpm typecheck`                     | `tsc --noEmit`.                                                                                                                     |
 | `pnpm format:check` / `pnpm format`  | Prettier check / write. Formatting applies to Markdown too.                                                                         |
 | `pnpm test`                          | Unit tests with `node --test`. See [`TESTING.md`](TESTING.md).                                                                      |
-| `pnpm test:e2e`                      | Playwright smoke test. Boots `pnpm dev` itself unless `E2E_BASE_URL` is set.                                                        |
+| `pnpm test:e2e`                      | Playwright specs (see [`TESTING.md`](TESTING.md)). Boots `pnpm dev` itself unless `E2E_BASE_URL` is set.                            |
 | `pnpm check:env`                     | Every `process.env.X` in `src/` is declared in `.env.example` and `src/lib/env.ts`.                                                 |
 | `pnpm check:secrets`                 | Scans every tracked file for credentials. The pre-commit hook runs the same scanner on staged files.                                |
 | `pnpm check:standards`               | Verifies the standards in [`STANDARDS.md`](STANDARDS.md) are still wired (rules index, hooks, CI gates, lint config).               |

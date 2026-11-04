@@ -3,10 +3,9 @@ import { getTranslations } from 'next-intl/server'
 import { PageHeader, SectionHeading } from '@/features/app-shell/section'
 import { AuthForm } from '@/features/auth/auth-form'
 import { UploadList } from '@/features/sessions/upload-list'
-import { listUploads } from '@/features/workspace/repository'
+import { listUploads } from '@/features/workspace/workspace-data'
 import { deleteAccount } from '@/server/actions/auth'
 import { requireUser } from '@/server/auth/current-user'
-import { db } from '@/server/db/client'
 
 const STORED = ['parsed', 'metrics', 'assessments', 'account'] as const
 const NOT_STORED = ['rawFiles', 'secrets', 'identity', 'thirdParties'] as const
@@ -23,7 +22,7 @@ export async function generateMetadata({
 export default async function AccountPage() {
 	const user = await requireUser()
 	const t = await getTranslations('Account')
-	const uploads = await listUploads({ db, userId: user.id })
+	const uploads = await listUploads(user)
 
 	return (
 		<main className="flex flex-col gap-16 px-5 py-14 md:px-14 md:py-20">

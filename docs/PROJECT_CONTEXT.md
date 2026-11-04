@@ -26,8 +26,10 @@ research or roadmap is in the repo yet — **open**.)
   `SITE.name` is still `Web template`. `template-setup` (the one-time bootstrap
   skill) has not been run, on purpose, until the product questions in
   `docs/HANDOFF.md` are answered.
-- **No Dojo product features beyond the landing page.** No accounts, no session
-  intake, no review or coaching, no database models beyond the template's.
+- **A first signed-in workspace exists.** Accounts (Supabase Auth), session
+  upload of `.claude-logs` digests, rules-based assessment, PDF reports and a
+  coaching-first dashboard. Not built: the LLM judge, progress sharing, a
+  production deployment. To run it locally, see `docs/TEAM_SETUP.md`.
 
 ## Architecture (the existing one — do not replace it)
 

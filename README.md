@@ -4,7 +4,7 @@
 
 Dojo is a web platform being built to help developers get better at working with AI coding agents such as Claude Code and Codex. Its coaching is meant to come from review of a developer's own agent sessions, rather than from generic lessons.
 
-> **Status: early development.** What exists today is the public landing page and the repository's engineering foundation. The coaching product itself (session intake, review and feedback) is **not built yet**. See [Project status](#project-status).
+> **Status: early development.** What exists today is the public landing page, the repository's engineering foundation, and a first signed-in workspace: session upload, rules-based assessment and a coaching-first dashboard. The LLM judge, progress sharing and a production deployment are **not built yet**. See [Project status](#project-status).
 
 ![Dojo landing page: hero section with the headline "Train how you work with AI agents" over an animated 3D dojo scene](docs/assets/screenshots/desktop-hero.webp)
 
@@ -41,7 +41,9 @@ How a learner's session data would reach Dojo (upload, local tooling or reposito
 | Public landing page (`/`)                          | **Implemented.** A scroll-driven 3D page adapted for Dojo, with copy in `messages/en.json`. See [The landing page](#the-landing-page).                                                                                                                   |
 | Local session logger for Claude Code and Codex     | **Implemented.** Writes redacted digests to `.claude-logs/`, committed with the work they produced. Claude Code hooks are verified in a real session; Codex hooks are not yet verified in one. See [`docs/SESSION_LOGGING.md`](docs/SESSION_LOGGING.md). |
 | Engineering foundation (CI, hooks, standards)      | **Implemented**, inherited from the template this repository started from. See [What is in this repository](#what-is-in-this-repository).                                                                                                                |
-| Accounts, session upload, review and coaching      | **Not built.** Undecided: whether accounts exist at launch, how session data reaches Dojo, and which AI provider (if any) would process it.                                                                                                              |
+| Accounts, session upload, rules-based assessment   | **Implemented** (Supabase Auth, Prisma, `.claude-logs` digests only, rules-based scoring, PDF report). See [`docs/TEAM_SETUP.md`](docs/TEAM_SETUP.md) to run it.                                                                                         |
+| Coaching-first dashboard (`/dashboard`)            | **Implemented.** Shows a next step backed by quoted evidence. A development-only sample-data mode exists for UI work; see [`docs/FRONTEND_DEV_MODE.md`](docs/FRONTEND_DEV_MODE.md).                                                                      |
+| LLM judge, progress sharing, AI provider           | **Not built.** Planning docs: [`docs/PRODUCT_STRATEGY.md`](docs/PRODUCT_STRATEGY.md), [`docs/FUTURE_ARCHITECTURE.md`](docs/FUTURE_ARCHITECTURE.md), [`docs/ROADMAP.md`](docs/ROADMAP.md).                                                                |
 | Deployed website                                   | **No production URL is configured in the repository**, so none is linked here.                                                                                                                                                                           |
 | Project name in code (`package.json`, `SITE.name`) | **Not customised yet.** `package.json` is still named `template-web` and the SEO site name is still `Web template`.                                                                                                                                      |
 
