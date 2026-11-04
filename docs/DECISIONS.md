@@ -3,6 +3,58 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-03 — Prompting Guru challenges live in PostgreSQL, as immutable versions
+
+**Decision.** The challenge library moved from code into PostgreSQL:
+`practice_challenges` (stable identity: slug, skill, type, active flag, current version)
+and `practice_challenge_versions` (immutable content and rubric per version, criteria as
+JSONB with each pattern stored as source and flags). Each attempt references the exact
+version it was scored against (`challenge_version_id`). The scoring algorithm stays in
+code and receives the stored criteria. The 40 definitions are seed content in
+`prisma/seed/practice-challenges/`, written by an idempotent seed that refuses an edit
+without a version bump; the app never imports them. Challenges reach the browser through
+`/api/prompting-guru/*`; server-rendered pages call the same repository functions
+in-process instead of fetching their own API, as Next.js recommends. The introduction is
+chosen by a tag, not a hard-coded id. RLS is on with no policies, as for every table:
+challenge content is shared, but only server code (Prisma, as the table owner) reads or
+writes it.
+**Why.** The owner asked for challenge content to be editable without changing code and
+served by APIs, with old results staying reproducible. Immutable versions give that
+without copying the rubric into every attempt; JSONB keeps the rubric's structure; the
+content hash makes the seed safe to re-run.
+**Limits.** Content is still edited through the seed files and a deploy: there is no admin
+interface or admin write endpoint yet. Admin RBAC exists (`src/lib/rbac/`); a write path
+would need a new permission (for example `practice.manage`) checked with
+`requirePermission`, and would create versions under the same rules as the seed. Stored
+patterns are trusted content: only the seed (or a future admin path) writes them.
+**Supersedes** the "code library of challenges" part of the entry below; its scoring and
+planning decisions still hold.
+
+## 2026-11-03 — Prompting Guru: a code library of challenges, scored by rules on the server
+
+**Decision.** Practice challenges are a versioned library in code
+(`src/features/practice/challenges/`), not a database table; each attempt stores the
+challenge id and version it answered. Answers are redacted and scored on the server by
+deterministic rules (`evaluate.ts`, evaluator `rules-1.0`) behind a `PromptEvaluator`
+interface, and saved as `practice_attempts` rows with the full evaluation. Progress,
+streaks, trends and due reviews are derived from those rows on each page load; there is
+no scheduler and no progress table. The plan (`plan.ts`) weights skills by the latest
+assessment's score band, adjusted by recent exercise scores, and every threshold and
+weight lives in `PRACTICE_CONFIG`. A skill the assessment could not score is "not
+assessed", never a weakness; with fewer than three scored skills the overview says the
+ranking is not reliable. Exercise scores are always shown apart from assessment scores.
+The criteria and the strong answer are rendered only on the result of the user's own
+attempt; the suggested rewrite is a labelled template, not generated text.
+**Why.** The brief rules out an LLM or paid service and asks for deterministic, explainable
+feedback. Challenges in code are reviewed, typed and tested like the rest of the rubric
+(every strong answer must score 100 on its own rubric); deriving progress from attempts
+means a new assessment never rewrites history.
+**Limits.** Rules read wording, not intent, and are English-only: a good answer phrased
+unusually can miss a criterion. Changing a challenge's criteria means bumping its version;
+trends only compare attempts at the same version.
+**Revisit when** an LLM evaluator is approved (implement `PromptEvaluator`), or authors
+other than developers need to edit challenges.
+
 ## 2026-11-04 — Assessment reports are PDFs rendered on the server with @react-pdf/renderer
 
 **Decision.** "Download PDF report" on `/assessment` fetches

@@ -95,6 +95,7 @@ model Assessment {
 	recommendations Json
 	createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
 	skills          SkillAssessment[]
+	practiceAttempts PracticeAttempt[]
 
 	@@index([userId, createdAt])
 	@@index([uploadId])

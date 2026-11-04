@@ -32,9 +32,9 @@ second developer's identity is deliberately not recorded; add it here when known
 
 Add rows as `path or area — branch — who`.
 
-| Area                                                                                   | Branch                       | Who                   |
-| -------------------------------------------------------------------------------------- | ---------------------------- | --------------------- |
-| Assessment PDF reports: `src/features/assessment/report/`, `/api/assessments/[id]/pdf` | `feat/assessment-pdf-export` | Developer 1's session |
+| Area                                                                                                                                                                                  | Branch                                         | Who                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | --------------------- |
+| Prompting Guru, with the challenge library in PostgreSQL: `src/features/practice/`, `src/app/api/prompting-guru/`, `/prompting-guru`, `prisma/schema/practice.prisma`, `prisma/seed/` | `feat/prompting-guru-db-library` (uncommitted) | Developer 1's session |
 
 ## Exact remaining actions
 

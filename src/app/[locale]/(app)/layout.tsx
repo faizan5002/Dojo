@@ -28,32 +28,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 			className={cn(onest.variable, 'bg-bg text-text relative isolate min-h-dvh')}
 		>
 			<div aria-hidden="true" className="app-backdrop" />
-			{isDevMockUser(user) ? (
-				<p
-					role="status"
-					data-testid="dev-frontend-banner"
-					className="border-border text-text-muted border-b px-5 py-2 text-center text-xs md:px-14"
-				>
-					{t('devMode')}
-				</p>
-			) : null}
-			{user == null ? (
-				<>
-					<header className="border-border border-b">
-						<nav className="flex h-20 items-center justify-between gap-6 px-5 md:px-14">
-							<Link href="/" className="app-brand flex items-center gap-3">
-								<span className="sr-only">{t('home')}</span>
-								<DotMark className="h-5 w-16" />
-								<span className="app-eyebrow text-text-faint hidden sm:block">{t('tagline')}</span>
-							</Link>
-							<AppNav isSignedIn={false} />
-						</nav>
-					</header>
-					{children}
-				</>
-			) : (
-				<WorkspaceShell email={user.email}>{children}</WorkspaceShell>
-			)}
+			<header className="border-border border-b">
+				{/* At least 80px tall, and taller when the links wrap on a phone, rather than clipping them. */}
+				<nav className="flex min-h-20 items-center justify-between gap-6 px-5 py-4 md:px-14">
+					<Link href="/" className="app-brand flex items-center gap-3">
+						<span className="sr-only">{t('home')}</span>
+						<DotMark className="h-5 w-16" />
+						<span className="app-eyebrow text-text-faint hidden sm:block">{t('tagline')}</span>
+					</Link>
+					<AppNav isSignedIn={user != null} />
+				</nav>
+			</header>
+			{children}
 		</div>
 	)
 }

@@ -47,6 +47,19 @@ The landing page shows a loading screen for several seconds while its 3D scene a
 | `pnpm prisma:generate`               | Regenerate the Prisma client after a schema change.                                                                                 |
 | `pnpm prisma:migrate:generate:check` | Dry-run what CI's migration generator would write.                                                                                  |
 | `pnpm db:run-once`                   | Apply `prisma/run-once.sql` once to `DIRECT_URL` (else `DATABASE_URL`). A deploy does this; you normally do not.                    |
+| `pnpm db:seed:practice`              | Seed the Prompting Guru challenge library into `DIRECT_URL` (else `DATABASE_URL`, or `--db-url`). Idempotent. Deploys run it too.   |
+
+## A database for the signed-in app
+
+Sessions, assessments and Prompting Guru need PostgreSQL and Supabase Auth (see [`ENVIRONMENT.md`](ENVIRONMENT.md)). For a fresh local database:
+
+```bash
+pnpm exec prisma migrate deploy   # every migration, in order
+pnpm db:seed:practice             # the 40 Prompting Guru challenges
+pnpm check:rls                    # RLS on every table, no policies
+```
+
+`prisma migrate deploy` reads `DATABASE_URL` and `DIRECT_URL` from the environment, not from `.env.local`, so export them first (the seed and the checks read `.env.local` themselves). Seeding again is safe: unchanged challenges are skipped. The database tests (`src/**/*-repository.test.mts`, `challenge-library.test.mts`) run against a second, throwaway database named by `TEST_DATABASE_URL`, with the same migrations applied, and skip without it.
 
 ## Git hooks
 
