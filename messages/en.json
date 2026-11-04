@@ -16,6 +16,14 @@
 		"account": "Account",
 		"signIn": "Sign in",
 		"signOut": "Sign out",
+		"devMode": "Frontend dev mode: sample data for a mock user, nothing here is saved. Saving, scoring and deleting need a real signed-in account.",
+		"dashboard": "Dashboard",
+		"skip": "Skip to content",
+		"workspaceNav": "Workspace",
+		"uploadAction": "Upload sessions",
+		"signedInAs": "Signed in as {email}",
+		"sidebar": "Sidebar",
+		"pageHeader": "Page header",
 		"promptingGuru": "Prompting Guru"
 	},
 	"Sessions": {
