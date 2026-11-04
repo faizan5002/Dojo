@@ -1,0 +1,73 @@
+# INACTIVE TEMPLATE. This file is not under .github/workflows/, so GitHub does
+# not run it. See docs/AGENT_AUTOMATION.md for what is needed to enable it.
+#
+# Read-only role reviews of a pull request, then one summary. Roles comment;
+# none pushes, merges or deploys.
+
+name: PR agent review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: agent-review-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  review:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        role:
+          - name: product-ux
+            focus: 'Screens and copy against PRODUCT.md and DESIGN.md. Report claims the UI makes that the code does not back.'
+          - name: frontend
+            focus: 'React and Next.js rules in AGENTS.md, accessibility, client boundaries, layout at phone width.'
+          - name: backend
+            focus: 'Server code, Prisma queries, user-scoping of every read and write, and fit with docs/FUTURE_ARCHITECTURE.md.'
+          - name: testing
+            focus: 'Whether each changed flow has unit and Playwright coverage, and whether tests could pass while the feature is broken.'
+          - name: security
+            focus: 'Auth, ownership checks, secrets, and any path by which a development-only guard could reach production.'
+          - name: documentation
+            focus: 'Docs that this change makes stale or contradicts.'
+    steps:
+      - name: Check for model credential
+        id: check
+        env:
+          HAS_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+        run: |
+          echo "enabled=$HAS_TOKEN" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_TOKEN" != "true" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is not set; skipping."
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@9c5ddab2e6d17b83ea679153b31f1d5f023cf636 # v1.0.217
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --max-turns 12
+            --allowedTools "Bash(git diff:*),Bash(git log:*),Bash(git show:*)"
+          prompt: |
+            You are the ${{ matrix.role.name }} reviewer for this pull request.
+            Focus: ${{ matrix.role.focus }}
+            Follow AGENTS.md and the rules in docs/rules/. Review only the diff
+            against the base branch. Report actionable defects introduced by
+            this PR, each with file, line and a concrete failure scenario. If
+            you find none, say so in one line. Do not modify files, do not
+            push, and do not propose to merge.

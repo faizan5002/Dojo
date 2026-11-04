@@ -436,7 +436,30 @@
 			"viewing": "Viewing",
 			"open": "Open",
 			"score": "{score} out of 100 · rubric {version}",
-			"noScore": "No overall score · rubric {version}"
+			"noScore": "No overall score · rubric {version}",
+			"search": {
+				"label": "Search",
+				"placeholder": "Date, score or id"
+			},
+			"filter": {
+				"label": "Level",
+				"all": "All levels",
+				"strong": "Strong (80+)",
+				"proficient": "Proficient (60 to 79)",
+				"developing": "Developing (40 to 59)",
+				"needsImprovement": "Needs improvement (under 40)",
+				"unscored": "No overall score"
+			},
+			"sort": {
+				"label": "Sort",
+				"newest": "Newest first",
+				"oldest": "Oldest first",
+				"highest": "Highest score",
+				"lowest": "Lowest score"
+			},
+			"count": "Showing {shown} of {total}",
+			"noMatches": "No assessments match.",
+			"clear": "Clear search and filter"
 		},
 		"download": {
 			"action": "Download PDF report",
@@ -503,7 +526,8 @@
 			"unavailable": "Something went wrong. Try again in a moment.",
 			"checkEmail": "Check your inbox: we sent a link to confirm your account.",
 			"resetSent": "If an account exists for that address, a reset link is on its way.",
-			"confirmMismatch": "That doesn't match your account's email."
+			"confirmMismatch": "That doesn't match your account's email.",
+			"devFrontendMode": "Frontend dev mode shows sample data only. Sign in with a real account to do this."
 		}
 	},
 	"Account": {
@@ -767,5 +791,121 @@
 		"privacy": "Privacy",
 		"terms": "Terms",
 		"contact": "Contact"
+	},
+	"Dashboard": {
+		"meta": {
+			"title": "Dashboard | Dojo"
+		},
+		"greeting": "Welcome back, {name}",
+		"greetingNew": "Welcome to Dojo",
+		"upload": "Upload sessions",
+		"focus": {
+			"heading": "Focus next",
+			"scoreLine": "{score} · {level}",
+			"quoteLabel": "From your own prompt",
+			"where": "Prompt {number} in session",
+			"action": "See evidence",
+			"none": {
+				"title": "Nothing to focus on this time",
+				"body": "Every reliably scored skill is at 80 or above, or has too little evidence to judge. Add a few more sessions and score again to look for the next habit to work on.",
+				"action": "Open assessment",
+				"secondary": "Upload more sessions"
+			},
+			"missingQuote": {
+				"title": "{skill} is the focus, but its quote is not in the saved evidence",
+				"body": "This assessment points to {skill} at {score}, but the line it quotes could not be found, so there is nothing honest to show here. Open the assessment to review its evidence.",
+				"action": "Open assessment"
+			}
+		},
+		"performance": {
+			"heading": "Your performance",
+			"outOf": "out of 100",
+			"basis": "Based on {sessions, plural, one {# session} other {# sessions}} and {prompts, plural, one {# prompt} other {# prompts}}.",
+			"assessedOn": "Assessed {date}",
+			"open": "Open assessment",
+			"up": "{value} points since your previous scored assessment.",
+			"down": "{value} points since your previous scored assessment.",
+			"same": "No change since your previous scored assessment.",
+			"provisional": "Provisional: one of the two assessments rests on limited evidence.",
+			"noPrevious": "No earlier scored assessment to compare with yet.",
+			"previousUnscored": "Not comparable: the earlier assessment had no score here.",
+			"currentUnscored": "Not comparable: no score this time.",
+			"newerUnscored": "Your newest assessment ({date}) had too little evidence to score, so this shows your last scored one.",
+			"newerUnscoredLink": "See why"
+		},
+		"skills": {
+			"heading": "Skills",
+			"intro": "Select a skill to see the evidence behind its score.",
+			"focusTag": "Focus",
+			"strongestTag": "Strongest",
+			"notScored": "Not enough evidence to score",
+			"linkName": "{skill}, {score}, {level}. See evidence",
+			"linkNameUnscored": "{skill}, not scored. See evidence",
+			"markers": "Markers show where Developing (40), Proficient (60) and Strong (80) begin.",
+			"changeLabel": "{value} points since the previous scored assessment",
+			"changeProvisional": "{value} points since the previous scored assessment, provisional because of limited evidence",
+			"provisionalNote": "Changes in grey are provisional: they rest on limited evidence."
+		},
+		"progress": {
+			"heading": "Your progress",
+			"summary": "{assessments, plural, one {# assessment} other {# assessments}} · {sessions, plural, one {# session} other {# sessions}} · {prompts, plural, one {# prompt} other {# prompts}}",
+			"trend": "Overall score over time",
+			"trendLabel": "Overall score across {count, plural, one {# assessment} other {# assessments}}: {scores}",
+			"trendRange": "{from} to {to}",
+			"trendSingle": "Score again after your next session to start a trend.",
+			"earlier": "Earlier assessments",
+			"earlierEmpty": "No earlier assessments.",
+			"noScore": "No overall score",
+			"open": "Open"
+		},
+		"recentSessions": {
+			"heading": "Recent sessions",
+			"prompts": "{count, plural, one {# prompt} other {# prompts}}",
+			"minutes": "{value} min",
+			"unknownProject": "Unknown project",
+			"undated": "Undated",
+			"upload": "Upload more sessions",
+			"empty": "No sessions yet."
+		},
+		"empty": {
+			"title": "Practise from your own sessions",
+			"body": "Dojo reads the Claude Code sessions you already have, finds the habit most worth changing, and shows you the lines of your own prompts that point to it.",
+			"steps": {
+				"upload": {
+					"title": "Upload",
+					"body": "Choose log files from your project’s .claude-logs folder. They are redacted in your browser."
+				},
+				"score": {
+					"title": "Score",
+					"body": "Run the rubric over them: five skills, each with a score and its evidence."
+				},
+				"practise": {
+					"title": "Practise",
+					"body": "Take the one thing to work on, then score again to see the change."
+				}
+			},
+			"action": "Upload sessions"
+		},
+		"toScore": {
+			"title": "Score your latest upload",
+			"body": "Your sessions are saved. Scoring them finds what to practise next, with the evidence behind it.",
+			"action": "Score latest upload",
+			"secondary": "Upload more sessions"
+		},
+		"insufficient": {
+			"title": "Not enough evidence to score yet",
+			"body": "An overall score needs at least {min} of the five skills to have enough evidence. Your newest assessment supports {count}.",
+			"needsHeading": "What each skill needs",
+			"need": "{observations} of {needed} {unit}",
+			"next": "Add a few more sessions that show these habits, then score again.",
+			"action": "Upload sessions",
+			"secondary": "See the assessment"
+		},
+		"error": {
+			"title": "The dashboard could not load",
+			"body": "Your data is safe. Try again in a moment.",
+			"retry": "Try again"
+		},
+		"loading": "Loading your dashboard"
 	}
 }

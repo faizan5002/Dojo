@@ -52,6 +52,8 @@ async function downloadReport(page: Page) {
 }
 
 test('a signed-out request for a report is refused', async ({ request }) => {
+	// With the dev frontend mode on, a signed-out request acts as the mock user by design.
+	test.skip(process.env.DOJO_DEV_FRONTEND_MODE === 'true', 'frontend dev mode is on')
 	const response = await request.get(`/api/assessments/${randomUUID()}/pdf`)
 	expect(response.status()).toBe(401)
 })

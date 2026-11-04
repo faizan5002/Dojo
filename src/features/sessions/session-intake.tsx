@@ -25,6 +25,7 @@ export function SessionIntake({ selectedUploadId }: { selectedUploadId: string |
 	const inputId = useId()
 	const hintId = useId()
 	const [status, setStatus] = useState<Status>('idle')
+	const [note, setNote] = useState<string | null>(null)
 	const isBusy = status === 'reading' || status === 'saving'
 
 	async function handleFiles(event: React.ChangeEvent<HTMLInputElement>) {
@@ -48,6 +49,7 @@ export function SessionIntake({ selectedUploadId }: { selectedUploadId: string |
 		setStatus('saving')
 		const saved = await saveUploadAction(payload)
 		if (!saved.ok) {
+			setNote(saved.status === 403 ? saved.error : null)
 			setStatus('saveFailed')
 			return
 		}
@@ -94,7 +96,7 @@ export function SessionIntake({ selectedUploadId }: { selectedUploadId: string |
 				{status === 'tooLarge' ? (
 					<p className="text-danger">{t('tooLarge', { maxMegabytes: MAX_UPLOAD_MEGABYTES })}</p>
 				) : null}
-				{status === 'saveFailed' ? <p className="text-danger">{t('saveFailed')}</p> : null}
+				{status === 'saveFailed' ? <p className="text-danger">{note ?? t('saveFailed')}</p> : null}
 			</div>
 		</section>
 	)

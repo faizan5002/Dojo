@@ -20,6 +20,11 @@ const envSchema = z.object({
 	NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional().or(z.literal('')),
 	SUPABASE_SECRET_KEY: z.string().optional(),
 
+	// Development-only frontend mode (src/server/auth/dev-frontend-mode.ts): the
+	// exact string "true" shows fixture data for a mock user. Never active in a
+	// production build, whatever this says.
+	DOJO_DEV_FRONTEND_MODE: z.string().optional(),
+
 	// Minimum severity the server logger emits (docs/rules/logging.md).
 	// Validated here so a typo fails the boot loudly, but the logger reads
 	// `process.env.LOG_LEVEL` directly (not `env.LOG_LEVEL`) so it can report a

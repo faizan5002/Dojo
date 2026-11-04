@@ -6,9 +6,8 @@ import { MAX_LOG_FILE_BYTES, MAX_LOG_FILES } from '@/features/sessions/limits'
 import { SessionIntake } from '@/features/sessions/session-intake'
 import { SessionMetricsView } from '@/features/sessions/session-metrics-view'
 import { UploadList } from '@/features/sessions/upload-list'
-import { getUploadView, listUploads } from '@/features/workspace/repository'
+import { getUploadView, listUploads } from '@/features/workspace/workspace-data'
 import { requireUser } from '@/server/auth/current-user'
-import { db } from '@/server/db/client'
 
 const BYTES_PER_MEGABYTE = 1024 * 1024
 const uuid = z.string().uuid()
@@ -31,12 +30,8 @@ export default async function SessionsPage({
 	const t = await getTranslations('Sessions')
 	const requested = uuid.safeParse((await searchParams).upload)
 	const [uploads, view] = await Promise.all([
-		listUploads({ db, userId: user.id }),
-		getUploadView({
-			db,
-			userId: user.id,
-			uploadId: requested.success ? requested.data : undefined
-		})
+		listUploads(user),
+		getUploadView(user, requested.success ? requested.data : undefined)
 	])
 
 	return (

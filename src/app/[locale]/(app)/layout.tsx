@@ -3,7 +3,9 @@ import { Onest } from 'next/font/google'
 import { getTranslations } from 'next-intl/server'
 import { DotMark } from '@/components/brand/dot-mark'
 import { AppNav } from '@/features/app-shell/app-nav'
-import { getCurrentUser } from '@/server/auth/current-user'
+import { WorkspaceShell } from '@/features/app-shell/workspace-shell'
+import { getAppUser } from '@/server/auth/current-user'
+import { isDevMockUser } from '@/server/auth/dev-frontend-mode'
 import { Link } from '@/i18n/routing'
 import { cn } from '@/lib/cn'
 import './app.css'
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-	const [t, user] = await Promise.all([getTranslations('AppShell'), getCurrentUser()])
+	const [t, user] = await Promise.all([getTranslations('AppShell'), getAppUser()])
 
 	return (
 		<div

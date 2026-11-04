@@ -20,13 +20,16 @@ export function RunAssessmentPanel({
 	const t = useTranslations('Assessment')
 	const router = useRouter()
 	const [hasFailed, setHasFailed] = useState(false)
+	const [note, setNote] = useState<string | null>(null)
 	const [isRunning, startTransition] = useTransition()
 
 	function run() {
 		setHasFailed(false)
+		setNote(null)
 		startTransition(async () => {
 			const result = await runAssessmentAction({ uploadId })
 			if (!result.ok) {
+				setNote(result.status === 403 ? result.error : null)
 				setHasFailed(true)
 				return
 			}
@@ -38,7 +41,7 @@ export function RunAssessmentPanel({
 		<section className="border-border flex flex-col gap-5 border-y py-10">
 			<h2 className="app-heading">{hasFailed ? t('failed.title') : t('ready.title')}</h2>
 			<p className="text-text-muted max-w-2xl">
-				{hasFailed ? t('failed.body') : t('ready.body', { sessions: sessionCount })}
+				{hasFailed ? (note ?? t('failed.body')) : t('ready.body', { sessions: sessionCount })}
 			</p>
 			<div className="flex flex-wrap items-center gap-5">
 				<button
