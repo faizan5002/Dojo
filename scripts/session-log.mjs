@@ -200,18 +200,29 @@ function parseJsonLines(text) {
 // Transcript parsers — a turn is { prompt, response }, each { timestamp, text }
 // ---------------------------------------------------------------------------
 
+/** The model a transcript names for a response, if it names a real one. */
+const modelOf = (model) =>
+	typeof model === 'string' && model.trim() !== '' && model !== '<synthetic>'
+		? { model: model.trim() }
+		: {}
+
 /**
  * Claude Code transcript (~/.claude/projects/<cwd>/<session>.jsonl). Real shape,
  * verified against the installed version: one JSONL line per content block, the
  * blocks of one API message share `message.id` and `stop_reason`; narration
  * before a tool call carries `stop_reason: "tool_use"`; real prompts are either
- * a string or a list of text blocks (pasted images arrive as a list).
+ * a string or a list of text blocks (pasted images arrive as a list). When the
+ * context fills up, Claude Code writes its summary of the conversation as a
+ * `user` entry flagged `isCompactSummary`, often in the middle of a turn: it is
+ * not something the human typed, so it is skipped and the answer that follows
+ * stays with the prompt that asked for it. Each response keeps the `model` the
+ * transcript records for it.
  */
 export function parseClaudeTranscript(jsonl) {
 	const turns = []
 	let responseId = null
 	for (const entry of parseJsonLines(jsonl)) {
-		if (entry.isSidechain || entry.isMeta) continue
+		if (entry.isSidechain || entry.isMeta || entry.isCompactSummary) continue
 		const message = entry.message ?? {}
 		if (entry.type === 'user') {
 			if (Array.isArray(message.content) && message.content.some((b) => b?.type === 'tool_result'))
@@ -235,7 +246,7 @@ export function parseClaudeTranscript(jsonl) {
 			if (turn.response && message.id && message.id === responseId) {
 				turn.response.text += `\n\n${text}`
 			} else {
-				turn.response = { timestamp: entry.timestamp ?? '', text }
+				turn.response = { timestamp: entry.timestamp ?? '', text, ...modelOf(message.model) }
 			}
 			responseId = message.id ?? null
 		}
@@ -255,6 +266,7 @@ export function parseCodexRollout(jsonl) {
 	let sessionId = null
 	let cwd = null
 	let weak = null
+	let model = {}
 	const closeTurn = () => {
 		const turn = turns[turns.length - 1]
 		if (turn && !turn.response && weak) turn.response = weak
@@ -269,6 +281,10 @@ export function parseCodexRollout(jsonl) {
 		if (record.type === 'session_meta') {
 			sessionId = payload.id ?? payload.session_id ?? sessionId
 			cwd = payload.cwd ?? cwd
+			continue
+		}
+		if (record.type === 'turn_context') {
+			model = modelOf(payload.model)
 			continue
 		}
 		let prompt = null
@@ -298,11 +314,11 @@ export function parseCodexRollout(jsonl) {
 		) {
 			const text = textOfBlocks(payload.content, ['output_text', 'text']).trim()
 			if (!text || payload.phase === 'commentary') continue
-			if (payload.phase === 'final_answer') turn.response = { timestamp, text }
-			else weak = { timestamp, text }
+			if (payload.phase === 'final_answer') turn.response = { timestamp, text, ...model }
+			else weak = { timestamp, text, ...model }
 		} else if (record.type === 'event_msg' && payload.type === 'task_complete') {
 			const text = String(payload.last_agent_message ?? '').trim()
-			if (text && !turn.response) turn.response = { timestamp, text }
+			if (text && !turn.response) turn.response = { timestamp, text, ...model }
 		}
 	}
 	closeTurn()
@@ -345,7 +361,7 @@ export function parseLog(markdown) {
 			meta[key] = rest.join(': ')
 		}
 		const text = unescapeBody(lines.join('\n').trim())
-		const entry = { timestamp: meta.timestamp ?? '', text }
+		const entry = { timestamp: meta.timestamp ?? '', text, ...modelOf(meta.model) }
 		if (current.type === 'PROMPT') turns.push({ prompt: entry, response: null })
 		else if (turns.length > 0 && !turns[turns.length - 1].response)
 			turns[turns.length - 1].response = entry
@@ -467,7 +483,9 @@ export function renderLog({
 	date
 }) {
 	const clean = (entry) =>
-		entry ? { timestamp: entry.timestamp, text: redact(entry.text).text } : null
+		entry
+			? { timestamp: entry.timestamp, text: redact(entry.text).text, ...modelOf(entry.model) }
+			: null
 	const safeTurns = turns
 		.map((turn) => ({ prompt: clean(turn.prompt), response: clean(turn.response) }))
 		.filter((turn) => turn.prompt || turn.response)
@@ -481,6 +499,8 @@ export function renderLog({
 		0
 	)
 	const lastType = entries.length > 0 ? entries[entries.length - 1][0] : UNKNOWN
+	// Every model that answered, in first-use order; `unknown` when no source named one.
+	const models = [...new Set(safeTurns.map((t) => t.response?.model).filter(Boolean))]
 	const day = date ?? now.toISOString().slice(0, 10)
 	const author = oneLine(attribution.author)
 	const githubUser = oneLine(attribution.githubUser)
@@ -493,6 +513,7 @@ export function renderLog({
 		`github_user: ${githubUser}`,
 		`git_email: ${oneLine(attribution.email)}`,
 		`project: ${oneLine(project)}`,
+		`models: ${models.length > 0 ? models.map(oneLine).join(', ') : UNKNOWN}`,
 		`session_status: ${lastType === 'RESPONSE' ? 'complete' : 'awaiting_response'}`,
 		`last_entry_type: ${lastType === 'RESPONSE' ? 'assistant' : lastType === 'PROMPT' ? 'user' : UNKNOWN}`,
 		`total_exchanges: ${safeTurns.filter((t) => t.prompt).length}`,
@@ -524,6 +545,8 @@ export function renderLog({
 			lines.push(`has_file_paths: ${paste.has_file_paths}`)
 			lines.push(`has_urls: ${paste.has_urls}`)
 			lines.push(`likely_pasted: ${paste.likely_pasted}`)
+		} else {
+			lines.push(`model: ${entry.model ? oneLine(entry.model) : UNKNOWN}`)
 		}
 		lines.push(`\n${escapeBody(entry.text)}\n`)
 	}

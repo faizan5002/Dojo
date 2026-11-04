@@ -1,11 +1,14 @@
 # Agent Session Logs — Setup Guide
 
-> **Superseded for this repository (2026-10-30).** The original guide below tells
-> agents to commit `.claude-logs/`. This repo's approved policy is the opposite:
-> logs are local-only, gitignored and never staged or committed, and sharing one is
-> prohibited until an approval process is documented. See
-> `docs/SESSION_LOGGING.md` and `docs/DECISIONS.md`. The rest of this file is
-> kept unchanged as the historical spec.
+> **How this repository applies it.** Session logs are **tracked**: every
+> session's log in `.claude-logs/` is committed, in its own commit, on the
+> branch that ships its work, and pushed with it; the pre-push hook refuses a
+> push while a log is uncommitted. The implementation differs from the guide
+> below: a repo-local Node script (`scripts/session-log.mjs`) run by the
+> project hooks in `.claude/settings.json` and `.codex/hooks.json`, not
+> `~/.claude/extract-log.py`, and it redacts credentials and records the model.
+> `docs/SESSION_LOGGING.md` is the current reference and `docs/DECISIONS.md`
+> the history; the rest of this file is the original spec, kept unchanged.
 
 Hand this file to your coding agent (Claude Code, Codex, Cursor, etc.) and ask it to set up session logging in the current repo. The end result: every prompt + final response from the session is captured to `.claude-logs/` in the directory where the session started, and committed alongside the work — but **none of the intermediate tool calls, file reads, or work artefacts** are recorded.
 
