@@ -10,6 +10,13 @@
 # Checked in package.json rather than with --if-present, which yarn has no
 # equivalent for and pnpm forwards to the script when it follows the name.
 # Genuine exception (a check that can only run in a real CI runner): git push --no-verify
+# Session logs first: a cheap check, and the one most often forgotten. Only
+# .claude-logs/ and .codex-logs/ are looked at; other uncommitted files are fine.
+if [ -f scripts/check-session-logs.mjs ] && ! node scripts/check-session-logs.mjs; then
+  echo ""
+  echo "Push blocked: commit the session logs above, then re-push."
+  exit 1
+fi
 if [ -f pnpm-lock.yaml ]; then RUN="pnpm run"; elif [ -f yarn.lock ]; then RUN="yarn run"; else RUN="npm run"; fi
 echo "pre-push: running required local gates via '$RUN' (format, lint, typecheck, env, events, tests)…"
 fail=0

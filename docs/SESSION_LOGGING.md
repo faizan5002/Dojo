@@ -12,14 +12,16 @@ One directory and one format for every agent. Source spec:
 | -------------------------------------------------------------- | ----------------------------------------------------- |
 | Your prompts                                                   | Tool calls and tool results, file reads and diffs     |
 | The agent's **final** answer for each turn                     | Narration between tool calls ("Let me look at…")      |
-| Session id, date, project                                      | Thinking / reasoning, sidechain (subagent) output     |
+| Session id, date, project, the model of each answer            | Thinking / reasoning, sidechain (subagent) output     |
 | Git author name + email, GitHub login (when `gh` is signed in) | Injected context (`<system-reminder>`, IDE tags, env) |
 | Session statistics (counts, lengths, durations)                | Credentials: redacted before the file is written      |
 
 Files are named `<UTC first-prompt time>_<session-id>.md`. A session rewrites
 its own file on every prompt and every stop, so there is one file per session
 and no duplicates. Format: YAML frontmatter, then `[CLAUDE_LOG_ENTRY
-type=PROMPT|RESPONSE num=N session=ID]` blocks. Claude and Codex logs share
+type=PROMPT|RESPONSE num=N session=ID]` blocks; each response carries the
+`model:` the transcript names for it (`unknown` if none does), and the header
+lists them as `models:`. Claude and Codex logs share
 the schema; the `agent:` field says which wrote it.
 
 Logs go to the **git root** of the session (`$CLAUDE_PROJECT_DIR`, else the
@@ -120,7 +122,11 @@ app), run `git config --global github.user <your-login>` once.
 2026-11-02; this reverses the earlier local-only policy).
 
 - Commit a session's log on the branch that ships its work, in its own commit,
-  immediately before the push. No hook does this; it is a deliberate step.
+  immediately before the push. Committing is a deliberate step no hook takes for
+  you, but the pre-push hook (`scripts/check-session-logs.mjs`) refuses a push
+  while any `.md` file under `.claude-logs/` or `.codex-logs/` is modified or
+  untracked, and prints the commands to fix it. Other uncommitted files do not
+  block a push. A log of a throwaway test session can be deleted instead.
 - This repository is private, so a pushed log is readable by everyone with access, and removing one later means rewriting history. Make the repository public only after reviewing every tracked log. A log holds full prompts and answers. It can contain private code,
   names, emails, paths and hostnames. Redaction is a pattern backstop and **does not
   make a log private or safe to publish**: read a log before committing it.
@@ -145,6 +151,10 @@ app), run `git config --global github.user <your-login>` once.
   update (read-modify-write on the Codex path). The agents fire them
   sequentially, so this has not been observed. Different sessions never share a
   file.
+- **Context compaction** (a long session running out of context) adds Claude
+  Code's summary of the conversation to the transcript as a `user` entry flagged
+  `isCompactSummary`. It is not a prompt and is left out, so the answer after it
+  stays with the prompt that asked for it.
 - **`/resume` or `/clear` in Claude Code** can start a new session id; the
   earlier part of the conversation may then appear in two log files.
 - **The hook runs through your shell.** Claude Code uses Git Bash on Windows (the
@@ -200,7 +210,7 @@ issues, not logger issues.
 ## Run the automated checks
 
 ```bash
-node --test scripts/session-log.test.mjs     # 31 logger tests
+node --test scripts/session-log.test.mjs scripts/check-session-logs.test.mjs
 pnpm test                                    # whole suite
 node scripts/check-secrets.mjs .claude-logs/*.md
 ```
