@@ -8,6 +8,7 @@ export const WORKSPACE_LINKS = [
 	{ href: '/dashboard', key: 'dashboard' },
 	{ href: '/sessions', key: 'sessions' },
 	{ href: '/assessment', key: 'assessment' },
+	{ href: '/prompting-guru', key: 'promptingGuru' },
 	{ href: '/account', key: 'account' }
 ] as const
 
@@ -27,7 +28,9 @@ export function WorkspaceNav() {
 				<Link
 					key={link.href}
 					href={link.href}
-					aria-current={pathname === link.href ? 'page' : undefined}
+					aria-current={
+						pathname === link.href || pathname.startsWith(`${link.href}/`) ? 'page' : undefined
+					}
 					className="app-side-link"
 				>
 					<b aria-hidden="true" className="hidden lg:inline">
