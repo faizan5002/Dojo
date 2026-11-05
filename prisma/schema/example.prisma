@@ -25,6 +25,7 @@ model User {
 	assessments      Assessment[]
 	skillAssessments SkillAssessment[]
 	practiceAttempts PracticeAttempt[]
+	aiInsights       AiInsight[]
 
 	@@map("users")
 }

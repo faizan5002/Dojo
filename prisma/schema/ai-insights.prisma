@@ -1,0 +1,38 @@
+// AI-generated insights (xAI Grok, through src/server/ai/llm.ts): assessment
+// explanations, session analysis, Prompting Guru feedback, examples and
+// recommendation notes. They sit beside the deterministic results and never
+// change them. One row per generation, success or failure, never rewritten:
+// a result is reused while its input, prompt version and model are unchanged,
+// and failures count toward the user's daily limit. Token usage and cost are
+// in `ai_usage`; the raw prompt sent and the session text are not stored.
+
+/// One generation for one user about one subject.
+model AiInsight {
+	id            String   @id @default(uuid()) @db.Uuid
+	userId        String   @map("user_id") @db.Uuid
+	user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+	/// assessment_explanation, session_analysis, attempt_feedback,
+	/// challenge_example or recommendation_explanation.
+	feature       String
+	/// What it is about: an assessment, upload or attempt id, a challenge
+	/// version id, or the recommended challenge's slug. Not a foreign key, as
+	/// it points at different tables; ownership is checked before generation.
+	subjectId     String   @map("subject_id")
+	promptVersion String   @map("prompt_version")
+	/// The model that answered (or would have, for a failure).
+	model         String
+	/// SHA-256 of the exact input, so an unchanged input is not paid for twice.
+	inputHash     String   @map("input_hash")
+	/// ok or failed.
+	status        String
+	/// For a failure: disabled, unavailable, timeout, rate_limited, auth,
+	/// invalid_output or refused. Never the provider's message.
+	errorCode     String?  @map("error_code")
+	/// The validated output, as the feature's schema defines it. Null on failure.
+	output        Json?
+	createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+	@@index([userId, feature, subjectId, createdAt])
+	@@index([userId, createdAt])
+	@@map("ai_insights")
+}

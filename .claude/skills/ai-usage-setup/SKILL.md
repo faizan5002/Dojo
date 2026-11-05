@@ -29,7 +29,7 @@ exists to tell someone.
 
 ## 2. Ask which providers, and which models
 
-Providers first — `anthropic`, `openai`, `google`. Then the specific models
+Providers first — `anthropic`, `openai`, `google`, `xai`, `openrouter`. Then the specific models
 under each. Push for specific: "Claude" is not an answer, `claude-opus-5`
 is. The model id is what goes in the map, and a wrong or vague one is the
 mis-pricing this whole design is built to prevent.

@@ -95,7 +95,7 @@ export async function recordAttempt({
 	])
 	if (challenge == null || !challenge.isActive) return null
 	const answer = redactSecrets(prompt.trim()).text
-	const evaluation = evaluator.evaluate({ challenge, prompt: answer })
+	const evaluation = await evaluator.evaluate({ challenge, prompt: answer })
 	const row = await db.practiceAttempt.create({
 		data: {
 			userId,

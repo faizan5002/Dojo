@@ -32,7 +32,10 @@ const AI_SDK_IMPORTS = {
 		'@google/genai',
 		'@google/genai/**',
 		'@google/generative-ai',
-		'ai',
+		// Anchored: these patterns follow .gitignore rules, where a bare 'ai' matches a
+		// path segment at any depth and so also banned the repo's own @/server/ai/*.
+		'/ai',
+		'/ai/**',
 		'@ai-sdk/**'
 	],
 	message:

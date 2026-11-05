@@ -25,6 +25,11 @@ export default defineConfig({
 		: {
 				command: 'pnpm dev',
 				url: 'http://localhost:3000',
+				// Scoring stays deterministic (the rules engine) under test, and never
+				// calls the real model: Next does not override a variable already set,
+				// so this wins over .env.local. AI insight panels are mocked per test.
+				// A dev server you started yourself is reused as is, so stop it first.
+				env: { AI_SCORING: process.env.AI_SCORING ?? 'off' },
 				reuseExistingServer: !process.env.CI,
 				timeout: 60_000
 			}

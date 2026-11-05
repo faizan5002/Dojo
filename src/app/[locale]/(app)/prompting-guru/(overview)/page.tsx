@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { getFormatter, getTranslations } from 'next-intl/server'
 import { ArrowUpRightIcon } from '@/components/ui/icons'
+import { aiInsightsAvailable } from '@/features/ai-insights/availability'
+import { AiInsightPanel } from '@/features/ai-insights/ui/ai-insight-panel'
 import { PageHeader, SectionHeading, Stat } from '@/features/app-shell/section'
 import { loadPracticeContext } from '@/features/practice/load-practice'
 import { PRACTICE_CONFIG } from '@/features/practice/plan'
@@ -21,11 +23,12 @@ export async function generateMetadata({
 
 export default async function PromptingGuruPage() {
 	const user = await requireUser()
-	const [t, tSkills, format, context] = await Promise.all([
+	const [t, tSkills, format, context, aiAvailable] = await Promise.all([
 		getTranslations('Guru'),
 		getTranslations('Assessment.skills'),
 		getFormatter(),
-		loadPracticeContext(user.id)
+		loadPracticeContext(user.id),
+		aiInsightsAvailable(user)
 	])
 	const { plan, summary, attempts, catalog } = context
 	const bySlug = (slug: string) => catalog.find((challenge) => challenge.slug === slug) ?? null
@@ -87,6 +90,12 @@ export default async function PromptingGuruPage() {
 						</Link>
 					</article>
 				)}
+				{aiAvailable && next != null ? (
+					<AiInsightPanel
+						feature="recommendation_explanation"
+						path="/api/prompting-guru/recommendation/ai-explanation"
+					/>
+				) : null}
 				<Link href="/prompting-guru/challenges" className="app-nav-link w-fit">
 					{t('browse')}
 				</Link>

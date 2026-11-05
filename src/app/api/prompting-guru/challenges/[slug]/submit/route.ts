@@ -1,6 +1,7 @@
 import { getChallengeVersion } from '@/features/practice/challenge-repository'
 import { toAttemptDto } from '@/features/practice/dto'
 import { recordAttempt } from '@/features/practice/practice-repository'
+import { practiceEvaluatorFor } from '@/features/practice/practice-scoring'
 import { slugSchema, submissionSchema } from '@/features/practice/stored'
 import { db } from '@/server/db/client'
 import { failure, json, signedIn } from '@/server/http/json-route'
@@ -21,7 +22,13 @@ export const POST = signedIn<{ params: Promise<{ slug: string }> }>(
 		const body = submissionSchema.safeParse(await request.json().catch(() => null))
 		if (!body.success) return failure(400, 'Write an answer of up to 8,000 characters.')
 
-		const attempt = await recordAttempt({ db, userId, slug: slug.data, prompt: body.data.answer })
+		const attempt = await recordAttempt({
+			db,
+			userId,
+			slug: slug.data,
+			prompt: body.data.answer,
+			evaluator: practiceEvaluatorFor(userId)
+		})
 		if (attempt == null) return failure(404, 'That challenge is not available.')
 		const version =
 			attempt.challengeVersionId == null

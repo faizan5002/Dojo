@@ -12,7 +12,7 @@
 // row is one `where cost_micro_usd is null` away from being counted on the
 // dashboard.
 
-export const AI_PROVIDERS = ['anthropic', 'openai', 'google'] as const
+export const AI_PROVIDERS = ['anthropic', 'openai', 'google', 'xai', 'openrouter'] as const
 export type AiProvider = (typeof AI_PROVIDERS)[number]
 
 export const SERVICE_TIERS = ['standard', 'fast', 'batch'] as const
@@ -41,7 +41,12 @@ export const OPENROUTER_SLUGS = {
 	'claude-haiku-4-5-20251001': 'anthropic/claude-haiku-4.5',
 	'gpt-5.4': 'openai/gpt-5.4',
 	'gpt-5.4-mini': 'openai/gpt-5.4-mini',
-	'gemini-3.8-flash': 'google/gemini-3.8-flash'
+	'gemini-3.8-flash': 'google/gemini-3.8-flash',
+	// xAI serves `grok-4.7` with no dated alias; OpenRouter's `id` (not its canonical slug).
+	'grok-4.7': 'x-ai/grok-4.7',
+	// Called through OpenRouter itself, so the model id is already OpenRouter's
+	// `id`. Free: its rate card is 0, so these calls cost a real $0, not NULL.
+	'nvidia/nemotron-3-ultra-550b-a55b:free': 'nvidia/nemotron-3-ultra-550b-a55b:free'
 } satisfies Record<string, string>
 
 // The model ids a call site is allowed to ask for. `satisfies` above keeps

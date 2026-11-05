@@ -3,6 +3,80 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-05 — The LLM scores assessments and practice answers; the rules are the fallback
+
+**Decision.** With AI scoring on (`AI_SCORING=on`, the default when AI is
+configured), an upload is scored by the LLM applying Dojo's rubric, written out
+as instructions in `src/features/assessment/llm/rubric-prompt.ts`: for each
+skill it reports the opportunities it finds (prompt reference, good / partial /
+poor, criterion and exact quote). Dojo's code then does the arithmetic, exactly
+as for the rules: each quote is checked against the prompt it names (unmatched
+ones are dropped), a prompt counts once per skill, scores are averaged from the
+outcomes, and confidence thresholds, bands, the insufficient-evidence rule, the
+three-skill overall rule, the profile and the recommendations are unchanged
+code. Prompting Guru answers are judged the same way: the model rates each of
+the challenge's criteria and pitfalls with quotes, and the weighted score,
+caps and suggestion are the rules evaluator's arithmetic (`scoreJudgements`).
+Parsing and the free metrics stay in code. When the model fails, the rules
+engine scores instead; the result says so (`rules-1.0 (AI unavailable)`).
+Every result records how it was made (`ai-rubric.v1 · <model>`,
+`ai-judge.v1 · <model>`), and the pages and PDF say which.
+**Why.** The owner wanted judgement from the LLM, with the rules as its
+instructions rather than as code, and chose to keep arithmetic in code and to
+fall back to the rules rather than fail.
+**Limits.** Scores vary between runs of the same log (low temperature reduces
+it, does not remove it). The free model is slow: an assessment took 92 s and
+248 s in two runs, a practice answer 30-60 s. The e2e suite runs with
+`AI_SCORING=off` so it stays deterministic and never calls the model.
+
+## 2026-11-05 — AI insights move from xAI to OpenRouter's free Nemotron
+
+**Decision.** The default AI provider is OpenRouter with
+`nvidia/nemotron-3-ultra-550b-a55b:free` (`AI_PROVIDER=openrouter`); xAI stays as
+an alternative (`AI_PROVIDER=xai`). `AI_ENABLED` replaces `XAI_ENABLED` as the
+master switch. Both providers share one OpenAI-compatible fetch client. The
+free model has no structured-output mode, so the answer is requested as the
+arguments of one forced tool call, fitted to the schema's length and count
+limits, and validated with Zod as before. Everything above the provider is
+unchanged: features, prompts, inputs, storage, endpoints, limits.
+**Why.** xAI needs paid credits; the owner chose the free model. Verified live:
+all five insights generate, are stored and reused, and cost $0.
+**Limits.** Free-tier rate limits (per minute and per day) and occasional
+unavailability, answered as 503; answers take 10-40 s; the model sometimes adds
+details to a rewrite that the user did not ask for despite the instruction.
+Dojo never switches to a paid model on its own.
+**UI.** The insights appear as labelled panels beside the deterministic
+results (assessment, sessions, Prompting Guru), generated only on the user's
+click, so a page never waits on AI and nothing is generated without asking.
+
+## 2026-11-05 — AI insights with xAI Grok, beside the deterministic engine
+
+**Decision.** Dojo calls xAI (`grok-4.7`) for five AI insights: session analysis,
+assessment explanations, Prompting Guru feedback with a rewrite, alternative
+example answers, and an explanation of the planner's recommendation. They are
+stored apart (`ai_insights`) and labelled AI-generated; official scores,
+bands, confidence, insufficient-evidence handling and challenge scoring are
+untouched. The planner, not the model, picks the next challenge. Generation
+runs only when the signed-in user calls an endpoint for their own data, from
+minimised, re-redacted input (never whole logs, never answer keys), fenced as
+data so instructions inside a log cannot steer the model. Results are reused
+while input, prompt version and model are unchanged; each user may start 20
+generations a day; calls time out at 30 s and retry at most twice on 429/5xx.
+Every call is tracked and priced in `ai_usage` (OpenRouter `x-ai/grok-4.7`).
+The provider sits behind `LlmProvider`, so adding OpenAI or Anthropic changes
+no feature. Backend only for now: no UI.
+**Why.** The owner chose Grok for contextual feedback that complements, not
+replaces, the rules engine; the existing AI-usage pattern (one module per
+provider, `trackAiCall`, priced at write time) was followed rather than
+duplicated. Plain `fetch` avoids an SDK, since xAI is OpenAI-compatible.
+**Data sent.** Users' redacted prompt excerpts, answers and scores go to xAI.
+Redaction removes credential formats, not names, private code or paths, and
+sensitive personal data cannot be detected reliably; the privacy copy should
+say so before a UI exposes this. This settles the HANDOFF question of which
+provider; the consent model for the UI is still open.
+**Revisit when** the UI ships (consent wording), usage outgrows the daily
+limit, or a second provider is added.
+
 ## 2026-11-03 — Prompting Guru challenges live in PostgreSQL, as immutable versions
 
 **Decision.** The challenge library moved from code into PostgreSQL:

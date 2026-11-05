@@ -227,14 +227,19 @@ export async function loadSessions({
 export async function runAssessment({
 	db,
 	userId,
-	uploadId
-}: Owner & { uploadId: string }): Promise<string | null> {
+	uploadId,
+	score = async (sessions) => assessSessions(sessions)
+}: Owner & {
+	uploadId: string
+	/** How the sessions are scored: the rules by default; the LLM with rules fallback from the action. */
+	score?: (sessions: ParsedSession[]) => Promise<Assessment>
+}): Promise<string | null> {
 	const upload = await db.upload.findFirst({
 		where: { id: uploadId, userId },
 		select: { id: true, redactionCount: true }
 	})
 	if (upload == null) return null
-	const result = assessSessions(await loadSessions({ db, userId, uploadId }))
+	const result = await score(await loadSessions({ db, userId, uploadId }))
 	const created = await db.assessment.create({
 		data: {
 			userId,

@@ -18,6 +18,61 @@ leaving it dormant — see "Removing it" at the bottom. An empty table nobody
 writes to is worse than no table, because the spend dashboard reports it as a project
 sitting at zero spend instead of a project that opted out.
 
+## This project's AI: OpenRouter (free Nemotron), for scoring and AI insights
+
+Dojo's LLM scoring of assessments and practice answers (`ai_assessment_scoring`,
+`ai_practice_scoring`; rules fallback, `AI_SCORING`) and its AI insight
+endpoints (`src/features/ai-insights/`) call one provider,
+chosen by `AI_PROVIDER`: **OpenRouter** by default, with
+`nvidia/nemotron-3-ultra-550b-a55b:free`; **xAI** (`grok-4.7`) is the
+alternative and needs paid credits. Master switch: `AI_ENABLED=true`. The
+layers, following the pattern below:
+
+- `src/server/ai/chat-completions-client.ts`: one plain-`fetch` client for
+  OpenAI-compatible Chat Completions (both providers speak it, so no SDK is
+  installed): timeout, at most two retries with backoff on 429/5xx, typed
+  failures (401/403 `auth`, 402 `payment_required`, never retried), errors
+  OpenRouter sends inside an HTTP 200, and response validation with Zod.
+- `src/server/ai/openrouter.ts` and `xai.ts`: the only places each provider is
+  called; configuration from the environment, every call wrapped in
+  `trackAiCall` (`provider: 'openrouter'` / `'xai'`). `openrouter-core.ts` holds
+  the pure request and answer handling.
+- `src/server/ai/llm-core.ts` and `llm.ts`: the provider-neutral layer feature
+  code uses. `generate()` asks for JSON matching a Zod schema and returns only
+  validated data, or throws `AiError`. It never falls back to another provider
+  or model: a failure is reported and Dojo's deterministic features carry on.
+
+**Structured output on the free model.** OpenRouter's catalogue lists no
+`response_format` / structured outputs for the `:free` Nemotron, but it does
+take tools, so the schema is sent as the parameters of one function the model
+is required to call (`tool_choice`), limits included. The arguments are the
+answer. Lengths go as soft targets in each field's description, not as
+`maxLength`: told the hard number, the model stops writing at exactly that
+character, mid-word. The free model (or its provider) also cuts any single
+string in a tool call at 1,024 characters, so long texts (example answers,
+rewrites) are asked for as lists of paragraphs and shown joined. Before
+validation, an answer is fitted to the schema's limits (overlong
+text cut at a word boundary with an ellipsis, surplus list items dropped);
+anything else that is wrong (missing fields, wrong types, unknown values,
+empty text) fails validation and is never stored or returned. xAI's strict
+`json_schema` mode rejects length keywords, so it is sent the schema without
+them (`acceptsSchemaLimits`).
+
+**Usage conventions differ.** OpenRouter follows OpenAI: `completion_tokens`
+already includes reasoning, so it is read with the OpenAI extractor. xAI's
+`completion_tokens` excludes reasoning, so the `xai` extractor adds
+`completion_tokens_details.reasoning_tokens` back. Swapping the two either
+under- or double-counts every call. The free model's rate card is 0, so its
+calls are stored with a real cost of 0, not NULL.
+
+**Free-tier limits.** Free OpenRouter models are rate-limited (requests per
+minute and per day) and can be unavailable. A 429 is retried at most twice,
+then answered 503 with a "try again later" message; a 402 (no credits) is not
+retried. Dojo's own limit of 20 generations per user per day still applies.
+
+The `ai` package pattern in `AI_SDK_IMPORTS` is anchored (`/ai`, `/ai/**`): the
+patterns follow .gitignore rules, and a bare `ai` also matched this folder.
+
 ## Two layers, and feature code only sees one
 
 **`src/server/ai/<provider>.ts` owns the SDK.** It is the only file allowed
