@@ -68,6 +68,22 @@ const openaiResponse = z.object({
 	})
 })
 
+// xAI's Chat Completions usage is OpenAI-shaped with one trap: its
+// `completion_tokens` leaves out reasoning tokens (the documented example has
+// total = prompt + completion + reasoning), and reasoning is billed as output.
+// So reasoning is added back here; the OpenAI extractor would under-count.
+const xaiResponse = z.object({
+	id: z.string().optional(),
+	model: z.string().optional(),
+	choices: z.array(z.object({ finish_reason: z.string().nullish() })).optional(),
+	usage: z.object({
+		prompt_tokens: count,
+		completion_tokens: count,
+		prompt_tokens_details: z.object({ cached_tokens: count }).nullish(),
+		completion_tokens_details: z.object({ reasoning_tokens: count }).nullish()
+	})
+})
+
 const googleResponse = z.object({
 	responseId: z.string().optional(),
 	modelVersion: z.string().optional(),
@@ -118,6 +134,30 @@ const EXTRACTORS: Record<AiProvider, UsageExtractor> = {
 				outputTokens: usage.completion_tokens,
 				// OpenAI does not bill for writing a cache entry, so there is
 				// no write figure to record — not a gap, an absence.
+				cacheWriteTokens: 0,
+				cacheReadTokens: cached
+			}
+		}
+	},
+
+	// OpenRouter returns OpenAI's usage shape and convention (completion_tokens
+	// already includes reasoning), so it reads the same way. Not xAI's reader:
+	// that adds reasoning back, which would double-count here.
+	openrouter: (response) => EXTRACTORS.openai(response),
+
+	xai: (response) => {
+		const parsed = xaiResponse.safeParse(response)
+		if (!parsed.success) return undefined
+		const { id, model, choices, usage } = parsed.data
+		const cached = usage.prompt_tokens_details?.cached_tokens ?? 0
+		const reasoning = usage.completion_tokens_details?.reasoning_tokens ?? 0
+		return {
+			model,
+			requestId: id,
+			status: choices?.[0]?.finish_reason === 'content_filter' ? 'refusal' : 'ok',
+			tokens: {
+				inputTokens: nonNegative(usage.prompt_tokens - cached),
+				outputTokens: usage.completion_tokens + reasoning,
 				cacheWriteTokens: 0,
 				cacheReadTokens: cached
 			}

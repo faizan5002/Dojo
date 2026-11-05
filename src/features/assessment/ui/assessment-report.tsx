@@ -1,6 +1,7 @@
 import { useFormatter, useTranslations } from 'next-intl'
 import { SectionHeading, Stat } from '@/features/app-shell/section'
 import type { MetricsOverview } from '@/features/sessions/metrics'
+import { scoringMethodOf } from '../llm/score-sessions'
 import { MIN_SKILLS_FOR_OVERALL } from '../rubric'
 import type { Assessment, Evidence } from '../types'
 import { EvidenceExplorer } from './evidence-explorer'
@@ -54,6 +55,13 @@ function MetricsContext({ overview }: { overview: MetricsOverview }) {
 		</div>
 	)
 }
+
+// How the coaching line describes the scoring, by how this assessment was scored.
+const COACHING = {
+	ai: 'overall.coachingAi',
+	rules: 'overall.coaching',
+	rules_fallback: 'overall.coachingFallback'
+} as const
 
 export function AssessmentReport({
 	assessment,
@@ -131,7 +139,11 @@ export function AssessmentReport({
 					/>
 				</dl>
 				<div className="text-text-muted flex flex-col gap-1 text-sm">
-					<p>{t('overall.coaching', { version: assessment.rubricVersion })}</p>
+					<p data-testid="scoring-method">
+						{t(COACHING[scoringMethodOf(assessment.rubricVersion)], {
+							version: assessment.rubricVersion
+						})}
+					</p>
 					<p>{t('overall.redactions', { count: assessment.redactions })}</p>
 				</div>
 				{overview == null ? null : <MetricsContext overview={overview} />}

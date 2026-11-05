@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
+import { aiInsightsAvailable } from '@/features/ai-insights/availability'
+import { AiInsightPanel } from '@/features/ai-insights/ui/ai-insight-panel'
 import { PageHeader, SectionHeading } from '@/features/app-shell/section'
 import { MAX_LOG_FILE_BYTES, MAX_LOG_FILES } from '@/features/sessions/limits'
 import { SessionIntake } from '@/features/sessions/session-intake'
@@ -27,11 +29,12 @@ export default async function SessionsPage({
 	searchParams: Promise<{ upload?: string }>
 }) {
 	const user = await requireUser()
-	const t = await getTranslations('Sessions')
+	const [t, tAi] = await Promise.all([getTranslations('Sessions'), getTranslations('AiInsight')])
 	const requested = uuid.safeParse((await searchParams).upload)
-	const [uploads, view] = await Promise.all([
+	const [uploads, view, aiAvailable] = await Promise.all([
 		listUploads(user),
-		getUploadView(user, requested.success ? requested.data : undefined)
+		getUploadView(user, requested.success ? requested.data : undefined),
+		aiInsightsAvailable(user)
 	])
 
 	return (
@@ -57,11 +60,19 @@ export default async function SessionsPage({
 						maxFiles={MAX_LOG_FILES}
 						maxMegabytes={MAX_LOG_FILE_BYTES / BYTES_PER_MEGABYTE}
 					/>
+					{aiAvailable ? (
+						<section aria-labelledby="ai-insight-heading" className="flex flex-col gap-8">
+							<SectionHeading id="ai-insight-heading" number="05">
+								{tAi('heading')}
+							</SectionHeading>
+							<AiInsightPanel feature="session_analysis" path={`/api/uploads/${view.id}/insight`} />
+						</section>
+					) : null}
 				</>
 			)}
 			{uploads.length === 0 ? null : (
 				<section aria-labelledby="uploads-heading" className="flex flex-col gap-8">
-					<SectionHeading id="uploads-heading" number="05">
+					<SectionHeading id="uploads-heading" number="06">
 						{t('history')}
 					</SectionHeading>
 					<UploadList uploads={uploads} selectedId={view?.id ?? null} />

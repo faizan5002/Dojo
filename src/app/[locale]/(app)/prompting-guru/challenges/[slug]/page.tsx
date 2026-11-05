@@ -3,8 +3,11 @@ import { notFound } from 'next/navigation'
 import { getFormatter, getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { ArrowUpRightIcon } from '@/components/ui/icons'
+import { aiInsightsAvailable } from '@/features/ai-insights/availability'
+import { AiInsightPanel } from '@/features/ai-insights/ui/ai-insight-panel'
 import { PageHeader, SectionHeading } from '@/features/app-shell/section'
 import { getChallenge, getChallengeVersion } from '@/features/practice/challenge-repository'
+import { judgedBy } from '@/features/practice/judge'
 import { loadPracticeContext } from '@/features/practice/load-practice'
 import type { StoredAttempt } from '@/features/practice/practice-repository'
 import type { CatalogEntry, Challenge } from '@/features/practice/types'
@@ -15,6 +18,13 @@ import { requireUser } from '@/server/auth/current-user'
 import { db } from '@/server/db/client'
 
 const uuid = z.string().uuid()
+
+// How the result describes its scoring, by who judged it.
+const METHOD = {
+	ai: 'result.methodAi',
+	rules: 'result.method',
+	rules_fallback: 'result.methodFallback'
+} as const
 
 export async function generateMetadata({
 	params
@@ -52,12 +62,13 @@ export default async function ChallengePage({
 	const requested = uuid.safeParse(query.attempt)
 	if (query.attempt != null && !requested.success) notFound()
 
-	const [t, tSkills, format, challenge, context] = await Promise.all([
+	const [t, tSkills, format, challenge, context, aiAvailable] = await Promise.all([
 		getTranslations('Guru'),
 		getTranslations('Assessment.skills'),
 		getFormatter(),
 		getChallenge({ db, slug }),
-		loadPracticeContext(user.id)
+		loadPracticeContext(user.id),
+		aiInsightsAvailable(user)
 	])
 	if (challenge == null) notFound()
 	const history = context.attempts.filter((attempt) => attempt.challengeSlug === challenge.slug)
@@ -119,6 +130,7 @@ export default async function ChallengePage({
 					attempt={selected}
 					scoredVersion={scoredVersion}
 					next={next}
+					aiAvailable={aiAvailable}
 					t={t}
 				/>
 			) : challenge.isActive ? (
@@ -179,6 +191,7 @@ function AttemptResult({
 	attempt,
 	scoredVersion,
 	next,
+	aiAvailable,
 	t
 }: {
 	slug: string
@@ -188,6 +201,8 @@ function AttemptResult({
 	/** The version this attempt was scored against: its strong answer is shown. */
 	scoredVersion: Challenge | null
 	next: CatalogEntry | null
+	/** Whether to offer AI feedback and an AI example beside the rule-based result. */
+	aiAvailable: boolean
 	t: Awaited<ReturnType<typeof getTranslations<'Guru'>>>
 }) {
 	const { evaluation } = attempt
@@ -347,8 +362,23 @@ function AttemptResult({
 				</div>
 			)}
 
+			{aiAvailable ? (
+				<div className="flex flex-col gap-6">
+					<AiInsightPanel
+						feature="attempt_feedback"
+						path={`/api/prompting-guru/attempts/${attempt.id}/ai-feedback`}
+					/>
+					{isActive ? (
+						<AiInsightPanel
+							feature="challenge_example"
+							path={`/api/prompting-guru/challenges/${slug}/ai-example`}
+						/>
+					) : null}
+				</div>
+			) : null}
+
 			<p className="text-text-faint max-w-3xl text-xs">
-				{t('result.method', { version: attempt.evaluator })}
+				{t(METHOD[judgedBy(attempt.evaluator)], { version: attempt.evaluator })}
 			</p>
 
 			<div className="flex flex-wrap items-center gap-4">

@@ -1,7 +1,7 @@
 import { proficiencyOf } from '@/features/assessment/rubric'
 import { sentenceSpan, similarity, wordCount } from '@/features/assessment/signals'
 import type {
-	Challenge,
+	ChallengeRubric,
 	Criterion,
 	CriterionResult,
 	Evaluation,
@@ -77,19 +77,26 @@ function findPitfall(text: string, pitfall: Pitfall): PitfallResult | null {
 		: { id: pitfall.id, label: pitfall.label, penalty: pitfall.penalty, evidence: sentence }
 }
 
-export function evaluateWithRules({
+/**
+ * The score from per-criterion and per-pitfall judgements, whoever made them
+ * (these rules, or an LLM judge in llm-evaluate.ts): the met criteria's share
+ * of the weights (half for partial), less pitfalls, under the unchanged-prompt
+ * and too-short caps, with a template suggestion for what is missing. One
+ * arithmetic for both, so a score means the same whichever judged it.
+ */
+export function scoreJudgements({
 	challenge,
-	prompt
+	text,
+	criteria,
+	pitfalls,
+	evaluator
 }: {
-	challenge: Challenge
-	prompt: string
+	challenge: ChallengeRubric
+	text: string
+	criteria: readonly CriterionResult[]
+	pitfalls: readonly PitfallResult[]
+	evaluator: string
 }): Evaluation {
-	const text = prompt.trim()
-	const criteria = challenge.criteria.map((criterion) => judge(text, criterion))
-	const pitfalls = challenge.pitfalls.flatMap((pitfall) => {
-		const found = findPitfall(text, pitfall)
-		return found == null ? [] : [found]
-	})
 	const totalWeight = challenge.criteria.reduce((total, criterion) => total + criterion.weight, 0)
 	const earned = criteria.reduce((total, result) => total + result.points, 0)
 	const penalty = Math.min(
@@ -113,16 +120,36 @@ export function evaluateWithRules({
 		.filter((criterion) => missing.some((result) => result.id === criterion.id))
 		.map((criterion) => criterion.template)
 	return {
-		evaluator: RULES_EVALUATOR_ID,
+		evaluator,
 		score,
 		band: proficiencyOf(score),
-		criteria,
-		pitfalls,
+		criteria: [...criteria],
+		pitfalls: [...pitfalls],
 		caps,
 		strengths: criteria.filter((result) => result.status === 'met').map((result) => result.label),
 		missing: missing.map((result) => result.label),
 		suggestion: templateLines.length === 0 ? text : `${text}\n\n${templateLines.join('\n')}`
 	}
+}
+
+export function evaluateWithRules({
+	challenge,
+	prompt
+}: {
+	challenge: ChallengeRubric
+	prompt: string
+}): Evaluation {
+	const text = prompt.trim()
+	return scoreJudgements({
+		challenge,
+		text,
+		criteria: challenge.criteria.map((criterion) => judge(text, criterion)),
+		pitfalls: challenge.pitfalls.flatMap((pitfall) => {
+			const found = findPitfall(text, pitfall)
+			return found == null ? [] : [found]
+		}),
+		evaluator: RULES_EVALUATOR_ID
+	})
 }
 
 export const rulesEvaluator: PromptEvaluator = {

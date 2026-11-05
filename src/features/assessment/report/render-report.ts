@@ -1,9 +1,16 @@
 import { renderToBuffer } from '@react-pdf/renderer'
+import { scoringMethodOf, type ScoringMethod } from '../llm/score-sessions'
 import type { StoredAssessment } from '@/features/workspace/repository'
 import { ReportDocument, type ReportLabels } from './report-document'
 import { buildReportModel, type Translate } from './report-model'
 
-export function reportLabels(t: Translate): ReportLabels {
+const METHODOLOGY = {
+	ai: 'Report.methodologyBodyAi',
+	rules: 'Report.methodologyBody',
+	rules_fallback: 'Report.methodologyBodyFallback'
+} as const
+
+export function reportLabels(t: Translate, method: ScoringMethod = 'rules'): ReportLabels {
 	const section = (key: string) => t(`Report.sections.${key}`)
 	return {
 		title: t('Report.title'),
@@ -47,7 +54,7 @@ export function reportLabels(t: Translate): ReportLabels {
 		noMetrics: t('Report.metrics.none'),
 		rubricVersion: t('Report.rubricVersion'),
 		methodology: t('Report.methodology'),
-		methodologyBody: t('Report.methodologyBody'),
+		methodologyBody: t(METHODOLOGY[method]),
 		disclaimer: t('Report.disclaimer'),
 		footer: t('Report.footer'),
 		page: (page, total) => t('Report.page', { page, total })
@@ -68,6 +75,7 @@ export async function renderReportPdf({
 	t: Translate
 }): Promise<{ readonly pdf: Buffer; readonly filename: string }> {
 	const model = buildReportModel({ stored, preparedFor, t })
-	const pdf = await renderToBuffer(ReportDocument({ model, labels: reportLabels(t) }))
+	const method = scoringMethodOf(stored.assessment.rubricVersion)
+	const pdf = await renderToBuffer(ReportDocument({ model, labels: reportLabels(t, method) }))
 	return { pdf, filename: model.filename }
 }

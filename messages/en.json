@@ -107,7 +107,7 @@
 		"eyebrow": "Assessment",
 		"title": "Your workflow",
 		"intro": "A rubric score for five skills, built from your own prompts. Every score links to the lines that produced it.",
-		"privacy": "Scored on the server with rules, not an AI model, from your redacted sessions. Each run is saved to your account as its own snapshot.",
+		"privacy": "Scored on the server from your redacted sessions: by an AI model applying Dojo’s rubric when AI scoring is on, with Dojo’s rules as the fallback. Each run is saved to your account as its own snapshot.",
 		"empty": {
 			"title": "No sessions to assess yet",
 			"body": "Upload your session logs on the Sessions page first. Once they are saved, you can score them here.",
@@ -140,7 +140,9 @@
 			"summaryEmpty": "No habit came up often enough to name yet.",
 			"coaching": "A coaching signal, not a measure of engineering ability. Rules-based scoring, rubric {version}.",
 			"redactions": "{count, plural, =0 {No credentials were found in your prompts.} one {# credential was redacted before scoring.} other {# credentials were redacted before scoring.}}",
-			"rerun": "Score again"
+			"rerun": "Score again",
+			"coachingAi": "A coaching signal, not a measure of engineering ability. Scored by an AI model applying Dojo’s rubric ({version}); Dojo checks every quote against your prompts and computes the scores, bands and confidence.",
+			"coachingFallback": "A coaching signal, not a measure of engineering ability. The AI model was unavailable, so Dojo’s rules scored it (rubric {version})."
 		},
 		"context": {
 			"heading": "From your free metrics",
@@ -557,7 +559,7 @@
 				"rawFiles": "The raw log files you choose. They are read in your browser and never uploaded.",
 				"secrets": "Credentials the redactor recognises: keys, tokens, passwords in URLs, auth headers.",
 				"identity": "The author name, email and GitHub login recorded in a log's header.",
-				"thirdParties": "Nothing is sent to an AI provider. Scoring runs on Dojo's own server, by rules."
+				"thirdParties": "When AI is switched on, your redacted prompts (credentials removed) are sent to the AI provider, OpenRouter, to score your sessions and practice answers and to write AI insights. With AI off, nothing is sent and scoring runs on Dojo’s server, by rules."
 			},
 			"redaction": "Redaction recognises common credential formats. It cannot recognise every secret, and it does not remove names, private code or file paths. Avoid pasting secrets into agent sessions in the first place."
 		},
@@ -601,7 +603,9 @@
 		"methodologyBody": "Rules-based evaluation of the redacted prompts. No AI model was used.",
 		"disclaimer": "Dojo scores are coaching signals drawn from the evidence in the uploaded sessions. They are not an objective measurement of engineering competence.",
 		"footer": "Dojo · A coaching signal, not a measure of engineering ability",
-		"page": "Page {page} of {total}"
+		"page": "Page {page} of {total}",
+		"methodologyBodyAi": "An AI model applied Dojo’s rubric to the redacted prompts; Dojo checked every quote against the prompts and computed the scores, bands and confidence.",
+		"methodologyBodyFallback": "The AI model was unavailable, so Dojo’s rules evaluated the redacted prompts."
 	},
 	"Guru": {
 		"meta": {
@@ -737,7 +741,7 @@
 			"exit": "Back to Prompting Guru",
 			"failed": "Your answer couldn't be scored. It is still here; try again.",
 			"tooLong": "Keep it under {max} characters.",
-			"privacy": "Your answer is scored on Dojo's server by rules, not an AI model, and saved to your account with credentials redacted.",
+			"privacy": "Your answer is scored on Dojo’s server, by an AI model applying this challenge’s criteria when AI scoring is on (Dojo’s rules otherwise), and saved to your account with credentials redacted.",
 			"version": "Version {version}",
 			"retired": "This challenge has been retired. Your attempts are kept below, but it can't be attempted again.",
 			"sessionExpired": "Your session has expired. Sign in again in the new tab, then submit: your answer is still here.",
@@ -779,7 +783,9 @@
 			"latest": "Latest",
 			"viewing": "Viewing",
 			"attemptLine": "Attempt {number} · {score} · {date}",
-			"olderVersion": "Scored against version {version} of this challenge, which has changed since. The strong answer below is the one for that version."
+			"olderVersion": "Scored against version {version} of this challenge, which has changed since. The strong answer below is the one for that version.",
+			"methodAi": "Judged by an AI model against this challenge’s criteria ({version}). Dojo checks each quote against your answer and computes the score; credit needs words you actually wrote.",
+			"methodFallback": "The AI model was unavailable, so Dojo’s rules scored this answer ({version})."
 		},
 		"band": {
 			"needsImprovement": "Needs improvement",
@@ -794,11 +800,6 @@
 			"retry": "Try again",
 			"back": "Go to Sessions"
 		}
-	},
-	"SiteFooter": {
-		"privacy": "Privacy",
-		"terms": "Terms",
-		"contact": "Contact"
 	},
 	"Dashboard": {
 		"meta": {
@@ -915,5 +916,76 @@
 			"retry": "Try again"
 		},
 		"loading": "Loading your dashboard"
+	},
+	"AiInsight": {
+		"heading": "AI-powered insight",
+		"notice": "Generated by AI from your Dojo data. It can be wrong, and it never changes your official Dojo scores, which come from deterministic rules.",
+		"labels": {
+			"session_analysis": "AI-powered insight",
+			"assessment_explanation": "AI-powered insight",
+			"attempt_feedback": "Personalized AI feedback",
+			"challenge_example": "AI-generated example",
+			"recommendation_explanation": "AI-powered insight"
+		},
+		"intros": {
+			"session_analysis": "An AI reading of how you work with your coding agent, from a short, redacted sample of the prompts in this upload. Every quote it shows is checked against what was sent.",
+			"assessment_explanation": "A plain-language explanation of this assessment: what your strongest and weakest skills mean in practice, and what to do next.",
+			"attempt_feedback": "A second opinion on this answer from AI, beside Dojo’s rule-based score: what is missing, a rewrite of your prompt that keeps your intent, and a stronger example.",
+			"challenge_example": "Another strong answer to this challenge, written by AI, with what makes it work.",
+			"recommendation_explanation": "Why this challenge is the right next step for you, explained by AI from your assessment and practice history."
+		},
+		"actions": {
+			"session_analysis": "Analyze my sessions with AI",
+			"assessment_explanation": "Explain my assessment with AI",
+			"attempt_feedback": "Get AI feedback",
+			"challenge_example": "Show an AI example",
+			"recommendation_explanation": "Why this challenge?"
+		},
+		"checking": "Checking for an earlier AI insight…",
+		"generating": "Generating…",
+		"slow": "This uses a free AI model and can take up to a minute. You can keep using the page.",
+		"retry": "Try again",
+		"failed": "The AI insight could not be generated. Try again in a moment; the rest of Dojo works as usual.",
+		"readFailed": "The AI insight could not be loaded.",
+		"unreadable": "This AI insight could not be displayed.",
+		"generatedBy": "Generated by {model}",
+		"basis": {
+			"observed": "Seen in your prompts",
+			"inferred": "Inferred pattern"
+		},
+		"confidence": {
+			"high": "High confidence",
+			"medium": "Medium confidence",
+			"low": "Low confidence"
+		},
+		"quote": "From your prompt",
+		"recommendation": "Recommendation",
+		"strengths": "Strengths",
+		"improvementAreas": "Areas to improve",
+		"recommendedActions": "Recommended actions",
+		"strongAreas": "Strong areas",
+		"weakAreas": "Areas to work on",
+		"whyItMatters": "Why it matters",
+		"nextSteps": "Next steps",
+		"weaknesses": "Weaknesses",
+		"missingRequirements": "Missing requirements",
+		"suggestedImprovements": "Suggested improvements",
+		"rewrittenPrompt": "Your prompt, rewritten",
+		"rewriteNote": "An AI rewrite of your own answer. Check it says what you meant: it may add details you did not ask for.",
+		"requirements": "Requirements",
+		"constraints": "Constraints",
+		"acceptanceCriteria": "Acceptance criteria",
+		"verification": "Verification",
+		"expectedOutput": "Expected output",
+		"improvedExample": "A stronger version",
+		"exampleAnswer": "Example answer",
+		"whyItWorks": "Why it works",
+		"reasons": "Reasons",
+		"focusTip": "Focus on"
+	},
+	"SiteFooter": {
+		"privacy": "Privacy",
+		"terms": "Terms",
+		"contact": "Contact"
 	}
 }

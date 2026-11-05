@@ -78,6 +78,10 @@ export interface Challenge extends ChallengeDefinition {
 /** What the evaluator needs, and nothing else. */
 export type ChallengeRubric = Pick<ChallengeDefinition, 'criteria' | 'pitfalls' | 'given'>
 
+/** What an evaluator is given: the rubric, and the brief an LLM judge reads it against. */
+export type ScoredChallenge = ChallengeRubric &
+	Pick<ChallengeDefinition, 'title' | 'scenario' | 'instructions'>
+
 /** What a page may show before the user has submitted: no criteria, no answer. */
 export type PublicChallenge = Pick<
 	Challenge,
@@ -146,10 +150,13 @@ export interface Evaluation {
 }
 
 /**
- * Anything that can score an answer against a challenge. The rules evaluator
- * is the only one today; an LLM evaluator could implement this later.
+ * Anything that can score an answer against a challenge: the rules evaluator
+ * (evaluate.ts) or the LLM judge with the rules as fallback (judge.ts).
  */
 export interface PromptEvaluator {
 	readonly id: string
-	evaluate(input: { readonly challenge: ChallengeRubric; readonly prompt: string }): Evaluation
+	evaluate(input: {
+		readonly challenge: ScoredChallenge
+		readonly prompt: string
+	}): Evaluation | Promise<Evaluation>
 }
