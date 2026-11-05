@@ -35,6 +35,15 @@ function clean(text: string): string {
 	return INJECTED_BLOCKS.reduce((out, block) => out.replace(block, ''), text).trim()
 }
 
+/**
+ * The text the assessment actually reads for a prompt: harness blocks removed and
+ * credentials redacted. Evidence offsets point into this text, so the conversation
+ * viewer shows it, and a test holds it equal to what `prepareSessions` produced.
+ */
+export function assessedPromptText(text: string): string {
+	return redactSecrets(clean(text)).text
+}
+
 export function classifyPrompt({
 	text,
 	followsResponse

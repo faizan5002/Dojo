@@ -15,12 +15,15 @@ export async function PracticeView({
 	stored,
 	emptyHref,
 	evidenceHref,
-	uploadHref
+	uploadHref,
+	scenariosHref
 }: {
 	stored: StoredAssessment | null
 	emptyHref: string
 	evidenceHref?: (skill: string) => string
 	uploadHref?: string
+	/** The scenario practice session; the default is the signed-in one. */
+	scenariosHref?: string
 }) {
 	const t = await getTranslations('Practice')
 	const tAssessment = await getTranslations('Assessment')
@@ -65,6 +68,13 @@ export async function PracticeView({
 					evidenceHref={evidenceHref?.(focus.skill)}
 					uploadHref={uploadHref}
 				/>
+				<Link
+					href={scenariosHref ?? `/practice/session?assessment=${stored.id}`}
+					className="app-nav-link mt-8 inline-block"
+					data-testid="to-scenarios"
+				>
+					{t('toScenarios')}
+				</Link>
 			</div>
 		</main>
 	)

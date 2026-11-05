@@ -1,0 +1,387 @@
+/* The dojo's materials, applied over the component CSS: rice paper and shoji for surfaces,
+   cedar for the frame (top beam, tab bar), indigo silk for the hanging scrolls, brass for
+   progress, sumi ink for brushwork. Vermilion is kept for the hanko, rank strokes and the
+   one live alert, never for panels or borders. Light is the daytime room; the dark palette
+   (tokens in app.css) is the same room at night. */
+
+[data-surface='app'] {
+	--heat: var(--indigo);
+}
+@media (prefers-color-scheme: dark) {
+	[data-surface='app'] {
+		--heat: #8a9fe6;
+	}
+}
+
+/* ---- surfaces ---- */
+.pg-card,
+.dj-panel {
+	background: linear-gradient(180deg, rgb(255 250 236 / 0.5), transparent 55%), var(--surface);
+	border: 1px solid var(--border-strong);
+	box-shadow: 0 10px 22px -18px rgb(60 38 16 / 0.65);
+}
+.dj-panel::after {
+	display: none;
+}
+.dj-wash {
+	--wash: rgb(44 58 105 / 0.1);
+}
+.dj-wash::before {
+	opacity: 0.7;
+}
+
+/* the hanging scroll: indigo silk between two brass-capped rollers */
+.dj-streak,
+.dj-home {
+	color: var(--text);
+	border: 0;
+	background:
+		repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 6px),
+		radial-gradient(90% 50% at 50% 34%, rgb(201 162 74 / 0.22), transparent 70%),
+		linear-gradient(180deg, #223070, #151d45);
+	box-shadow:
+		inset 0 0 0 1px rgb(201 162 74 / 0.35),
+		0 14px 26px -18px rgb(20 20 50 / 0.8);
+}
+.dj-streak::before,
+.dj-streak::after,
+.dj-home::before,
+.dj-home::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 9px;
+	z-index: 2;
+	background: linear-gradient(180deg, #8a6420, #e2c06c 45%, #6d4b14);
+	box-shadow: 0 2px 4px rgb(0 0 0 / 0.35);
+}
+.dj-streak::before,
+.dj-home::before {
+	top: 0;
+}
+.dj-streak::after,
+.dj-home::after {
+	bottom: 0;
+}
+.dj-embers i {
+	background: #f3c36a;
+	box-shadow: 0 0 5px 1px rgb(243 190 100 / 0.7);
+}
+
+/* ---- paper scroll for quests (kept paper in both palettes) ---- */
+.dj-scroll {
+	--accent-text: #a42815;
+	background:
+		repeating-linear-gradient(95deg, transparent 0 3px, rgb(120 98 60 / 0.05) 3px 4px),
+		radial-gradient(120% 100% at 0% 0%, var(--scroll-a), var(--scroll-b));
+}
+.dj-scroll::before,
+.dj-scroll::after {
+	background: linear-gradient(180deg, #6d4b27, #b68b52 45%, #4d3319);
+}
+
+/* ---- progress: brass ---- */
+.pg-xp > span,
+.dj-rankbar .now {
+	background: linear-gradient(90deg, var(--brass), var(--gold));
+}
+.pg-xp::after {
+	background: linear-gradient(
+		100deg,
+		transparent 30%,
+		rgb(255 255 255 / 0.35) 50%,
+		transparent 70%
+	);
+}
+.pg-xp,
+.dj-rankbar {
+	background: color-mix(in srgb, var(--text) 14%, var(--surface));
+}
+.dj-streak .pg-xp,
+.dj-home .pg-xp {
+	background: rgb(243 233 207 / 0.2);
+}
+.dj-rankbar .was {
+	background: color-mix(in srgb, var(--brass) 40%, transparent);
+}
+.app-meter > span {
+	background: var(--accent);
+}
+.dj-scroll .app-meter > span {
+	background: var(--brass);
+}
+
+/* week dots: brass seals with an ink tick */
+.pg-day-dot {
+	border-color: var(--border-strong);
+}
+.pg-day-on .pg-day-dot {
+	background: radial-gradient(circle at 35% 30%, #f0d487, #b78a30);
+	border-color: #8a6420;
+	color: #2a1c08;
+}
+.pg-day-today .pg-day-dot {
+	outline: 2px solid var(--gold);
+	outline-offset: 2px;
+}
+.pg-day-today {
+	color: var(--text);
+}
+
+/* ---- training grounds: an indigo ramp on paper ---- */
+.pg-cell {
+	background: color-mix(in srgb, var(--text) 9%, var(--surface));
+}
+.pg-cell[data-level='1'] {
+	background: color-mix(in srgb, var(--heat) 28%, var(--surface));
+}
+.pg-cell[data-level='2'] {
+	background: color-mix(in srgb, var(--heat) 52%, var(--surface));
+}
+.pg-cell[data-level='3'] {
+	background: color-mix(in srgb, var(--heat) 78%, var(--surface));
+}
+.pg-cell[data-level='4'] {
+	background: var(--heat);
+	box-shadow: none;
+}
+.pg-cell:hover,
+.pg-cell[aria-pressed='true'] {
+	outline: 2px solid var(--brass);
+}
+.pg-cell:focus-visible {
+	/* the app's one keyboard ring */
+	outline: 2px solid var(--accent);
+	outline-offset: 1px;
+}
+
+/* ---- seals ---- */
+.pg-badge {
+	--r1: #6e6354;
+	--r2: #2a241c;
+	background: var(--surface);
+	box-shadow: 0 8px 16px -14px rgb(60 38 16 / 0.7);
+}
+.pg-badge[data-rarity='rare'] {
+	--r1: #3e529a;
+	--r2: #1d2a5c;
+}
+.pg-badge[data-rarity='epic'] {
+	--r1: #b68a2c;
+	--r2: #7d5614;
+}
+.pg-badge[data-rarity='legendary'] {
+	--r1: #c0301c;
+	--r2: #8c1c0e;
+}
+.pg-badge[data-locked='false'][data-rarity='epic'],
+.pg-badge[data-locked='false'][data-rarity='legendary'] {
+	box-shadow: 0 10px 20px -14px var(--r1);
+}
+.pg-badge[data-locked='true'] svg {
+	filter: grayscale(1) opacity(0.45);
+}
+.pg-rarity {
+	color: var(--r1);
+	font-weight: 500;
+}
+.dj-detail {
+	background: color-mix(in srgb, var(--paper) 55%, var(--surface));
+}
+
+/* ---- rewards: coins, not red boxes ---- */
+.pg-reward {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0;
+	border: 0;
+	color: var(--brass-text);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+.dj-scroll .pg-reward {
+	color: #7d5a14;
+}
+.dj-scroll .pg-quest[data-done='true'] .pg-reward {
+	opacity: 0.6;
+}
+.dj-xp-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 14px 6px 10px;
+	border: 1px solid color-mix(in srgb, var(--brass) 55%, transparent);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--gold) 16%, var(--surface));
+	color: var(--brass-text);
+	font-weight: 600;
+}
+.dj-tile {
+	border-color: var(--border);
+	background: color-mix(in srgb, var(--paper) 40%, var(--surface));
+}
+.pg-quest-mark {
+	border-color: color-mix(in srgb, var(--brass) 60%, transparent);
+	color: #7d5a14;
+	background: rgb(166 124 42 / 0.1);
+}
+.dj-scroll .pg-quest[data-done='true'] .pg-quest-mark {
+	background: var(--indigo);
+	border-color: var(--indigo);
+	color: #f3e9cf;
+}
+
+/* ---- dividers, demo strip, level badge ---- */
+.dj-divider::before {
+	height: 6px;
+	background: linear-gradient(
+		90deg,
+		var(--text),
+		color-mix(in srgb, var(--text) 40%, transparent) 60%,
+		transparent
+	);
+	clip-path: polygon(0 45%, 12% 10%, 40% 35%, 75% 25%, 100% 50%, 75% 75%, 40% 70%, 12% 95%, 0 60%);
+	opacity: 0.8;
+}
+.dj-divider > i {
+	background: var(--brass);
+}
+.pg-demo {
+	border: 1px solid color-mix(in srgb, var(--brass) 50%, transparent);
+	border-style: solid;
+	background: color-mix(in srgb, var(--gold) 12%, var(--surface));
+	color: var(--text-muted);
+}
+.pg-link-btn {
+	color: var(--accent-text);
+}
+.pg-level-badge {
+	background: linear-gradient(160deg, #e2c06c, #8a601c);
+	color: #2a1c08;
+}
+
+/* ---- cedar tab bar ---- */
+.dj-tabbar {
+	--text: #f4ead2;
+	--text-muted: #dccfb0;
+	background:
+		repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 2px, transparent 2px 9px),
+		linear-gradient(180deg, #4d3119, #35200f);
+	border-top: 2px solid #1f1209;
+	backdrop-filter: none;
+	box-shadow: 0 -6px 14px -8px rgb(40 22 8 / 0.7);
+}
+.dj-tab {
+	color: #d8c9a8;
+}
+.dj-tab[aria-current='page'] {
+	color: #f7edd2;
+}
+.dj-tab[aria-current='page']::before {
+	background: var(--gold);
+	box-shadow: none;
+	height: 3px;
+}
+.dj-tab[aria-current='page'] svg {
+	color: var(--gold);
+}
+.dj-avatar {
+	border-color: var(--gold);
+	color: var(--text);
+}
+.dj-icon-btn {
+	color: var(--text);
+}
+.app-topnav-link[aria-current='page']::after {
+	background: var(--gold);
+}
+.pg-chip {
+	color: var(--text);
+}
+.pg-chip-bar {
+	background: rgb(244 234 210 / 0.25);
+}
+.pg-chip-bar > span {
+	background: var(--gold);
+}
+
+/* ---- sticky action area ---- */
+.dj-actionbar {
+	background: color-mix(in srgb, var(--bg) 94%, transparent);
+	border-top-color: var(--border-strong);
+}
+
+/* ---- the reveal: a paper scroll handed over, over a warm, light veil ---- */
+.pg-overlay {
+	background: rgb(40 26 12 / 0.42);
+}
+.dj-reveal,
+.pg-modal {
+	--text: var(--paper-ink);
+	--text-muted: #54473a;
+	--text-faint: #6d5f4b;
+	--border: rgb(70 48 26 / 0.18);
+	--border-strong: rgb(70 48 26 / 0.36);
+	color: var(--paper-ink);
+	border: 0;
+	background:
+		repeating-linear-gradient(95deg, transparent 0 3px, rgb(120 98 60 / 0.05) 3px 4px),
+		radial-gradient(90% 55% at 50% 22%, rgb(201 162 74 / 0.22), transparent 70%),
+		linear-gradient(180deg, var(--scroll-a), var(--scroll-b));
+	box-shadow: 0 24px 50px -20px rgb(30 18 6 / 0.7);
+}
+.dj-bloom {
+	border-color: var(--gold);
+}
+.dj-bloom:nth-child(2) {
+	border-color: var(--brass);
+}
+.dj-reveal .app-pill {
+	background: var(--wood-deep);
+	border-color: var(--wood-deep);
+	color: #f4ead2;
+}
+.dj-reveal .app-pill:hover {
+	background: var(--wood);
+}
+.dj-reveal .pg-reward {
+	color: #7d5a14;
+	font-size: 18px;
+}
+.pg-toast {
+	background: var(--surface);
+	border-color: color-mix(in srgb, var(--brass) 60%, transparent);
+	color: var(--text);
+	box-shadow: 0 10px 20px -12px rgb(40 26 12 / 0.6);
+}
+
+/* ---- compact demo marker in place of the big dev banner ---- */
+.dj-demo-bar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 3px 16px;
+	background: #26160a;
+	color: #e9dcc0;
+	font-size: 11px;
+	line-height: 1.6;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.dj-demo-bar b {
+	flex-shrink: 0;
+	padding: 0 8px;
+	border-radius: 999px;
+	background: var(--gold);
+	color: #2a1c08;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+}
+.dj-demo-bar span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

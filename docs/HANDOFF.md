@@ -32,9 +32,9 @@ second developer's identity is deliberately not recorded; add it here when known
 
 Add rows as `path or area — branch — who`.
 
-| Area                                                                                   | Branch                       | Who                   |
-| -------------------------------------------------------------------------------------- | ---------------------------- | --------------------- |
-| Assessment PDF reports: `src/features/assessment/report/`, `/api/assessments/[id]/pdf` | `feat/assessment-pdf-export` | Developer 1's session |
+| Area                                                                                                                                                | Branch                  | Who                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | --------------------- |
+| AI insights (OpenRouter, xAI optional): `src/server/ai/`, `src/features/ai-insights/`, the AI insight endpoints, `prisma/schema/ai-insights.prisma` | `feat/grok-integration` | Developer 1's session |
 
 ## Exact remaining actions
 

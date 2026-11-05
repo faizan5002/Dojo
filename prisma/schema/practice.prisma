@@ -1,0 +1,127 @@
+// Prompting Guru. The challenge library lives here, in two parts: a stable
+// identity per challenge, and immutable versions of its content and rubric.
+// The scoring rules stay in code (src/features/practice/evaluate.ts); they read
+// a version's criteria. Attempts point at the exact version they were scored
+// against, so editing a challenge (a new version) never changes an old result.
+// Progress, streaks and reviews are derived from attempts; nothing else is stored.
+
+enum PracticeSkill {
+	promptClarity
+	planning
+	verification
+	iteration
+	scopeControl
+
+	@@map("practice_skill")
+}
+
+enum PracticeDifficulty {
+	beginner
+	intermediate
+	advanced
+
+	@@map("practice_difficulty")
+}
+
+enum PracticeExerciseType {
+	improveVaguePrompt
+	planBeforeCoding
+	verifyOutput
+	improveIteration
+	controlScope
+
+	@@map("practice_exercise_type")
+}
+
+/// A challenge's identity. Its content is in `versions`; `currentVersion` is
+/// the one offered now. A challenge is retired by clearing `isActive`, never
+/// deleted, so its attempts keep their history.
+model PracticeChallenge {
+	id               String                     @id @default(uuid()) @db.Uuid
+	/// Stable, URL-safe and unique: what URLs, attempts and the seed refer to.
+	slug             String                     @unique
+	skill            PracticeSkill
+	exerciseType     PracticeExerciseType       @map("exercise_type")
+	isActive         Boolean                    @default(true) @map("is_active")
+	currentVersionId String?                    @unique @map("current_version_id") @db.Uuid
+	currentVersion   PracticeChallengeVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: Restrict)
+	versions         PracticeChallengeVersion[] @relation("ChallengeVersions")
+	createdAt        DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+	updatedAt        DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+	@@index([skill, isActive])
+	@@index([exerciseType, isActive])
+	@@map("practice_challenges")
+}
+
+/// One version of a challenge's content and rubric. Rows are only ever
+/// inserted: a change to anything here is a new version.
+model PracticeChallengeVersion {
+	id               String             @id @default(uuid()) @db.Uuid
+	challengeId      String             @map("challenge_id") @db.Uuid
+	challenge        PracticeChallenge  @relation("ChallengeVersions", fields: [challengeId], references: [id], onDelete: Restrict)
+	version          Int
+	title            String
+	description      String
+	difficulty       PracticeDifficulty
+	scenario         String
+	instructions     String
+	/// The vague prompt to improve, or the fictional agent reply to answer.
+	givenLabel       String?            @map("given_label")
+	givenText        String?            @map("given_text")
+	/// Weighted criteria; each pattern is stored as its source and flags.
+	criteria         Json
+	pitfalls         Json
+	/// Shown only after the user has submitted an attempt.
+	exemplar         String
+	explanation      String
+	estimatedMinutes Int                @map("estimated_minutes")
+	tags             String[]
+	/// SHA-256 of the content above, so the seed can tell an edit from a re-run.
+	contentHash      String             @map("content_hash")
+	createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+	currentFor       PracticeChallenge? @relation("CurrentVersion")
+	attempts         PracticeAttempt[]
+
+	@@unique([challengeId, version])
+	@@index([difficulty])
+	@@map("practice_challenge_versions")
+}
+
+/// One submitted answer to a challenge, and how it was scored. Attempts are
+/// never rewritten: a retry adds a row.
+model PracticeAttempt {
+	id                 String                    @id @default(uuid()) @db.Uuid
+	userId             String                    @map("user_id") @db.Uuid
+	user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+	/// The assessment whose priorities were in force, if any. Deleting that
+	/// assessment keeps the attempt and clears this link.
+	assessmentId       String?                   @map("assessment_id") @db.Uuid
+	assessment         Assessment?               @relation(fields: [assessmentId], references: [id], onDelete: SetNull)
+	/// The exact version scored against. Null only for attempts saved before
+	/// challenges moved into the database, until the seed backfills them.
+	challengeVersionId String?                   @map("challenge_version_id") @db.Uuid
+	scoredVersion      PracticeChallengeVersion? @relation(fields: [challengeVersionId], references: [id], onDelete: Restrict)
+	/// The challenge's slug and version number, kept on the row so an attempt
+	/// stays readable on its own.
+	challengeSlug      String                    @map("challenge_id")
+	challengeVersion   Int                       @map("challenge_version")
+	skill              String
+	exerciseType       String                    @map("exercise_type")
+	difficulty         String
+	/// The answer as submitted, with credentials redacted.
+	prompt             String
+	score              Int
+	band               String
+	evaluator          String
+	/// Criteria, pitfalls, caps, strengths, missing items and the suggestion.
+	evaluation         Json
+	reviewAfter        DateTime                  @map("review_after") @db.Timestamptz(6)
+	createdAt          DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+	@@index([userId, createdAt])
+	@@index([userId, challengeSlug, createdAt])
+	@@index([assessmentId])
+	@@index([challengeVersionId])
+	@@map("practice_attempts")
+}

@@ -14,6 +14,7 @@ import {
 	deleteTestUser,
 	logFile,
 	signIn,
+	visit,
 	type TestUser
 } from './workspace-helpers'
 
@@ -61,10 +62,13 @@ test.describe('dashboard with fixture data', () => {
 		await expect(block.locator('blockquote')).toContainText(focus?.quote.excerpt ?? '')
 		await expect(block).toContainText(focus?.quote.sessionId ?? '')
 		await expect(block).toContainText('Practise this')
-		// One primary action (the evidence), and one drill on the same habit.
-		await expect(block.getByRole('link')).toHaveCount(2)
+		// One primary action (the evidence), then the quote in its conversation, targeted
+		// practice and the rewrite drill on the same habit.
+		await expect(block.getByRole('link')).toHaveCount(5)
 		await expect(block.getByRole('link', { name: 'See evidence' })).toBeVisible()
 		await expect(block.getByRole('link', { name: 'Try a rewrite drill' })).toBeVisible()
+		await expect(block.getByRole('link', { name: 'Open in the conversation' })).toBeVisible()
+		await expect(block.getByRole('link', { name: 'Start targeted practice' })).toBeVisible()
 	})
 
 	test('the coaching block is in the first screen at desktop and phone widths', async ({
@@ -76,21 +80,28 @@ test.describe('dashboard with fixture data', () => {
 		] as const) {
 			await page.setViewportSize({ width, height })
 			await page.goto('/dashboard')
+			// Coaching leads: Focus next sits right under the hero, above the demo bands, so its
+			// heading is in the first screen (a quarter-screen of slack on a phone, where the hero
+			// stacks tall).
 			const heading = region(page, 'Focus next').getByRole('heading', { name: 'Focus next' })
 			const box = await heading.boundingBox()
 			expect(box, `Focus next heading at ${width}px`).not.toBeNull()
-			expect((box?.y ?? 9999) + (box?.height ?? 0)).toBeLessThan(height)
+			expect((box?.y ?? 9999) + (box?.height ?? 0)).toBeLessThan(height * (width < 768 ? 1.25 : 1))
+			const band = await region(page, 'Training status').boundingBox()
+			expect(band?.y ?? 0).toBeGreaterThan(box?.y ?? 0)
 		}
 	})
 
-	test('the order is coaching, performance, skills, progress, sessions', async ({ page }) => {
+	test('the order is performance, coaching, skills, then progress and sessions', async ({
+		page
+	}) => {
 		for (const width of [390, 1440]) {
 			await page.setViewportSize({ width, height: 900 })
 			await page.goto('/dashboard')
 			const tops: number[] = []
 			for (const name of [
-				'Focus next',
 				'Your performance',
+				'Focus next',
 				'Skills',
 				'Your progress',
 				'Recent sessions'
@@ -98,13 +109,13 @@ test.describe('dashboard with fixture data', () => {
 				const box = await region(page, name).boundingBox()
 				tops.push(box?.y ?? Number.NaN)
 			}
-			if (width === 390) expect(tops).toEqual([...tops].sort((a, b) => a - b))
-			else {
-				// On a wide screen performance and skills share a row, progress sits under performance.
-				expect(tops[0]).toBeLessThan(tops[1] ?? 0)
-				expect(tops[1]).toBeLessThan(tops[3] ?? 0)
-				expect(tops[3]).toBeLessThan(tops[4] ?? 0)
-			}
+			// Performance first, the coaching right under it, the five skills, then the history.
+			expect(tops[0]).toBeLessThan(tops[1] ?? 0)
+			expect(tops[1]).toBeLessThan(tops[2] ?? 0)
+			expect(tops[2]).toBeLessThan(tops[3] ?? 0)
+			if (width === 390) expect(tops[3]).toBeLessThan(tops[4] ?? 0)
+			// On a wide screen progress and recent sessions sit side by side.
+			else expect(Math.abs((tops[3] ?? 0) - (tops[4] ?? 0))).toBeLessThan(24)
 		}
 	})
 
@@ -152,7 +163,7 @@ test.describe('dashboard with fixture data', () => {
 		await expect(page.getByText('First assessment')).toHaveCount(0)
 	})
 
-	test('the sidebar navigates and marks the current page', async ({ page }) => {
+	test('the top navigation navigates and marks the current page', async ({ page }) => {
 		await page.goto('/dashboard')
 		const nav = page.getByRole('navigation', { name: 'Workspace' })
 		await expect(nav.getByRole('link', { name: /Dashboard/ })).toHaveAttribute(
@@ -174,7 +185,8 @@ test.describe('dashboard with fixture data', () => {
 	test('See evidence opens the skill evidence in the assessment the quote came from', async ({
 		page
 	}) => {
-		await page.goto('/dashboard')
+		await visit(page, '/dashboard')
+		await expect(page.getByTestId('heatmap')).toBeVisible()
 		await region(page, 'Focus next').getByRole('link', { name: 'See evidence' }).click()
 		await expect(page).toHaveURL(
 			new RegExp(`/assessment\\?id=${expected.valid?.id}#skill-${focus?.skill}$`)
@@ -188,7 +200,8 @@ test.describe('dashboard with fixture data', () => {
 	})
 
 	test('a skill row opens that skill’s evidence', async ({ page }) => {
-		await page.goto('/dashboard')
+		await visit(page, '/dashboard')
+		await expect(page.getByTestId('heatmap')).toBeVisible()
 		const row = expected.skills[1]
 		await region(page, 'Skills')
 			.getByRole('link', { name: new RegExp(`^${skillName(row?.skill ?? '')},`) })
@@ -199,7 +212,8 @@ test.describe('dashboard with fixture data', () => {
 
 	test('earlier assessments open the right assessment', async ({ page }) => {
 		for (const [index, summary] of expected.earlier.entries()) {
-			await page.goto('/dashboard')
+			await visit(page, '/dashboard')
+			await expect(page.getByTestId('heatmap')).toBeVisible()
 			await region(page, 'Your progress').getByRole('listitem').nth(index).getByRole('link').click()
 			await expect(page).toHaveURL(new RegExp(`/assessment\\?id=${summary.id}$`))
 			await expect(page.getByTestId('overall-score')).toHaveText(String(summary.score))
@@ -207,11 +221,13 @@ test.describe('dashboard with fixture data', () => {
 	})
 
 	test('upload and session links go to the existing flows', async ({ page }) => {
-		await page.goto('/dashboard')
+		await visit(page, '/dashboard')
+		await expect(page.getByTestId('heatmap')).toBeVisible()
 		await page.getByRole('link', { name: 'Upload sessions', exact: true }).click()
 		await expect(page).toHaveURL(/\/sessions$/)
 
-		await page.goto('/dashboard')
+		await visit(page, '/dashboard')
+		await expect(page.getByTestId('heatmap')).toBeVisible()
 		const row = expected.recentSessions[0]
 		await region(page, 'Recent sessions')
 			.getByRole('link')
@@ -222,7 +238,6 @@ test.describe('dashboard with fixture data', () => {
 
 	test('landmarks are named', async ({ page }) => {
 		await page.goto('/dashboard')
-		await expect(page.getByRole('complementary', { name: 'Sidebar' })).toBeVisible()
 		await expect(page.getByRole('banner', { name: 'Page header' })).toBeVisible()
 		await expect(page.getByRole('navigation', { name: 'Workspace' })).toBeVisible()
 	})
@@ -230,7 +245,8 @@ test.describe('dashboard with fixture data', () => {
 	test('keyboard: the skip link works and every focus stop has the same visible ring', async ({
 		page
 	}) => {
-		await page.goto('/dashboard')
+		await visit(page, '/dashboard')
+		await expect(page.getByTestId('heatmap')).toBeVisible()
 		await page.keyboard.press('Tab')
 		await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused()
 		await page.keyboard.press('Enter')
@@ -256,7 +272,7 @@ test.describe('dashboard with fixture data', () => {
 			}
 		}
 		expect(stops.size).toBeGreaterThan(15)
-		expect([...rings]).toEqual(['2px solid rgb(224, 35, 28)'])
+		expect([...rings]).toEqual(['2px solid rgb(192, 48, 28)'])
 	})
 
 	test('the vermilion numerals pass AA contrast', async ({ page }) => {
@@ -298,22 +314,28 @@ test.describe('dashboard with fixture data', () => {
 			)
 			expect(overflow, `overflow at ${width}px`).toBeLessThanOrEqual(0)
 			const nav = page.getByRole('navigation', { name: 'Workspace' })
-			for (const label of ['Dashboard', 'Sessions', 'Assessment', 'Account']) {
-				await expect(nav.getByRole('link', { name: label })).toBeVisible()
-			}
-			const signOut = nav.getByRole('button', { name: 'Sign out' })
-			await expect(signOut).toBeVisible()
 			if (width < 768) {
+				// A phone gets the app frame: four tabs along the bottom edge. Sessions and
+				// upload sit in the header, account and sign out on the profile screen.
+				for (const label of ['Dojo', 'Train', 'Progress', 'Profile']) {
+					const tab = nav.getByRole('link', { name: label })
+					await expect(tab).toBeVisible()
+					const box = await tab.boundingBox()
+					expect(box?.height ?? 0).toBeGreaterThanOrEqual(43.5)
+				}
 				for (const target of [
-					...(await nav.getByRole('link').all()),
-					signOut,
 					page.getByRole('link', { name: 'Upload sessions', exact: true }),
-					region(page, 'Your performance').getByRole('link')
+					...(await region(page, 'Your performance').getByRole('link').all())
 				]) {
 					const box = await target.boundingBox()
 					expect(box?.height ?? 0).toBeGreaterThanOrEqual(43.5)
 				}
+				return
 			}
+			for (const label of ['Dashboard', 'Sessions', 'Assessment', 'Account']) {
+				await expect(nav.getByRole('link', { name: label })).toBeVisible()
+			}
+			await expect(nav.getByRole('button', { name: 'Sign out' })).toBeVisible()
 		})
 	}
 })
@@ -359,7 +381,8 @@ test.describe('dashboard for real accounts', () => {
 		await expect(
 			page.getByRole('heading', { name: 'Practise from your own sessions' })
 		).toBeVisible()
-		await expect(page.locator('main li')).toHaveCount(3)
+		// The demo progression band has its own lists; count only the empty-state steps.
+		await expect(page.locator('main > :not([aria-label="Training status"]) li')).toHaveCount(3)
 		await expect(region(page, 'Focus next')).toHaveCount(0)
 		await expect(region(page, 'Your performance')).toHaveCount(0)
 		const action = page.getByRole('link', { name: 'Upload sessions', exact: true })

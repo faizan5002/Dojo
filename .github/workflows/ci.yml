@@ -193,6 +193,12 @@ jobs:
       # that check too.
       - name: Apply run-once SQL
         run: node scripts/run-once-sql.mjs --db-url "$DATABASE_URL"
+      # The Prompting Guru challenge library lives in the database, seeded from
+      # prisma/seed/practice-challenges/. Seeding the replayed database proves
+      # the seed applies cleanly, and refuses an edited challenge whose version
+      # was not bumped, before main ever sees it.
+      - name: Seed the practice challenge library
+        run: pnpm db:seed:practice --db-url "$DATABASE_URL"
       - name: Check for drift (guard on main, hard gate on PRs)
         run: pnpm exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema --exit-code
       # RLS is not in the Prisma schema, so the drift check above cannot see

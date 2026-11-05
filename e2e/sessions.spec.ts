@@ -75,7 +75,8 @@ test.describe('sessions', () => {
 		const uploadUrl = page.url()
 		const band = page.locator('section').filter({ has: page.getByLabel('Choose log files') })
 		await band.getByRole('button', { name: 'Delete' }).click()
-		await band.getByRole('button', { name: 'Confirm delete' }).click()
+		// The confirmation is an alert dialog (a portal), so its buttons are found on the page.
+		await page.getByRole('alertdialog').getByRole('button', { name: 'Confirm delete' }).click()
 		await expect(page).toHaveURL(/\/sessions$/)
 		await page.goto(uploadUrl)
 		await expect(page.getByText('That upload could not be found in your account.')).toBeVisible()

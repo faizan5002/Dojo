@@ -1,4 +1,8 @@
+'use client'
+
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
+import { useConversationHref } from './conversation-link'
 import type { Evidence, Suggestion } from '../types'
 
 const SHORT_SESSION_ID = 8
@@ -45,6 +49,7 @@ export function SuggestionBlock({ suggestion }: { suggestion: Suggestion }) {
 
 export function EvidenceItem({ evidence }: { evidence: Evidence }) {
 	const t = useTranslations('Assessment')
+	const conversationHref = useConversationHref()(evidence)
 	const criterion = `criteria.${evidence.criterion}`
 	const isStrength = evidence.polarity === 'strength'
 	return (
@@ -67,6 +72,15 @@ export function EvidenceItem({ evidence }: { evidence: Evidence }) {
 				)}
 			</dl>
 			{evidence.suggestion == null ? null : <SuggestionBlock suggestion={evidence.suggestion} />}
+			{conversationHref == null ? null : (
+				<Link
+					href={conversationHref}
+					className="app-nav-link self-start"
+					data-testid="open-conversation"
+				>
+					{t('evidence.openConversation')}
+				</Link>
+			)}
 		</article>
 	)
 }

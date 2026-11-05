@@ -7,6 +7,7 @@ import {
 	createTestUser,
 	deleteTestUser,
 	signIn,
+	visit,
 	type TestUser
 } from './workspace-helpers'
 
@@ -38,7 +39,7 @@ test.describe('sample session, signed out', () => {
 			await page.goto(path)
 			await expect(page.getByRole('link', { name: 'Try a sample session' })).toBeVisible()
 		}
-		await page.goto('/sign-in')
+		await visit(page, '/sign-in')
 		await page.getByRole('link', { name: 'Try a sample session' }).focus()
 		await page.keyboard.press('Enter')
 		await expect(page).toHaveURL(/\/sample$/)
@@ -68,7 +69,7 @@ test.describe('sample session, signed out', () => {
 		expect(focus.kind).toBe('ready')
 		if (focus.kind !== 'ready') return
 
-		await page.goto('/sample')
+		await visit(page, '/sample')
 		await page.getByRole('link', { name: 'Run the assessment' }).click()
 		await expect(page).toHaveURL(/\/sample\/assessment$/)
 		await expect(page.getByTestId('sample-banner')).toContainText('Demonstration data')

@@ -50,6 +50,25 @@ const envSchema = z.object({
 
 	NEXT_PUBLIC_DEFAULT_LOCALE: z.string().default('en'),
 
+	// AI insights (docs/rules/ai-usage.md). Server only: none of these may ever
+	// be NEXT_PUBLIC_. With AI_ENABLED anything but "true", or the chosen
+	// provider's key unset, every insight endpoint answers 503 and the rest of
+	// Dojo is unaffected. A *_MODEL must be registered in
+	// src/server/lib/ai-usage/models.ts, or that provider stays off.
+	AI_ENABLED: z.string().optional(),
+	AI_PROVIDER: z.enum(['openrouter', 'xai']).default('openrouter'),
+	// Whether assessments and Prompting Guru answers are scored by the LLM (with
+	// the rules engine as fallback) or by the rules alone. "off" keeps scoring
+	// deterministic, as the e2e suite needs; AI insights are unaffected.
+	AI_SCORING: z.enum(['on', 'off']).default('on'),
+	OPENROUTER_API_KEY: z.string().optional(),
+	OPENROUTER_BASE_URL: z.string().url().default('https://openrouter.ai/api/v1'),
+	OPENROUTER_MODEL: z.string().default('nvidia/nemotron-3-ultra-550b-a55b:free'),
+	// xAI (Grok), the alternative provider (AI_PROVIDER=xai). Needs paid credits.
+	XAI_API_KEY: z.string().optional(),
+	XAI_BASE_URL: z.string().url().default('https://api.x.ai/v1'),
+	XAI_MODEL: z.string().default('grok-4.7'),
+
 	// Required by cron routes only; an unset secret must not break unrelated pages.
 	CRON_SECRET: z.string().optional(),
 

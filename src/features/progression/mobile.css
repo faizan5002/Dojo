@@ -1,0 +1,498 @@
+/* Mobile-native layer. Phones (under 768px) get an app frame: compact header, bottom tab bar,
+   stacked full-width sections, horizontal shelves and sticky action bars. Tablets keep the top
+   bar. Rules key off width, and off height where a short landscape phone needs less chrome. */
+
+/* ---- no visible scrollbars anywhere in the app; scrolling itself is untouched ---- */
+[data-surface='app'],
+[data-surface='app'] * {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+[data-surface='app'] ::-webkit-scrollbar,
+[data-surface='app']::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0;
+}
+html:has([data-surface='app']) {
+	scrollbar-width: none;
+}
+html:has([data-surface='app'])::-webkit-scrollbar {
+	display: none;
+}
+/* Page-level sideways drift is a bug; shelves scroll inside their own box. */
+html:has([data-surface='app']),
+html:has([data-surface='app']) body {
+	overflow-x: clip;
+}
+
+/* ---- header, tab bar ---- */
+.dj-icon-btn,
+.dj-avatar {
+	display: inline-grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	color: var(--text);
+}
+.dj-avatar {
+	width: 34px;
+	height: 34px;
+	margin: 0 4px;
+	border: 1px solid var(--accent);
+	border-radius: 50%;
+	font-size: 13px;
+}
+.dj-tabbar {
+	position: fixed;
+	inset: auto 0 0;
+	z-index: 50;
+	padding-bottom: env(safe-area-inset-bottom, 0px);
+	background: rgb(8 9 11 / 0.92);
+	backdrop-filter: blur(14px);
+	border-top: 1px solid var(--border-strong);
+}
+.dj-tabbar ul {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	padding-inline: max(4px, env(safe-area-inset-left, 0px)) max(4px, env(safe-area-inset-right, 0px));
+}
+.dj-tab {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 3px;
+	min-height: 56px;
+	color: var(--text-muted);
+	font-size: 11px;
+	letter-spacing: 0.04em;
+	transition: color 0.15s;
+}
+.dj-tab[aria-current='page'] {
+	color: var(--text);
+}
+.dj-tab[aria-current='page']::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	width: 28px;
+	height: 3px;
+	background: var(--accent);
+	box-shadow: 0 0 10px var(--accent);
+}
+.dj-tab[aria-current='page'] svg {
+	color: var(--accent-text);
+}
+.dj-tab:active {
+	transform: scale(0.94);
+}
+@media (max-width: 767px) {
+	.dj-frame {
+		padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+	}
+	.app-topbar {
+		position: sticky;
+		top: 0;
+	}
+	/* Tablet and desktop keep their own rhythm; phones get tighter gutters. */
+	.dj-frame main {
+		padding-inline: 16px;
+		padding-block: 16px;
+		gap: 20px;
+	}
+}
+/* A short landscape phone: the bar shrinks to icons so content keeps its height. */
+@media (max-height: 480px) and (orientation: landscape) and (max-width: 900px) {
+	.dj-tab {
+		min-height: 44px;
+		flex-direction: row;
+		gap: 8px;
+	}
+	.dj-frame {
+		padding-bottom: calc(46px + env(safe-area-inset-bottom, 0px));
+	}
+}
+
+/* ---- phone status: rank emblem, flame, XP, week ---- */
+.dj-home {
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 18px 16px;
+	border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border-strong));
+	background:
+		radial-gradient(70% 90% at 100% 0%, rgb(224 35 28 / 0.28), transparent 70%),
+		linear-gradient(180deg, #170b0c, var(--surface));
+}
+.dj-home-top {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 14px;
+}
+.dj-emblem {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: 76px;
+	height: 76px;
+}
+.dj-emblem svg {
+	position: absolute;
+	inset: 0;
+	transform: rotate(-110deg);
+}
+.dj-emblem b {
+	font-size: 34px;
+	font-weight: 300;
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---- horizontal shelves ---- */
+.dj-shelf {
+	display: flex;
+	gap: 12px;
+	margin-inline: -16px;
+	padding: 4px 16px 10px;
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	scroll-padding-inline: 16px;
+	overscroll-behavior-x: contain;
+	-webkit-overflow-scrolling: touch;
+}
+.dj-shelf > * {
+	flex: 0 0 auto;
+	scroll-snap-align: start;
+}
+
+@media (max-width: 767px) {
+	/* quests: paper cards in a shelf */
+	.dj-scroll {
+		padding: 0;
+		background: none;
+		box-shadow: none;
+		color: var(--text);
+		--text: var(--text);
+		--text-muted: var(--text-muted);
+		gap: 10px;
+	}
+	.dj-scroll::before,
+	.dj-scroll::after {
+		display: none;
+	}
+	.dj-scroll .pg-title {
+		color: var(--text-muted);
+	}
+	.dj-scroll > ul {
+		display: flex;
+		gap: 12px;
+		margin-inline: -16px;
+		padding: 2px 16px 8px;
+		overflow-x: auto;
+		scroll-snap-type: x proximity;
+		overscroll-behavior-x: contain;
+	}
+	.dj-scroll .pg-quest {
+		flex: 0 0 min(76vw, 17rem);
+		scroll-snap-align: start;
+		grid-template-columns: auto 1fr;
+		align-items: start;
+		padding: 14px;
+		border: 0;
+		color: var(--paper-ink);
+		background:
+			repeating-linear-gradient(95deg, transparent 0 3px, rgb(120 98 60 / 0.05) 3px 4px),
+			radial-gradient(120% 100% at 0% 0%, var(--scroll-a), var(--scroll-b));
+		--text: var(--paper-ink);
+		--text-muted: #5b5143;
+		--border: rgb(27 23 18 / 0.16);
+		--accent-text: #a8120b;
+	}
+	.dj-scroll .pg-quest:first-of-type {
+		border: 0;
+	}
+	.dj-scroll .pg-quest .pg-reward {
+		grid-column: 1 / -1;
+		justify-self: start;
+	}
+	.dj-scroll .pg-quest p {
+		color: var(--paper-ink);
+	}
+	.dj-scroll .pg-quest .text-text-muted {
+		color: #5b5143;
+	}
+	.dj-scroll > p.pg-title {
+		padding-top: 4px;
+		border: 0;
+	}
+
+	/* the seal shelf */
+	.pg-badges[data-layout='shelf'] {
+		display: flex;
+		margin-inline: -16px;
+		padding: 4px 16px 10px;
+		overflow-x: auto;
+		scroll-snap-type: x proximity;
+		overscroll-behavior-x: contain;
+	}
+	.pg-badges[data-layout='shelf'] > li {
+		display: block;
+		flex: 0 0 7.2rem;
+		scroll-snap-align: start;
+	}
+	.pg-badges[data-layout='grid'] {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 8px;
+	}
+	.pg-badges[data-layout='grid'] .pg-badge {
+		padding: 12px 4px 10px;
+		font-size: 12px;
+	}
+	.pg-badge {
+		min-height: 44px;
+	}
+	.dj-detail {
+		grid-template-columns: auto 1fr;
+		gap: 12px;
+		padding: 12px;
+	}
+
+	/* panels lose desktop padding */
+	.dj-panel,
+	.dj-streak {
+		padding: 16px;
+	}
+}
+
+/* ---- heatmap fits the width ---- */
+.pg-heat {
+	grid-template-rows: repeat(7, auto);
+	grid-auto-columns: minmax(0, 1fr);
+	gap: 3px;
+	width: 100%;
+	max-width: 40rem;
+}
+.pg-months {
+	grid-auto-columns: minmax(0, 1fr);
+	gap: 3px;
+	width: 100%;
+	max-width: 40rem;
+}
+.pg-cell {
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1;
+	border-radius: 3px;
+}
+.pg-legend .pg-cell {
+	width: 12px;
+	height: 12px;
+}
+@media (max-width: 767px) {
+	/* on a phone, the last fourteen weeks at a size a thumb can hit */
+	.pg-heat [data-old='true'],
+	.pg-months [data-old='true'] {
+		display: none;
+	}
+	.pg-heat {
+		max-width: none;
+	}
+	.pg-months {
+		max-width: none;
+	}
+}
+
+/* ---- practice on a phone ---- */
+@media (max-width: 767px) {
+	.dj-actionbar {
+		position: sticky;
+		bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+		z-index: 20;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-inline: -16px;
+		padding: 12px 16px;
+		background: rgb(8 9 11 / 0.94);
+		backdrop-filter: blur(12px);
+		border-top: 1px solid var(--border-strong);
+	}
+	.dj-actionbar .app-pill {
+		flex: 1;
+		justify-content: center;
+		min-height: 52px;
+		padding: 12px 16px;
+		white-space: nowrap;
+		letter-spacing: 0.1em;
+	}
+	.dj-actionbar .app-nav-link {
+		min-height: 52px;
+		padding-inline: 8px;
+		font-size: 12px;
+	}
+	.dj-answer {
+		min-height: 64px;
+		padding: 16px 16px 16px 20px;
+		font-size: 16px;
+		line-height: 1.45;
+	}
+}
+@media (min-width: 768px) {
+	.dj-actionbar {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 16px;
+	}
+}
+
+/* ---- completion ---- */
+.dj-count::after {
+	counter-reset: n var(--n);
+	content: counter(n);
+}
+@property --n {
+	syntax: '<integer>';
+	initial-value: 0;
+	inherits: false;
+}
+.dj-count {
+	animation: dj-count 1.1s 0.2s var(--dj-ease) both;
+}
+@keyframes dj-count {
+	from {
+		--n: 0;
+	}
+}
+.dj-tiles {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+}
+.dj-tile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 10px 4px;
+	border: 1px solid var(--border-strong);
+	font-variant-numeric: tabular-nums;
+}
+.dj-tile b {
+	font-size: 20px;
+	font-weight: 400;
+}
+.dj-tile span {
+	font-size: 10px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+.dj-rankbar {
+	position: relative;
+	height: 10px;
+	background: var(--border);
+	overflow: hidden;
+}
+.dj-rankbar i {
+	position: absolute;
+	inset: 0 auto 0 0;
+	display: block;
+}
+.dj-rankbar .was {
+	background: rgb(235 228 212 / 0.28);
+}
+.dj-rankbar .now {
+	background: linear-gradient(90deg, var(--accent), #ff9a62);
+	transform-origin: left;
+	animation: dj-fill 1.1s 0.4s var(--dj-ease) both;
+}
+
+/* The reveal: a lighter backdrop and a bottom sheet on phones, so the page stays visible. */
+.pg-overlay {
+	background: rgb(8 8 10 / 0.5);
+	backdrop-filter: none;
+}
+@media (max-width: 767px) {
+	.pg-overlay {
+		place-items: end center;
+		padding: 0;
+	}
+	.dj-reveal {
+		width: 100%;
+		padding: 28px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+		border-width: 1px 0 0;
+		border-radius: 18px 18px 0 0;
+		animation: dj-sheet 0.45s var(--dj-ease) both;
+	}
+	.dj-reveal .app-pill {
+		width: 100%;
+		justify-content: center;
+		min-height: 52px;
+	}
+}
+@keyframes dj-sheet {
+	from {
+		transform: translateY(40%);
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dj-count,
+	.dj-rankbar .now,
+	.dj-reveal {
+		animation: none !important;
+	}
+}
+
+/* Phone/desktop switches. Plain classes, because component rules here are unlayered and would
+   otherwise beat Tailwind's display utilities. */
+@media (max-width: 767px) {
+	.dj-hide-phone {
+		display: none !important;
+	}
+}
+@media (min-width: 768px) {
+	.dj-only-phone {
+		display: none !important;
+	}
+}
+
+.dj-row {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 14px;
+	min-height: 54px;
+	padding: 0 16px;
+	color: var(--text);
+	font-size: 16px;
+}
+.dj-row:active {
+	background: var(--surface-hover);
+}
+
+.dj-pop {
+	display: inline-block;
+	animation: dj-pop 0.7s 0.25s var(--dj-snap) both;
+}
+@keyframes dj-pop {
+	from {
+		opacity: 0;
+		transform: scale(0.6);
+		filter: drop-shadow(0 0 0 rgb(224 35 28 / 0));
+	}
+	60% {
+		filter: drop-shadow(0 0 12px rgb(224 35 28 / 0.7));
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.dj-pop {
+		animation: none !important;
+	}
+}

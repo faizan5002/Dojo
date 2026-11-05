@@ -1,9 +1,10 @@
 import { useFormatter, useTranslations } from 'next-intl'
 import { ArrowUpRightIcon } from '@/components/ui/icons'
+import { SkillGlyph } from '@/features/app-shell/skill-glyph'
 import { Link } from '@/i18n/routing'
 import type { Focus } from '../dashboard-model'
 
-const FRAME = 'border-border-strong bg-surface border p-6 md:p-8'
+const FRAME = 'app-panel app-panel-accent p-6 md:p-10'
 
 /**
  * The coaching block, first on the page: the one skill to work on, why (a line from
@@ -16,6 +17,10 @@ export interface FocusLinks {
 	readonly overview: string
 	readonly evidence: string
 	readonly practise: string
+	/** The quote in its original conversation; the default is the signed-in viewer. */
+	readonly conversation?: string
+	/** The scenario practice session; the default is the signed-in one. */
+	readonly scenarios?: string
 }
 
 export function FocusNext({
@@ -85,15 +90,23 @@ export function FocusNext({
 				<h2 id="focus-heading" className="app-eyebrow">
 					{t('heading')}
 				</h2>
-				<h3 className="app-heading">{tAssessment(`skills.${focus.skill}.name`)}</h3>
-				<p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-					<span className="app-number" data-testid="focus-score">
-						{focus.score}
-					</span>
+				<div className="flex items-center gap-4">
+					<SkillGlyph skill={focus.skill} size={22} active />
+					<h3 className="app-heading">{tAssessment(`skills.${focus.skill}.name`)}</h3>
+				</div>
+				<div className="flex items-center gap-5">
+					<div
+						className="app-ring app-ring-md"
+						style={{ '--v': focus.score } as React.CSSProperties}
+					>
+						<span className="app-number" data-testid="focus-score">
+							{focus.score}
+						</span>
+					</div>
 					{focus.proficiency == null ? null : (
-						<span className="app-eyebrow">{tLevel(focus.proficiency)}</span>
+						<span className="app-chip app-chip-risk">{tLevel(focus.proficiency)}</span>
 					)}
-				</p>
+				</div>
 				<p className="text-text-muted text-sm">
 					{tAssessment(`confidence.${focus.confidence}.label`)}.{' '}
 					{tAssessment(`confidence.${focus.confidence}.detail`, {
@@ -140,7 +153,7 @@ export function FocusNext({
 				</dl>
 			</div>
 
-			<div className="flex flex-wrap items-center gap-x-6 gap-y-3 lg:col-start-1 lg:row-start-2 lg:self-end">
+			<div className="border-border flex flex-wrap items-center gap-3 border-t pt-6 lg:col-span-2 lg:row-start-3">
 				<Link
 					href={links?.evidence ?? `/assessment?id=${assessmentId}#skill-${focus.skill}`}
 					className="app-pill"
@@ -149,8 +162,28 @@ export function FocusNext({
 					<ArrowUpRightIcon size={14} />
 				</Link>
 				<Link
+					href={
+						links?.conversation ??
+						`/assessment/session?id=${assessmentId}&session=${encodeURIComponent(quote.sessionId)}&finding=${encodeURIComponent(quote.evidenceId)}`
+					}
+					className="app-pill app-pill-sm"
+					data-testid="focus-conversation"
+				>
+					{t('conversation')}
+				</Link>
+				<Link
+					href={links?.scenarios ?? `/practice/session?assessment=${assessmentId}`}
+					className="app-pill app-pill-sm"
+					data-testid="focus-scenarios"
+				>
+					{t('scenarios')}
+				</Link>
+				<Link href="/prompting-guru" className="app-pill app-pill-sm" data-testid="focus-guru">
+					Prompting Guru
+				</Link>
+				<Link
 					href={links?.practise ?? `/practice?assessment=${assessmentId}`}
-					className="app-nav-link"
+					className="app-pill app-pill-sm"
 				>
 					{t('practise')}
 				</Link>

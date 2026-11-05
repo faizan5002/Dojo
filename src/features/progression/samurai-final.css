@@ -1,0 +1,304 @@
+/* Final pass: one material (paper and ink). The streak and rank panels are paper with an ink
+   landscape, not silk on rods; cedar stays on the navigation rails only; paper scrolls keep
+   their rollers because a scroll is the one object that has them. */
+
+/* ---- streak and mobile home: paper, ink, a brush flame ---- */
+.dj-streak,
+.dj-home {
+	color: var(--text);
+	border: 1px solid var(--border-strong);
+	background: linear-gradient(180deg, rgb(255 250 236 / 0.5), transparent 55%), var(--surface);
+	box-shadow: 0 10px 22px -18px rgb(60 38 16 / 0.65);
+}
+.dj-streak::before,
+.dj-streak::after,
+.dj-home::before,
+.dj-home::after {
+	display: none;
+}
+.dj-streak {
+	min-height: 0;
+}
+.dj-landscape {
+	height: 30% !important;
+}
+.dj-flame-stage {
+	flex: none;
+	padding-block: 8px 20px;
+}
+.dj-embers i {
+	background: #d6452b;
+	box-shadow: none;
+	opacity: 0;
+}
+.pg-flame-lit .pg-flame-glow {
+	display: none;
+}
+.pg-day-on .pg-day-dot {
+	color: #2a1c08;
+}
+.dj-streak .pg-xp,
+.dj-home .pg-xp {
+	background: color-mix(in srgb, var(--text) 14%, var(--surface));
+}
+.dj-streak ol[aria-label='Streak milestones'] li {
+	background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+/* ---- the demo marker on every demo band ---- */
+.dj-demo-tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 9px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--brass) 70%, transparent);
+	background: color-mix(in srgb, var(--gold) 18%, var(--surface));
+	color: var(--brass-text);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+.dj-demo-tag-corner {
+	position: absolute;
+	top: 10px;
+	right: 12px;
+	z-index: 3;
+}
+.dj-panel,
+.dj-home {
+	position: relative;
+}
+
+/* ---- demo strip: the whole sentence, wrapped ---- */
+.pg-demo {
+	flex-wrap: wrap;
+	row-gap: 4px;
+	font-size: 12.5px;
+	line-height: 1.5;
+}
+.pg-demo > span:first-child {
+	flex: 1 1 14rem;
+	min-width: 0;
+}
+
+/* ---- the score change, next to the score ---- */
+.dj-delta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 8px;
+	font-size: 13px;
+}
+.dj-delta b {
+	font-weight: 600;
+	color: var(--text);
+}
+.dj-delta span {
+	padding: 0 8px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--gold) 20%, var(--surface));
+	color: var(--brass-text);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+/* ---- one reward row in coaching ---- */
+.dj-reward-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 14px;
+}
+.dj-reward-note {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+.dj-reward-quest {
+	display: flex;
+	flex: 1 1 12rem;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 12.5px;
+	color: var(--text-muted);
+}
+.dj-pick-label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-muted);
+}
+.dj-xp-help {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+.dj-xp-help summary {
+	min-height: 32px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-weight: 600;
+}
+.dj-xp-help p {
+	padding-bottom: 8px;
+	line-height: 1.55;
+}
+.dj-xp-help b {
+	font-weight: 600;
+	color: var(--text);
+}
+
+/* ---- the terminal artifact: no fake window chrome ---- */
+.dj-session-bar {
+	padding: 6px 12px;
+}
+
+/* ---- night: lit paper, lit seals ---- */
+@media (prefers-color-scheme: dark) {
+	.pg-badge {
+		--r1: #bfb299;
+	}
+	.pg-badge[data-rarity='rare'] {
+		--r1: #9db0f0;
+	}
+	.pg-badge[data-rarity='epic'] {
+		--r1: #e3c473;
+	}
+	.pg-badge[data-rarity='legendary'] {
+		--r1: #ff9a7e;
+	}
+	.dj-tabbar,
+	.app-topbar {
+		background:
+			repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.14) 0 2px, transparent 2px 9px),
+			linear-gradient(180deg, #3a2514, #26170b);
+	}
+	.dj-demo-bar {
+		background: #120d08;
+	}
+	.pg-cell[data-level='4'] {
+		background: var(--heat);
+	}
+}
+
+/* ---- touch and legibility ---- */
+.pg-link-btn {
+	min-height: 44px;
+	padding-inline: 8px;
+}
+.dj-avatar {
+	width: 40px;
+	height: 40px;
+}
+.app-pill-sm {
+	font-size: 11px;
+	font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+	.pg-card,
+	.dj-panel,
+	.dj-streak,
+	.dj-home {
+		background: linear-gradient(180deg, rgb(255 244 214 / 0.05), transparent 55%), var(--surface);
+		box-shadow: 0 10px 22px -18px rgb(0 0 0 / 0.8);
+	}
+}
+.dj-home .dj-demo-tag-corner {
+	position: static;
+	align-self: flex-end;
+	margin-bottom: -6px;
+}
+
+/* ---- ink banner at the head of profile and achievements ---- */
+.dj-banner {
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-height: 132px;
+	padding: 20px 22px;
+	border: 1px solid var(--border-strong);
+	background: linear-gradient(135deg, var(--surface), var(--bg));
+	box-shadow: 0 10px 22px -18px rgb(60 38 16 / 0.65);
+}
+.dj-banner > :not(.dj-ink-banner) {
+	position: relative;
+	z-index: 1;
+}
+.dj-ink-banner {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+.dj-banner-moon {
+	transform-origin: 610px 62px;
+}
+@media (max-width: 767px) {
+	.dj-banner {
+		min-height: 112px;
+		padding: 16px;
+	}
+}
+
+/* ---- motion: the dojo breathes, it does not blink ---- */
+@media (prefers-reduced-motion: no-preference) {
+	.dj-lantern-glow {
+		animation: dj-lantern 4.2s ease-in-out infinite;
+	}
+	.dj-banner-moon {
+		animation: dj-moon-rise 1.6s var(--dj-ease) both;
+	}
+	.dj-divider::before {
+		animation: dj-brush 1s var(--dj-ease) both;
+		transform-origin: left;
+	}
+	.dj-rank-stamp-in {
+		animation: dj-stamp 0.55s 0.3s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+	}
+	.dj-hanko {
+		animation: dj-stamp 0.6s 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+	}
+}
+@keyframes dj-lantern {
+	0%,
+	100% {
+		opacity: 0.55;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.12);
+	}
+}
+@keyframes dj-moon-rise {
+	from {
+		transform: translateY(40px);
+		opacity: 0;
+	}
+}
+@keyframes dj-brush {
+	from {
+		transform: scaleX(0);
+		opacity: 0;
+	}
+}
+
+.dj-ink-banner {
+	mask-image: linear-gradient(to right, transparent 30%, #000 72%);
+}
+@media (max-width: 767px) {
+	.dj-ink-banner {
+		mask-image: linear-gradient(to right, transparent 45%, #000 85%);
+	}
+}
+
+@media (max-width: 767px) {
+	.dj-ink-banner {
+		inset: 0 0 0 auto;
+		width: 46%;
+		mask-image: linear-gradient(to right, transparent 0%, #000 40%);
+	}
+}

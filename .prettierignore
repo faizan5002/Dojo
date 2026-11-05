@@ -9,3 +9,5 @@ agent-session-logs-setup.md
 
 # Vendored third-party Kage landing page assets (see public/landing-pages/ADAPTATION.md).
 public/landing-pages/
+
+.impeccable/

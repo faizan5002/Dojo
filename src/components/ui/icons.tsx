@@ -19,6 +19,7 @@
 // import path if you stay on phosphor.
 import {
 	ArrowRight,
+	ArrowsClockwise,
 	ArrowSquareOut,
 	ArrowUpRight,
 	Calendar,
@@ -26,23 +27,33 @@ import {
 	CaretLeft,
 	CaretRight,
 	CaretUp,
+	ChartLineUp,
+	Chats,
 	Check,
 	CheckCircle,
 	CircleNotch,
 	Copy,
+	Crosshair,
 	DotsThreeVertical,
 	DownloadSimple,
 	FunnelSimple,
 	Gear,
+	House,
 	Info,
+	Lightning,
 	List,
 	MagnifyingGlass,
+	MapTrifold,
 	Minus,
 	PencilSimple,
+	PencilSimpleLine,
 	Plus,
+	ShieldCheck,
 	SignOut,
 	Trash,
+	UploadSimple,
 	User,
+	UserCircle,
 	Warning,
 	X
 } from '@phosphor-icons/react/ssr'
@@ -129,3 +140,17 @@ export const SpinnerIcon = ({ className, ...props }: IconProps) => (
 		{...props}
 	/>
 )
+
+// The five assessed skills and two ways into practice, one glyph each, so a skill is
+// recognised by its shape as well as its name.
+export const PromptSkillIcon = (props: IconProps) => <Glyph source={PencilSimpleLine} {...props} />
+export const PlanSkillIcon = (props: IconProps) => <Glyph source={MapTrifold} {...props} />
+export const VerifySkillIcon = (props: IconProps) => <Glyph source={ShieldCheck} {...props} />
+export const IterateSkillIcon = (props: IconProps) => <Glyph source={ArrowsClockwise} {...props} />
+export const ScopeSkillIcon = (props: IconProps) => <Glyph source={Crosshair} {...props} />
+export const HomeIcon = (props: IconProps) => <Glyph source={House} {...props} />
+export const ProgressIcon = (props: IconProps) => <Glyph source={ChartLineUp} {...props} />
+export const ProfileIcon = (props: IconProps) => <Glyph source={UserCircle} {...props} />
+export const UploadIcon = (props: IconProps) => <Glyph source={UploadSimple} {...props} />
+export const PracticeIcon = (props: IconProps) => <Glyph source={Lightning} {...props} />
+export const ConversationIcon = (props: IconProps) => <Glyph source={Chats} {...props} />

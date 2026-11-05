@@ -1,0 +1,53 @@
+/* Maps the BoardUI semantic tokens that Tabs, the Modal and its close button use
+   onto Dojo's own tokens (globals.css, and the app skin in (app)/app.css).
+   BoardUI's theme.css, typography.css and globals.css are deliberately NOT
+   installed: they would bring a second palette, font, shadow scale and body
+   styles. Every value here resolves through a Dojo variable, so the landing page
+   and the vermilion identity stay the single source of truth. */
+@theme inline {
+	--color-background-full: var(--bg);
+	--color-text-primary: var(--text);
+	--color-text-secondary: var(--text-muted);
+	--color-text-tertiary: var(--text-faint);
+	--color-text-white: #ffffff;
+
+	--color-background-primary-default: var(--surface);
+	--color-background-primary-hover: var(--surface-hover);
+	--color-background-primary-active: var(--surface-hover);
+	--color-background-primary-disabled: var(--surface);
+	--color-background-tertiary-default: var(--surface-hover);
+
+	--color-border-button-default: var(--border-strong);
+	--color-border-button-hover: var(--text-faint);
+	--color-border-button-active: var(--text-muted);
+	--color-separator-border: var(--border);
+	--color-border-focus-ring: var(--accent);
+
+	--color-foreground-icon-primary: var(--text);
+	--color-foreground-icon-secondary: var(--text-muted);
+
+	--color-accent-500: var(--accent);
+	/* The active tab's text and underline. --accent-hover is below AA for small type
+	   on ink, so this takes the lighter tint defined in app.css. */
+	--color-accent-600: var(--accent-text, var(--accent-hover));
+	--color-accent-100: color-mix(in srgb, var(--accent) 22%, transparent);
+	--color-tab-count-selected-background: color-mix(in srgb, var(--accent) 22%, transparent);
+
+	--radius-2lg: 10px;
+
+	--text-title-3-medium: 18px;
+	--text-title-3-medium--line-height: 24px;
+	--text-title-3-medium--font-weight: 500;
+	--text-body-regular: 14px;
+	--text-body-regular--line-height: 20px;
+	--text-body-regular--font-weight: 400;
+	--text-body-medium: 14px;
+	--text-body-medium--line-height: 20px;
+	--text-body-medium--font-weight: 500;
+	--text-caption-1-medium: 12px;
+	--text-caption-1-medium--line-height: 16px;
+	--text-caption-1-medium--font-weight: 500;
+	--text-caption-1-semibold: 12px;
+	--text-caption-1-semibold--line-height: 16px;
+	--text-caption-1-semibold--font-weight: 600;
+}

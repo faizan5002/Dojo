@@ -6,6 +6,7 @@ import {
 	devAssessment,
 	devUploadView
 } from '../src/features/dev-frontend/fixtures'
+import { visit } from './workspace-helpers'
 
 // Runs only against a dev server started with DOJO_DEV_FRONTEND_MODE=true, where the
 // dashboard shows fixture data. The drill itself needs no database: it scores in the tab.
@@ -32,7 +33,8 @@ test.describe('practice drill with fixture data', () => {
 
 	test('the focus leads to a drill on the same habit, with its own quote', async ({ page }) => {
 		expect(focus).not.toBeNull()
-		await page.goto('/dashboard')
+		await visit(page, '/dashboard')
+		await expect(page.getByTestId('heatmap')).toBeVisible()
 		await page
 			.getByRole('region', { name: 'Focus next' })
 			.getByRole('link', { name: 'Try a rewrite drill' })

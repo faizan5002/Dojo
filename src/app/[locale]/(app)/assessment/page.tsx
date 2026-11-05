@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { ArrowUpRightIcon } from '@/components/ui/icons'
+import { aiInsightsAvailable } from '@/features/ai-insights/availability'
+import { AiInsightPanel } from '@/features/ai-insights/ui/ai-insight-panel'
 import { PageHeader, SectionHeading } from '@/features/app-shell/section'
 import { AssessmentHistory } from '@/features/assessment/ui/assessment-history'
 import { AssessmentReport } from '@/features/assessment/ui/assessment-report'
@@ -32,8 +34,12 @@ export default async function AssessmentPage({
 	searchParams: Promise<{ id?: string; upload?: string }>
 }) {
 	const user = await requireUser()
-	const t = await getTranslations('Assessment')
-	const params = await searchParams
+	const [t, tAi, params, aiAvailable] = await Promise.all([
+		getTranslations('Assessment'),
+		getTranslations('AiInsight'),
+		searchParams,
+		aiInsightsAvailable(user)
+	])
 	const requestedAssessment = uuid.safeParse(params.id)
 	const requestedUpload = uuid.safeParse(params.upload)
 	const [assessments, uploads] = await Promise.all([listAssessments(user), listUploads(user)])
@@ -72,7 +78,22 @@ export default async function AssessmentPage({
 						<DownloadReportButton assessmentId={selected.id} />
 						<p className="text-text-muted text-sm">{t('saved')}</p>
 					</div>
-					<AssessmentReport assessment={selected.assessment} overview={selected.overview} />
+					<AssessmentReport
+						assessment={selected.assessment}
+						overview={selected.overview}
+						conversationBase={`/assessment/session?id=${selected.id}`}
+					/>
+					{aiAvailable ? (
+						<section aria-labelledby="ai-insight-heading" className="flex flex-col gap-8">
+							<SectionHeading id="ai-insight-heading" number="07">
+								{tAi('heading')}
+							</SectionHeading>
+							<AiInsightPanel
+								feature="assessment_explanation"
+								path={`/api/assessments/${selected.id}/insight`}
+							/>
+						</section>
+					) : null}
 				</>
 			) : latestUpload != null ? (
 				<RunAssessmentPanel uploadId={latestUpload.id} sessionCount={latestUpload.sessionCount} />
@@ -88,7 +109,7 @@ export default async function AssessmentPage({
 			)}
 			{assessments.length === 0 ? null : (
 				<section aria-labelledby="history-heading" className="flex flex-col gap-8">
-					<SectionHeading id="history-heading" number="07">
+					<SectionHeading id="history-heading" number="08">
 						{t('history.heading')}
 					</SectionHeading>
 					<AssessmentHistory assessments={assessments} selectedId={selected?.id ?? null} />

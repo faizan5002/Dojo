@@ -2,11 +2,13 @@
 
 import { useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/routing'
+import { clearReviewMemory } from '@/features/review/review-store'
 import { signOut } from '@/server/actions/auth'
 
 const SIGNED_IN_LINKS = [
 	{ href: '/sessions', key: 'sessions' },
 	{ href: '/assessment', key: 'assessment' },
+	{ href: '/prompting-guru', key: 'promptingGuru' },
 	{ href: '/account', key: 'account' }
 ] as const
 
@@ -29,14 +31,16 @@ export function AppNav({ isSignedIn }: { isSignedIn: boolean }) {
 				<Link
 					key={link.href}
 					href={link.href}
-					aria-current={pathname === link.href ? 'page' : undefined}
+					aria-current={
+						pathname === link.href || pathname.startsWith(`${link.href}/`) ? 'page' : undefined
+					}
 					className="app-nav-link"
 				>
 					{t(link.key)}
 				</Link>
 			))}
 			{isSignedIn ? (
-				<form action={signOut}>
+				<form action={signOut} onSubmit={() => clearReviewMemory()}>
 					<button type="submit" className="app-nav-link">
 						{t('signOut')}
 					</button>

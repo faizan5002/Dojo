@@ -23,6 +23,7 @@ export default async function SamplePracticePage() {
 			<PracticeView
 				stored={stored}
 				emptyHref="/sample"
+				scenariosHref="/sample/practice/session"
 				evidenceHref={(skill) => `/sample/assessment#skill-${skill}`}
 			/>
 		</>

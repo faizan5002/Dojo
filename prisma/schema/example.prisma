@@ -24,6 +24,8 @@ model User {
 	uploadMetrics    UploadMetrics[]
 	assessments      Assessment[]
 	skillAssessments SkillAssessment[]
+	practiceAttempts PracticeAttempt[]
+	aiInsights       AiInsight[]
 
 	@@map("users")
 }

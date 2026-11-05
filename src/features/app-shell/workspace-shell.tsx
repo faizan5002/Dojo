@@ -1,40 +1,49 @@
 import { useTranslations } from 'next-intl'
 import { DotMark } from '@/components/brand/dot-mark'
+import { UploadIcon } from '@/components/ui/icons'
+import { Celebration } from '@/features/progression/ui/celebration'
+import { NavChip } from '@/features/progression/ui/nav-chip'
 import { Link } from '@/i18n/routing'
-import { WorkspaceHeader } from './workspace-header'
+import { MobileTabBar } from './mobile-tab-bar'
 import { WorkspaceNav } from './workspace-nav'
 
 /**
- * The signed-in frame: a sidebar (a top bar on small screens), a header and the
- * page. Signed-out pages (sign in, sign up, reset) keep the plain top bar in the
- * app layout.
+ * The signed-in frame. From tablet width: a sticky top bar (brand, the places you work,
+ * upload, who you are, sign out). On a phone: a compact header (brand, streak, upload,
+ * profile) and a bottom tab bar, like an app. Signed-out pages (sign in, sign up, reset)
+ * keep the plain top bar in the app layout.
  */
 export function WorkspaceShell({ email, children }: { email: string; children: React.ReactNode }) {
 	const t = useTranslations('AppShell')
+	const initial = email.trim().charAt(0).toUpperCase() || '?'
 	return (
-		<div className="min-h-dvh lg:grid lg:grid-cols-[16.5rem_minmax(0,1fr)]">
+		<div className="dj-frame min-h-dvh">
 			<a href="#workspace-content" className="app-skip">
 				{t('skip')}
 			</a>
-			<aside
-				aria-label={t('sidebar')}
-				className="border-border bg-bg/80 flex flex-col gap-3 border-b backdrop-blur-sm lg:sticky lg:top-0 lg:h-dvh lg:gap-8 lg:border-r lg:border-b-0 lg:py-8"
-			>
-				<Link href="/" className="app-brand flex items-center gap-3 px-5 pt-4 lg:px-6 lg:pt-0">
-					<span className="sr-only">{t('home')}</span>
-					<DotMark className="h-5 w-16" />
-					<span className="app-eyebrow text-text-faint hidden sm:block lg:hidden xl:block">
-						{t('tagline')}
-					</span>
-				</Link>
-				<WorkspaceNav />
-			</aside>
-			<div className="flex min-w-0 flex-col">
-				<WorkspaceHeader email={email} />
-				<div id="workspace-content" tabIndex={-1} className="outline-none">
-					{children}
+			<header aria-label={t('pageHeader')} className="app-topbar">
+				<div className="mx-auto flex max-w-[96rem] items-center gap-x-6 px-4 md:px-10 xl:flex-nowrap">
+					<Link href="/" className="app-brand flex shrink-0 items-center gap-3 py-3 xl:py-0">
+						<span className="sr-only">{t('home')}</span>
+						<DotMark className="h-5 w-16" />
+					</Link>
+					<WorkspaceNav email={email} />
+					<div className="ml-auto flex items-center gap-1 md:hidden">
+						<NavChip />
+						<Link href="/sessions" className="dj-icon-btn" aria-label={t('sessionsShort')}>
+							<UploadIcon size={22} />
+						</Link>
+						<Link href="/profile" className="dj-avatar" aria-label={t('tab.profile')}>
+							{initial}
+						</Link>
+					</div>
 				</div>
+			</header>
+			<Celebration />
+			<div id="workspace-content" tabIndex={-1} className="mx-auto max-w-[96rem] outline-none">
+				{children}
 			</div>
+			<MobileTabBar />
 		</div>
 	)
 }

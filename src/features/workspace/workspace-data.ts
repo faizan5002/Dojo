@@ -3,8 +3,10 @@ import {
 	DEV_ASSESSMENTS,
 	DEV_UPLOADS,
 	devAssessment,
+	devSessions,
 	devUploadView
 } from '@/features/dev-frontend/fixtures'
+import type { ParsedSession } from '@/features/sessions/types'
 import { isDevMockUser } from '@/server/auth/dev-frontend-mode'
 import { db } from '@/server/db/client'
 import {
@@ -12,6 +14,7 @@ import {
 	getUploadView as getStoredUploadView,
 	listAssessments as listStoredAssessments,
 	listUploads as listStoredUploads,
+	loadSessions,
 	type AssessmentSummary,
 	type StoredAssessment,
 	type UploadSummary,
@@ -49,4 +52,17 @@ export async function getAssessment(
 ): Promise<StoredAssessment | null> {
 	if (isDevMockUser(user)) return devAssessment(assessmentId)
 	return getStoredAssessment({ db, userId: user.id, assessmentId })
+}
+
+/**
+ * The redacted sessions behind an assessment, for the conversation viewer. The
+ * assessment was already read for this user, and the sessions are read scoped to
+ * the same user again, so another account's upload finds nothing.
+ */
+export async function getAssessmentSessions(
+	user: Reader,
+	assessment: StoredAssessment
+): Promise<readonly ParsedSession[]> {
+	if (isDevMockUser(user)) return devSessions(assessment.uploadId)
+	return loadSessions({ db, userId: user.id, uploadId: assessment.uploadId })
 }

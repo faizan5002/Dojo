@@ -167,3 +167,8 @@ export function devAssessment(assessmentId: string | undefined): StoredAssessmen
 	if (assessmentId == null) return STORED[0] ?? null
 	return STORED.find((item) => item.id === assessmentId) ?? null
 }
+
+/** The fixture sessions of an upload, for the conversation viewer. */
+export function devSessions(uploadId: string): readonly ParsedSession[] {
+	return UPLOADS.find((upload) => upload.id === uploadId)?.sessions ?? []
+}

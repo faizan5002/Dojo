@@ -95,6 +95,15 @@ export const FLAGS = {
 		description: 'Enables the payments module end to end.',
 		owner: 'web-team'
 	},
+	// Master switch for the AI insight endpoints (src/features/ai-insights/).
+	// On by default; AI_ENABLED and a provider key must also be set. Flip off to stop
+	// all AI generation in an incident; deterministic scoring is unaffected.
+	ai_insights: {
+		default: true,
+		kind: 'ops',
+		description: 'Kill switch for AI-generated insights; off makes their endpoints answer 503.',
+		owner: 'web-team'
+	},
 	checkout_kill_switch: {
 		default: true,
 		kind: 'ops',

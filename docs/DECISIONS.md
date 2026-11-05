@@ -3,6 +3,132 @@
 Newest first. Add an entry when you make a choice a future agent could not
 infer from the code. One paragraph each: what, why, what would change it.
 
+## 2026-11-05 — The LLM scores assessments and practice answers; the rules are the fallback
+
+**Decision.** With AI scoring on (`AI_SCORING=on`, the default when AI is
+configured), an upload is scored by the LLM applying Dojo's rubric, written out
+as instructions in `src/features/assessment/llm/rubric-prompt.ts`: for each
+skill it reports the opportunities it finds (prompt reference, good / partial /
+poor, criterion and exact quote). Dojo's code then does the arithmetic, exactly
+as for the rules: each quote is checked against the prompt it names (unmatched
+ones are dropped), a prompt counts once per skill, scores are averaged from the
+outcomes, and confidence thresholds, bands, the insufficient-evidence rule, the
+three-skill overall rule, the profile and the recommendations are unchanged
+code. Prompting Guru answers are judged the same way: the model rates each of
+the challenge's criteria and pitfalls with quotes, and the weighted score,
+caps and suggestion are the rules evaluator's arithmetic (`scoreJudgements`).
+Parsing and the free metrics stay in code. When the model fails, the rules
+engine scores instead; the result says so (`rules-1.0 (AI unavailable)`).
+Every result records how it was made (`ai-rubric.v1 · <model>`,
+`ai-judge.v1 · <model>`), and the pages and PDF say which.
+**Why.** The owner wanted judgement from the LLM, with the rules as its
+instructions rather than as code, and chose to keep arithmetic in code and to
+fall back to the rules rather than fail.
+**Limits.** Scores vary between runs of the same log (low temperature reduces
+it, does not remove it). The free model is slow: an assessment took 92 s and
+248 s in two runs, a practice answer 30-60 s. The e2e suite runs with
+`AI_SCORING=off` so it stays deterministic and never calls the model.
+
+## 2026-11-05 — AI insights move from xAI to OpenRouter's free Nemotron
+
+**Decision.** The default AI provider is OpenRouter with
+`nvidia/nemotron-3-ultra-550b-a55b:free` (`AI_PROVIDER=openrouter`); xAI stays as
+an alternative (`AI_PROVIDER=xai`). `AI_ENABLED` replaces `XAI_ENABLED` as the
+master switch. Both providers share one OpenAI-compatible fetch client. The
+free model has no structured-output mode, so the answer is requested as the
+arguments of one forced tool call, fitted to the schema's length and count
+limits, and validated with Zod as before. Everything above the provider is
+unchanged: features, prompts, inputs, storage, endpoints, limits.
+**Why.** xAI needs paid credits; the owner chose the free model. Verified live:
+all five insights generate, are stored and reused, and cost $0.
+**Limits.** Free-tier rate limits (per minute and per day) and occasional
+unavailability, answered as 503; answers take 10-40 s; the model sometimes adds
+details to a rewrite that the user did not ask for despite the instruction.
+Dojo never switches to a paid model on its own.
+**UI.** The insights appear as labelled panels beside the deterministic
+results (assessment, sessions, Prompting Guru), generated only on the user's
+click, so a page never waits on AI and nothing is generated without asking.
+
+## 2026-11-05 — AI insights with xAI Grok, beside the deterministic engine
+
+**Decision.** Dojo calls xAI (`grok-4.7`) for five AI insights: session analysis,
+assessment explanations, Prompting Guru feedback with a rewrite, alternative
+example answers, and an explanation of the planner's recommendation. They are
+stored apart (`ai_insights`) and labelled AI-generated; official scores,
+bands, confidence, insufficient-evidence handling and challenge scoring are
+untouched. The planner, not the model, picks the next challenge. Generation
+runs only when the signed-in user calls an endpoint for their own data, from
+minimised, re-redacted input (never whole logs, never answer keys), fenced as
+data so instructions inside a log cannot steer the model. Results are reused
+while input, prompt version and model are unchanged; each user may start 20
+generations a day; calls time out at 30 s and retry at most twice on 429/5xx.
+Every call is tracked and priced in `ai_usage` (OpenRouter `x-ai/grok-4.7`).
+The provider sits behind `LlmProvider`, so adding OpenAI or Anthropic changes
+no feature. Backend only for now: no UI.
+**Why.** The owner chose Grok for contextual feedback that complements, not
+replaces, the rules engine; the existing AI-usage pattern (one module per
+provider, `trackAiCall`, priced at write time) was followed rather than
+duplicated. Plain `fetch` avoids an SDK, since xAI is OpenAI-compatible.
+**Data sent.** Users' redacted prompt excerpts, answers and scores go to xAI.
+Redaction removes credential formats, not names, private code or paths, and
+sensitive personal data cannot be detected reliably; the privacy copy should
+say so before a UI exposes this. This settles the HANDOFF question of which
+provider; the consent model for the UI is still open.
+**Revisit when** the UI ships (consent wording), usage outgrows the daily
+limit, or a second provider is added.
+
+## 2026-11-03 — Prompting Guru challenges live in PostgreSQL, as immutable versions
+
+**Decision.** The challenge library moved from code into PostgreSQL:
+`practice_challenges` (stable identity: slug, skill, type, active flag, current version)
+and `practice_challenge_versions` (immutable content and rubric per version, criteria as
+JSONB with each pattern stored as source and flags). Each attempt references the exact
+version it was scored against (`challenge_version_id`). The scoring algorithm stays in
+code and receives the stored criteria. The 40 definitions are seed content in
+`prisma/seed/practice-challenges/`, written by an idempotent seed that refuses an edit
+without a version bump; the app never imports them. Challenges reach the browser through
+`/api/prompting-guru/*`; server-rendered pages call the same repository functions
+in-process instead of fetching their own API, as Next.js recommends. The introduction is
+chosen by a tag, not a hard-coded id. RLS is on with no policies, as for every table:
+challenge content is shared, but only server code (Prisma, as the table owner) reads or
+writes it.
+**Why.** The owner asked for challenge content to be editable without changing code and
+served by APIs, with old results staying reproducible. Immutable versions give that
+without copying the rubric into every attempt; JSONB keeps the rubric's structure; the
+content hash makes the seed safe to re-run.
+**Limits.** Content is still edited through the seed files and a deploy: there is no admin
+interface or admin write endpoint yet. Admin RBAC exists (`src/lib/rbac/`); a write path
+would need a new permission (for example `practice.manage`) checked with
+`requirePermission`, and would create versions under the same rules as the seed. Stored
+patterns are trusted content: only the seed (or a future admin path) writes them.
+**Supersedes** the "code library of challenges" part of the entry below; its scoring and
+planning decisions still hold.
+
+## 2026-11-03 — Prompting Guru: a code library of challenges, scored by rules on the server
+
+**Decision.** Practice challenges are a versioned library in code
+(`src/features/practice/challenges/`), not a database table; each attempt stores the
+challenge id and version it answered. Answers are redacted and scored on the server by
+deterministic rules (`evaluate.ts`, evaluator `rules-1.0`) behind a `PromptEvaluator`
+interface, and saved as `practice_attempts` rows with the full evaluation. Progress,
+streaks, trends and due reviews are derived from those rows on each page load; there is
+no scheduler and no progress table. The plan (`plan.ts`) weights skills by the latest
+assessment's score band, adjusted by recent exercise scores, and every threshold and
+weight lives in `PRACTICE_CONFIG`. A skill the assessment could not score is "not
+assessed", never a weakness; with fewer than three scored skills the overview says the
+ranking is not reliable. Exercise scores are always shown apart from assessment scores.
+The criteria and the strong answer are rendered only on the result of the user's own
+attempt; the suggested rewrite is a labelled template, not generated text.
+**Why.** The brief rules out an LLM or paid service and asks for deterministic, explainable
+feedback. Challenges in code are reviewed, typed and tested like the rest of the rubric
+(every strong answer must score 100 on its own rubric); deriving progress from attempts
+means a new assessment never rewrites history.
+**Limits.** Rules read wording, not intent, and are English-only: a good answer phrased
+unusually can miss a criterion. Changing a challenge's criteria means bumping its version;
+trends only compare attempts at the same version.
+**Revisit when** an LLM evaluator is approved (implement `PromptEvaluator`), or authors
+other than developers need to edit challenges.
+
 ## 2026-11-04 — Assessment reports are PDFs rendered on the server with @react-pdf/renderer
 
 **Decision.** "Download PDF report" on `/assessment` fetches

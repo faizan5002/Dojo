@@ -57,6 +57,8 @@ export interface SkillRow {
 }
 
 export interface FocusQuote {
+	/** The evidence id, so a link can open this quote in its conversation. */
+	readonly evidenceId: string
 	/** Exactly the stored, redacted excerpt of the user's prompt. */
 	readonly excerpt: string
 	readonly clippedBefore: boolean
@@ -213,6 +215,7 @@ export function focusOf(assessment: StoredAssessment, uploadView: UploadView | n
 		seen: recommendation.count,
 		of: recommendation.total,
 		quote: {
+			evidenceId: evidence.id,
 			excerpt: evidence.excerpt,
 			clippedBefore: evidence.clippedBefore,
 			clippedAfter: evidence.clippedAfter,

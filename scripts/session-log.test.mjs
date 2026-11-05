@@ -944,7 +944,8 @@ test('the instruction files state the commit policy and none repeats the local-o
 		'docs/SESSION_LOGGING.md',
 		'docs/DEVELOPMENT_WORKFLOW.md',
 		'docs/PROJECT_CONTEXT.md',
-		'docs/rules/secrets.md'
+		'docs/rules/secrets.md',
+		'agent-session-logs-setup.md'
 	]
 	for (const path of instructionFiles) {
 		const text = readFileSync(repoFile(path), 'utf8')
@@ -955,5 +956,198 @@ test('the instruction files state the commit policy and none repeats the local-o
 		if (['AGENTS.md', 'CLAUDE.md', 'docs/SESSION_LOGGING.md'].includes(path)) {
 			assert.ok(/\btracked\b/i.test(text), `${path} does not state that logs are tracked`)
 		}
+	}
+})
+
+// --- compaction, models and isolation ----------------------------------------
+
+/** A turn interrupted by Claude Code's context compaction, answered after it. */
+const compactedFixture = () =>
+	jsonl(
+		{
+			type: 'user',
+			timestamp: '2026-11-03T15:00:00.000Z',
+			message: { content: 'build the library' }
+		},
+		{
+			type: 'assistant',
+			timestamp: '2026-11-03T15:00:05.000Z',
+			message: {
+				id: 'a1',
+				model: 'claude-sonnet-5-5',
+				stop_reason: 'tool_use',
+				content: [{ type: 'tool_use', id: 't1', name: 'Bash', input: {} }]
+			}
+		},
+		{ type: 'system', subtype: 'compact_boundary', timestamp: '2026-11-03T15:38:08.000Z' },
+		{
+			type: 'user',
+			isCompactSummary: true,
+			timestamp: '2026-11-03T15:38:07.000Z',
+			message: {
+				content:
+					'This session is being continued from a previous conversation. COMPACT-SUMMARY-LEAK'
+			}
+		},
+		{
+			type: 'assistant',
+			timestamp: '2026-11-03T15:40:00.000Z',
+			message: {
+				id: 'a2',
+				model: 'claude-opus-5-5',
+				stop_reason: 'end_turn',
+				content: [{ type: 'text', text: 'The library is built.' }]
+			}
+		},
+		{ type: 'user', timestamp: '2026-11-03T16:00:00.000Z', message: { content: 'thanks' } },
+		{
+			type: 'assistant',
+			timestamp: '2026-11-03T16:00:02.000Z',
+			message: {
+				model: '<synthetic>',
+				stop_reason: 'stop_sequence',
+				content: [{ type: 'text', text: 'No response requested.' }]
+			}
+		},
+		{
+			type: 'assistant',
+			timestamp: '2026-11-03T16:00:03.000Z',
+			message: {
+				id: 'a3',
+				model: 'claude-sonnet-5-5',
+				stop_reason: 'end_turn',
+				content: [{ type: 'text', text: 'You are welcome.' }]
+			}
+		}
+	)
+
+const ATTRIBUTION = { author: 'a', email: 'e', githubUser: 'g' }
+
+test('a compaction summary is not a prompt, and the answer stays with the prompt that asked', () => {
+	const { turns } = parseClaudeTranscript(compactedFixture())
+	assert.deepEqual(
+		turns.map((t) => [t.prompt.text, t.response?.text ?? null]),
+		[
+			['build the library', 'The library is built.'],
+			['thanks', 'You are welcome.']
+		]
+	)
+	assert.ok(!JSON.stringify(turns).includes('COMPACT-SUMMARY-LEAK'))
+})
+
+test('a genuine prompt that mentions a continued session is still a prompt', () => {
+	const { turns } = parseClaudeTranscript(
+		jsonl({
+			type: 'user',
+			timestamp: 't0',
+			message: { content: 'This session is being continued from a previous conversation, right?' }
+		})
+	)
+	assert.equal(turns.length, 1)
+})
+
+test('each response records the model the transcript names, never a synthetic one', () => {
+	const { turns } = parseClaudeTranscript(compactedFixture())
+	assert.deepEqual(
+		turns.map((t) => t.response?.model),
+		['claude-opus-5-5', 'claude-sonnet-5-5']
+	)
+	const text = renderLog({
+		turns,
+		sessionId: 's',
+		agent: 'claude',
+		project: 'p',
+		attribution: ATTRIBUTION,
+		now: NOW
+	})
+	assert.equal(readFrontmatter(text).models, 'claude-opus-5-5, claude-sonnet-5-5')
+	assert.deepEqual(
+		[...text.matchAll(/^model: (.+)$/gm)].map((m) => m[1]),
+		['claude-opus-5-5', 'claude-sonnet-5-5']
+	)
+	assert.ok(!text.includes('<synthetic>'))
+	// The model survives the round trip the Codex hook path relies on.
+	assert.deepEqual(
+		parseLog(text).map((t) => t.response?.model),
+		['claude-opus-5-5', 'claude-sonnet-5-5']
+	)
+})
+
+test('a response with no named model says unknown rather than guessing', () => {
+	const text = renderLog({
+		turns: [
+			{ prompt: { timestamp: 't0', text: 'hi' }, response: { timestamp: 't1', text: 'hello' } }
+		],
+		sessionId: 's',
+		agent: 'codex',
+		project: 'p',
+		attribution: ATTRIBUTION,
+		now: NOW
+	})
+	assert.equal(readFrontmatter(text).models, 'unknown')
+	assert.match(text, /^model: unknown$/m)
+})
+
+test('a Codex rollout records the model from its turn context', () => {
+	const rollout = jsonl(
+		{ type: 'session_meta', payload: { id: 'codex-1', cwd: '/r' } },
+		{ type: 'turn_context', payload: { model: 'gpt-6.1' } },
+		{
+			type: 'event_msg',
+			payload: {
+				type: 'item_completed',
+				item: { type: 'UserMessage', content: [{ type: 'text', text: 'go' }] }
+			}
+		},
+		{
+			type: 'response_item',
+			payload: {
+				type: 'message',
+				role: 'assistant',
+				phase: 'final_answer',
+				content: [{ type: 'output_text', text: 'went' }]
+			}
+		}
+	)
+	assert.equal(parseCodexRollout(rollout).turns[0].response.model, 'gpt-6.1')
+})
+
+test('two sessions in one repo stay in their own files, with their own prompts and models', () => {
+	const repo = tempRepo()
+	try {
+		claudeSession(repo, 'sess-one', compactedFixture(), 'Stop')
+		claudeSession(
+			repo,
+			'sess-two',
+			jsonl(
+				{
+					type: 'user',
+					timestamp: '2026-11-04T09:00:00.000Z',
+					message: { content: 'only in two' }
+				},
+				{
+					type: 'assistant',
+					timestamp: '2026-11-04T09:00:01.000Z',
+					message: {
+						id: 'b1',
+						model: 'claude-haiku-5-5',
+						stop_reason: 'end_turn',
+						content: [{ type: 'text', text: 'two answered' }]
+					}
+				}
+			),
+			'Stop'
+		)
+		const files = logFiles(repo).sort()
+		assert.deepEqual(files, ['2026-11-03_15-00-00_sess-one.md', '2026-11-04_09-00-00_sess-two.md'])
+		const one = read(repo, files[0])
+		const two = read(repo, files[1])
+		assert.ok(one.includes('The library is built.') && !one.includes('only in two'))
+		assert.ok(two.includes('two answered') && !two.includes('build the library'))
+		assert.equal(readFrontmatter(one).models, 'claude-opus-5-5, claude-sonnet-5-5')
+		assert.equal(readFrontmatter(two).models, 'claude-haiku-5-5')
+		assert.equal(readFrontmatter(one).total_exchanges, '2')
+	} finally {
+		rmSync(repo, { recursive: true, force: true })
 	}
 })

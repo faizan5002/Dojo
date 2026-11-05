@@ -79,7 +79,11 @@ async function run(): Promise<SampleRun> {
 		// The sample is a fixed file; if intake ever rejects it, say so loudly in tests.
 		throw new Error('The sample session was rejected by intake')
 	}
-	const sessions = redactSessions(intake.sessions)
+	// The digest format fixes the project name of the shared test builder; show a clear one.
+	const sessions = redactSessions(intake.sessions).map((session) => ({
+		...session,
+		project: 'expense-tracker (sample)'
+	}))
 	const assessment = assessSessions(sessions)
 	const overview = metricsOverview(sessions)
 	return {

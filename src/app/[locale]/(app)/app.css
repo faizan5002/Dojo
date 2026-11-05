@@ -6,49 +6,87 @@
    these pages carry no transitions or animation. Vermilion is an accent, never
    body text: on ink it is below AA contrast for small type. */
 [data-surface='app'] {
-	--bg: #05070a;
-	--surface: #0a0e12;
-	--surface-hover: #121820;
-	--border: rgba(223, 231, 224, 0.13);
-	--border-strong: rgba(223, 231, 224, 0.26);
-	--text: #dfe7e0;
-	--text-muted: #aab4ad;
-	--text-faint: #8a958d;
-	--accent: #e0231c;
-	--accent-hover: #c41d17;
-	--accent-ink: #ffffff;
-	--success: #7cc79a;
-	--warning: #c9a24a;
-	--danger: #ff5a3c;
-	/* Vermilion for small type: the lighter tint passes AA (about 6.8:1 on ink), where the
-	   accent itself is 4.1 to 4.3:1. Use it for numerals and labels; keep --accent for
-	   rules, rings and large marks. */
-	--accent-text: #ff6a4d;
+	/* A dojo by daylight: rice paper and shoji, sumi ink, cedar and brass. Vermilion is
+	   a deliberate accent (a stamp, a mark), never a surface. The dark palette further
+	   down is the same room at night: indigo and navy, with the paper turned to lamplight. */
+	--bg: #ece2cb;
+	--surface: #f6eedb;
+	--surface-hover: #efe4cb;
+	--border: rgba(70, 48, 26, 0.16);
+	--border-strong: rgba(70, 48, 26, 0.34);
+	--text: #1d1710;
+	--text-muted: #54473a;
+	--text-faint: #6d5f4b;
+	--accent: #c0301c;
+	--accent-hover: #a22616;
+	--accent-ink: #fff8ec;
+	--success: #3d6a4b;
+	--warning: #8a6420;
+	--danger: #b3261a;
+	--accent-text: #a42815;
 
-	color-scheme: dark;
+	--paper: #f1e7cf;
+	--paper-ink: #1d1710;
+	--stone: #7d7160;
+	--wood: #6a4727;
+	--wood-deep: #3b2514;
+	--indigo: #2c3a69;
+	--navy: #172044;
+	--brass: #a67c2a;
+	--gold: #c9a24a;
+	--brass-text: #7d5a14;
+	--scroll-a: #f7efdb;
+	--scroll-b: #eadfc4;
+
+	color-scheme: light;
 	font-family: var(--font-onest), var(--font-sans);
-	font-weight: 300;
+	font-weight: 400;
+}
+
+@media (prefers-color-scheme: dark) {
+	[data-surface='app'] {
+		/* the same room by lantern: warm sumi charcoal, paper-coloured type, brass and vermilion */
+		--bg: #17130e;
+		--surface: #221b13;
+		--surface-hover: #2d241a;
+		--border: rgba(241, 228, 198, 0.14);
+		--border-strong: rgba(241, 228, 198, 0.3);
+		--text: #f1e7cf;
+		--text-muted: #d0c3a3;
+		--text-faint: #ab9e80;
+		--accent: #e0553a;
+		--accent-hover: #c8452d;
+		--accent-text: #ff9a7e;
+		--success: #8cc79f;
+		--warning: #d4ab5a;
+		--danger: #ff7a60;
+		--stone: #9a8f7a;
+		--indigo: #8a9fe6;
+		--brass: #c9a24a;
+		--brass-text: #e3c473;
+		--scroll-a: #e6dac0;
+		--scroll-b: #d4c7a6;
+		color-scheme: dark;
+	}
 }
 
 /* One still frame of the landing scene, fading into the page's ink. */
 .app-backdrop {
+	/* paper grain, not a picture: a fine fibre texture over the whole page */
 	position: absolute;
-	inset: 0 0 auto;
+	inset: 0;
 	z-index: -1;
-	height: 100dvh;
 	pointer-events: none;
 	background-image:
-		linear-gradient(to bottom, rgba(5, 7, 10, 0.42), rgba(5, 7, 10, 0.7) 55%, var(--bg)),
-		url('/landing-pages/secret-pathways-assets/generated/kage-moonwater.webp');
-	background-position: center top;
-	background-size: cover;
+		repeating-linear-gradient(92deg, rgba(110, 80, 40, 0.035) 0 1px, transparent 1px 5px),
+		repeating-linear-gradient(2deg, rgba(110, 80, 40, 0.025) 0 1px, transparent 1px 7px);
 }
 
 .app-eyebrow {
-	font-size: 10px;
+	/* a quiet label in sentence case: the heading carries the weight */
+	font-size: 12px;
 	font-weight: 500;
-	letter-spacing: 0.22em;
-	text-transform: uppercase;
+	letter-spacing: 0.03em;
 	color: var(--text-muted);
 }
 
@@ -70,7 +108,6 @@
 	font-weight: 400;
 	line-height: 1.1;
 	letter-spacing: -0.012em;
-	text-transform: uppercase;
 }
 
 .app-number {
@@ -160,6 +197,33 @@
 	background: transparent;
 	color: var(--text);
 	font-size: 15px;
+}
+
+/* A select in the same look: the native arrow replaced by a thin bone chevron,
+   and the open list drawn on ink rather than the browser's white, so options
+   stay legible. Options can only take colours, not borders or padding. */
+.app-select {
+	appearance: none;
+	padding-right: 44px;
+	background-color: var(--surface);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%23dfe7e0' stroke-width='1.2'/%3E%3C/svg%3E");
+	background-position: right 16px center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.app-select:hover {
+	border-color: var(--text-muted);
+}
+
+.app-select option {
+	background-color: var(--surface);
+	color: var(--text);
+}
+
+.app-select option:checked {
+	background-color: var(--accent);
+	color: var(--accent-ink);
 }
 
 .app-input:focus-visible {
@@ -304,4 +368,258 @@ a.app-card:hover {
 	line-height: 0.9;
 	letter-spacing: -0.04em;
 	font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------------------
+   The visual layer: a competitive-platform top bar, score rings, level meters and
+   the quiet grid behind the hero. Same tokens; vermilion is the only hue. */
+
+.app-topbar {
+	/* a cedar beam across the top of the room */
+	--text: #f4ead2;
+	--text-muted: #dccfb0;
+	--border: rgba(244, 234, 210, 0.18);
+	--border-strong: rgba(244, 234, 210, 0.36);
+	--surface-hover: rgba(244, 234, 210, 0.1);
+	position: sticky;
+	top: 0;
+	z-index: 40;
+	color: var(--text);
+	background:
+		repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 2px, transparent 2px 9px),
+		linear-gradient(180deg, #5b3b1f, #3f2815);
+	border-bottom: 2px solid #26160a;
+	box-shadow: 0 6px 14px -8px rgba(40, 22, 8, 0.7);
+}
+
+.app-topnav-link {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 60px;
+	padding-inline: 16px;
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.app-topnav-link::after {
+	content: '';
+	position: absolute;
+	inset-inline: 16px;
+	bottom: -1px;
+	height: 2px;
+	background: transparent;
+}
+
+.app-topnav-link:hover {
+	color: var(--text);
+	background: var(--surface-hover);
+}
+
+.app-topnav-link[aria-current='page'] {
+	color: var(--text);
+}
+
+.app-topnav-link[aria-current='page']::after {
+	background: var(--accent);
+}
+
+.app-hero {
+	/* a single sheet of paper in a timber frame; no lattice, nothing behind the text */
+	position: relative;
+	overflow: hidden;
+	border: 1px solid var(--border-strong);
+	background: linear-gradient(135deg, var(--surface), var(--bg));
+	box-shadow: 0 10px 24px -16px rgba(60, 38, 16, 0.5);
+}
+
+.app-hero::before {
+	/* one low band of seigaiha along the bottom edge only, away from the copy */
+	content: '';
+	position: absolute;
+	inset: auto 0 0 0;
+	height: 34px;
+	pointer-events: none;
+	background-image:
+		radial-gradient(
+			circle at 50% 100%,
+			transparent 0 9px,
+			rgb(44 58 105 / 0.13) 9px 10px,
+			transparent 10px 17px,
+			rgb(44 58 105 / 0.13) 17px 18px,
+			transparent 18px
+		),
+		radial-gradient(
+			circle at 0% 100%,
+			transparent 0 9px,
+			rgb(44 58 105 / 0.13) 9px 10px,
+			transparent 10px 17px,
+			rgb(44 58 105 / 0.13) 17px 18px,
+			transparent 18px
+		);
+	background-size: 36px 18px;
+	background-position:
+		0 0,
+		18px 9px;
+	mask-image: linear-gradient(to top, #000, transparent);
+}
+
+.app-hero > * {
+	position: relative;
+}
+
+/* A ring for a 0 to 100 score: --v is the score. The number is text beside it, so
+   the ring is a picture of it and never the only place it appears. */
+.app-ring {
+	--size: 96px;
+	--track: 8px;
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
+	width: var(--size);
+	height: var(--size);
+	border-radius: 50%;
+	background:
+		radial-gradient(
+			closest-side,
+			var(--surface) calc(100% - var(--track)),
+			transparent calc(100% - var(--track) + 1px)
+		),
+		conic-gradient(var(--accent) calc(var(--v) * 1%), var(--border-strong) 0);
+}
+
+.app-ring-lg {
+	--size: 148px;
+	--track: 10px;
+}
+
+.app-ring-md {
+	--size: 112px;
+	--track: 9px;
+}
+
+.app-ring-sm {
+	--size: 68px;
+	--track: 6px;
+}
+
+.app-ring-quiet {
+	background:
+		radial-gradient(
+			closest-side,
+			var(--surface) calc(100% - var(--track)),
+			transparent calc(100% - var(--track) + 1px)
+		),
+		conic-gradient(var(--text-muted) calc(var(--v) * 1%), var(--border-strong) 0);
+}
+
+/* A bar for a 0 to 100 score, ticked where the four level bands change. */
+.app-meter {
+	position: relative;
+	display: block;
+	height: 6px;
+	background: var(--border);
+}
+
+.app-meter > span {
+	display: block;
+	height: 100%;
+	background: var(--accent);
+}
+
+.app-meter-quiet > span {
+	background: var(--text-muted);
+}
+
+.app-meter i {
+	position: absolute;
+	top: -2px;
+	bottom: -2px;
+	width: 1px;
+	background: var(--bg);
+}
+
+/* Evidence strength as three pips: none, limited, strong. */
+.app-pips {
+	display: inline-flex;
+	gap: 3px;
+}
+
+.app-pips i {
+	display: block;
+	width: 14px;
+	height: 4px;
+	background: var(--border-strong);
+}
+
+.app-pips i[data-on='true'] {
+	background: var(--accent);
+}
+
+.app-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding-left: 14px;
+	border-left: 1px solid var(--border-strong);
+}
+
+.app-stat b {
+	font-size: 22px;
+	font-weight: 300;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+}
+
+.app-panel {
+	position: relative;
+	border: 1px solid var(--border-strong);
+	background: var(--surface);
+}
+
+.app-panel-accent::before {
+	content: '';
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 3px;
+	background: var(--brass);
+}
+
+.app-keycap {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 28px;
+	height: 28px;
+	border: 1px solid var(--border-strong);
+	font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.app-skill-card:hover {
+	border-color: var(--text-faint);
+	background: var(--surface-hover);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.app-topnav-link,
+	.app-skill-card {
+		transition:
+			color 150ms ease,
+			background-color 150ms ease,
+			border-color 150ms ease;
+	}
+}
+
+@media (pointer: coarse), (max-width: 767px) {
+	.app-topnav-link {
+		min-height: 48px;
+	}
 }

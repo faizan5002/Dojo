@@ -54,6 +54,29 @@ export async function deleteTestUser(user: TestUser): Promise<void> {
 	await admin().auth.admin.deleteUser(user.id)
 }
 
+/**
+ * Waits until React has hydrated the page's first interactive element. A click before
+ * that is dropped by a dev server that is still loading its client chunks, which reads as a
+ * navigation or action that "did nothing". Use it after loading a page you then click on.
+ */
+export async function hydrated(page: Page): Promise<void> {
+	await page.waitForFunction(
+		() => {
+			const element = document.querySelector('a[href], button')
+			return element != null && Object.keys(element).some((key) => key.startsWith('__reactProps$'))
+		},
+		undefined,
+		{ timeout: FIRST_COMPILE_MS }
+	)
+}
+
+/** `page.goto`, then wait for hydration. */
+export async function visit(page: Page, url: string) {
+	const response = await page.goto(url)
+	await hydrated(page)
+	return response
+}
+
 export async function signIn(page: Page, user: TestUser): Promise<void> {
 	await page.goto('/sign-in')
 	await page.getByLabel('Email').fill(user.email)
@@ -61,6 +84,7 @@ export async function signIn(page: Page, user: TestUser): Promise<void> {
 	await page.getByRole('button', { name: 'Sign in' }).click()
 	// The first visit compiles /sessions on a cold dev server.
 	await expect(page).toHaveURL(/\/sessions/, { timeout: FIRST_COMPILE_MS })
+	await hydrated(page)
 }
 
 /** The form's own message; Next's route announcer is also role="alert". */

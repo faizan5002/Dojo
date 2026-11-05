@@ -9,6 +9,12 @@ import { isDevMockUser } from '@/server/auth/dev-frontend-mode'
 import { Link } from '@/i18n/routing'
 import { cn } from '@/lib/cn'
 import './app.css'
+import '@/features/progression/progression.css'
+import '@/features/progression/dojo.css'
+import '@/features/progression/mobile.css'
+import '@/features/progression/samurai.css'
+import '@/features/progression/samurai-practice.css'
+import '@/features/progression/samurai-final.css'
 
 // The landing page's typeface. next/font self-hosts it at build time, so a
 // visitor's browser never requests Google Fonts.
@@ -32,9 +38,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 				<p
 					role="status"
 					data-testid="dev-frontend-banner"
-					className="border-border text-text-muted border-b px-5 py-2 text-center text-xs md:px-14"
+					title={t('devMode')}
+					className="dj-demo-bar"
 				>
-					{t('devMode')}
+					<b>DEMO</b>
+					<span>{t('devMode')}</span>
 				</p>
 			) : null}
 			{user == null ? (

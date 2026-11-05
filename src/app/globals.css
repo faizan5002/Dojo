@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '../styles/boardui-bridge.css';
 
 /* Tailwind v4 is CSS-first — no tailwind.config.js. Static tokens (nothing
    that needs to change with color scheme) live directly in @theme, which

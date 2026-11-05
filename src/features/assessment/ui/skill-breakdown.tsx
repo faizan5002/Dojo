@@ -1,7 +1,16 @@
 import { useTranslations } from 'next-intl'
-import { CRITERIA } from '../rubric'
+import { SkillGlyph } from '@/features/app-shell/skill-glyph'
+import { CRITERIA, PROFICIENCY_BANDS } from '../rubric'
 import type { CriterionTally, SkillAssessment } from '../types'
 import { EvidenceItem } from './evidence-item'
+
+const MARKERS = PROFICIENCY_BANDS.filter((band) => band.min > 0).map((band) => band.min)
+
+const SKILL_MILESTONES = [
+	{ at: 40, label: 'Foundations' },
+	{ at: 60, label: 'Reliable' },
+	{ at: 80, label: 'Mastery' }
+] as const
 
 function Tallies({ label, tallies }: { label: string; tallies: readonly CriterionTally[] }) {
 	const t = useTranslations('Assessment.criteria')
@@ -27,22 +36,62 @@ function SkillRow({ skill }: { skill: SkillAssessment }) {
 	const t = useTranslations('Assessment')
 	const unit = t(`skills.${skill.skill}.unit`, { count: skill.observations })
 	return (
-		<li id={`skill-${skill.skill}`} className="border-border flex flex-col gap-4 border-b py-7">
-			<div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-				<h3 className="text-xl font-normal">{t(`skills.${skill.skill}.name`)}</h3>
+		<li
+			id={`skill-${skill.skill}`}
+			className="border-border-strong bg-surface dj-tick flex scroll-mt-24 flex-col gap-5 border p-6"
+		>
+			<div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+				<div className="flex items-center gap-4">
+					<SkillGlyph
+						skill={skill.skill}
+						size={20}
+						active={skill.score != null && skill.score < 80}
+					/>
+					<h3 className="text-xl font-normal">{t(`skills.${skill.skill}.name`)}</h3>
+				</div>
 				{skill.score == null || skill.proficiency == null ? (
 					<p className="app-eyebrow">{t('confidence.insufficient.label')}</p>
 				) : (
-					<p className="flex items-baseline gap-3">
-						<span className="app-number">{skill.score}</span>
-						<span className="app-eyebrow">{t(`proficiency.${skill.proficiency}`)}</span>
+					<p className="flex items-center gap-4">
+						<span
+							className="app-ring app-ring-sm"
+							style={{ '--v': skill.score } as React.CSSProperties}
+						>
+							<span className="app-number !text-lg">{skill.score}</span>
+						</span>
+						<span className="app-chip">{t(`proficiency.${skill.proficiency}`)}</span>
 					</p>
 				)}
 			</div>
 			{skill.score == null ? null : (
-				<span aria-hidden="true" className="bg-border block h-0.5">
-					<span className="bg-accent block h-0.5" style={{ width: `${skill.score}%` }} />
+				<span aria-hidden="true" className="app-meter">
+					<span style={{ width: `${skill.score}%` }} />
+					{MARKERS.map((marker) => (
+						<i key={marker} style={{ left: `${marker}%` }} />
+					))}
 				</span>
+			)}
+			{skill.score == null ? null : (
+				<ul
+					className="flex flex-wrap gap-2"
+					aria-label="Skill milestones, from your real score"
+					data-testid="skill-milestones"
+				>
+					{SKILL_MILESTONES.map((milestone) => {
+						const reached = (skill.score ?? 0) >= milestone.at
+						return (
+							<li
+								key={milestone.at}
+								data-reached={reached}
+								className={`app-chip flex items-center gap-2 ${reached ? '!border-accent text-text' : 'text-text-faint'}`}
+							>
+								<span aria-hidden="true">{reached ? '◆' : '◇'}</span>
+								{milestone.label} · {milestone.at}
+								<span className="sr-only">{reached ? ' reached' : ' not yet reached'}</span>
+							</li>
+						)
+					})}
+				</ul>
 			)}
 			<p className="text-text-muted text-sm">{t(`skills.${skill.skill}.summary`)}</p>
 			<p className="text-sm">
@@ -90,7 +139,7 @@ function SkillRow({ skill }: { skill: SkillAssessment }) {
 
 export function SkillBreakdown({ skills }: { skills: readonly SkillAssessment[] }) {
 	return (
-		<ol className="border-border flex flex-col border-t">
+		<ol className="flex flex-col gap-4">
 			{skills.map((skill) => (
 				<SkillRow key={skill.skill} skill={skill} />
 			))}

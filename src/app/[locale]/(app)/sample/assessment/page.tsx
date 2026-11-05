@@ -41,10 +41,19 @@ export default async function SampleAssessmentPage() {
 							focus.kind === 'none'
 								? '/sample/assessment'
 								: `/sample/assessment#skill-${focus.skill}`,
-						practise: '/sample/practice'
+						practise: '/sample/practice',
+						scenarios: '/sample/practice/session',
+						conversation:
+							focus.kind === 'ready'
+								? `/sample/session?session=${encodeURIComponent(focus.quote.sessionId)}&finding=${encodeURIComponent(focus.quote.evidenceId)}`
+								: undefined
 					}}
 				/>
-				<AssessmentReport assessment={stored.assessment} overview={stored.overview} />
+				<AssessmentReport
+					assessment={stored.assessment}
+					overview={stored.overview}
+					conversationBase="/sample/session"
+				/>
 				<div className="flex flex-wrap items-center gap-x-8 gap-y-4">
 					<Link href="/sessions" className="app-pill">
 						{t('assessment.useOwn')}

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useFormatter, useTranslations } from 'next-intl'
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@/components/base/modal/modal'
 import { Link, useRouter } from '@/i18n/routing'
 import { deleteUploadAction } from '@/server/actions/workspace'
 
@@ -14,26 +15,25 @@ export interface UploadListItem {
 	readonly assessmentCount: number
 }
 
-/** Two clicks: the first asks, the second deletes. Deletion is checked on the server. */
+/**
+ * Asks in an alert dialog before deleting (focus is trapped, Escape and Cancel back
+ * out, and the dialog is named for assistive technology). Deletion is checked on the server.
+ */
 export function DeleteUploadButton({ uploadId }: { uploadId: string }) {
 	const t = useTranslations('Uploads')
 	const router = useRouter()
-	const [isConfirming, setIsConfirming] = useState(false)
+	const [isOpen, setIsOpen] = useState(false)
 	const [hasFailed, setHasFailed] = useState(false)
 	const [note, setNote] = useState<string | null>(null)
 	const [isPending, startTransition] = useTransition()
 
-	function handleClick() {
-		if (!isConfirming) {
-			setIsConfirming(true)
-			return
-		}
+	function confirmDelete() {
 		startTransition(async () => {
 			const result = await deleteUploadAction({ uploadId })
 			if (!result.ok) {
 				setNote(result.status === 403 ? result.error : null)
 				setHasFailed(true)
-				setIsConfirming(false)
+				setIsOpen(false)
 				return
 			}
 			router.push('/sessions')
@@ -48,10 +48,30 @@ export function DeleteUploadButton({ uploadId }: { uploadId: string }) {
 				className="app-pill"
 				disabled={isPending}
 				aria-busy={isPending}
-				onClick={handleClick}
+				onClick={() => setIsOpen(true)}
 			>
-				{isConfirming ? t('confirmDelete') : t('delete')}
+				{t('delete')}
 			</button>
+			<Modal isOpen={isOpen} onOpenChange={setIsOpen} role="alertdialog" size="sm">
+				<ModalHeader title={t('deleteTitle')} description={t('deleteBody')} />
+				<ModalBody>
+					<p className="text-text-muted text-sm">{t('deleteNote')}</p>
+				</ModalBody>
+				<ModalFooter>
+					<button
+						type="button"
+						className="app-pill"
+						disabled={isPending}
+						aria-busy={isPending}
+						onClick={confirmDelete}
+					>
+						{t('confirmDelete')}
+					</button>
+					<button type="button" className="app-nav-link" onClick={() => setIsOpen(false)}>
+						{t('cancel')}
+					</button>
+				</ModalFooter>
+			</Modal>
 			{hasFailed ? <span className="text-danger text-xs">{note ?? t('deleteFailed')}</span> : null}
 		</span>
 	)
